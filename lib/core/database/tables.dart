@@ -27,6 +27,9 @@ class Characters extends Table {
   /// Pontos de vida atuais.
   IntColumn get hpAtual => integer()();
 
+  /// Caminho local para a imagem de avatar do personagem; pode ser nulo.
+  TextColumn get avatarPath => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

@@ -26,6 +26,9 @@ class Character {
   /// Conjunto de atributos base do personagem.
   final Attribute attributes;
 
+  /// Caminho local para a imagem de avatar; nulo quando nenhum avatar foi definido.
+  final String? avatarPath;
+
   /// Cria um [Character] com todos os campos obrigatórios.
   const Character({
     required this.id,
@@ -36,5 +39,6 @@ class Character {
     required this.maxHp,
     required this.currentHp,
     required this.attributes,
+    this.avatarPath,
   });
 }

@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:crit_sense/di/injection_container.dart';
@@ -52,6 +57,9 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   /// Valor selecionado no dropdown de classe; corresponde a [ApiReference.name].
   String? _selectedClass;
 
+  /// Arquivo de avatar escolhido pelo usuário; nulo enquanto nenhum for selecionado.
+  File? _avatarImage;
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +87,27 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     super.dispose();
   }
 
+  /// Abre a [source] (câmera ou galeria) e persiste a imagem escolhida.
+  ///
+  /// O [ImagePicker] retorna um arquivo temporário no cache do sistema —
+  /// similar a um upload recebido em `IFormFile` no ASP.NET Core, cujo
+  /// conteúdo existe apenas durante a requisição. Mover o arquivo para
+  /// `getApplicationDocumentsDirectory()` equivale a salvá-lo em
+  /// `wwwroot/uploads` no servidor: garante persistência entre sessões,
+  /// pois o sistema operacional pode limpar o cache a qualquer momento.
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await ImagePicker().pickImage(source: source);
+    if (picked == null) return;
+
+    final docsDir = await getApplicationDocumentsDirectory();
+    final ext = p.extension(picked.path);
+    final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final destPath = p.join(docsDir.path, fileName);
+
+    final saved = await File(picked.path).copy(destPath);
+    setState(() => _avatarImage = saved);
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -103,6 +132,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
         wisdom: int.parse(_wisdomCtrl.text),
         charisma: int.parse(_charismaCtrl.text),
       ),
+      avatarPath: _avatarImage?.path,
     );
 
     // Dispara o evento original do CharacterBloc — sem alterar seu contrato.
@@ -139,6 +169,50 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     );
   }
 
+  /// Exibe o [CircleAvatar] de avatar e abre o seletor de origem ao toque.
+  Widget _buildAvatarPicker() {
+    return Center(
+      child: GestureDetector(
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          builder: (ctx) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.camera_alt_outlined),
+                  title: const Text('Tirar Foto'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('Escolher da Galeria'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        child: CircleAvatar(
+          radius: 50,
+          backgroundColor: Colors.grey.shade300,
+          backgroundImage: _avatarImage != null
+              ? FileImage(_avatarImage!)
+              : null,
+          child: _avatarImage == null
+              ? const Icon(Icons.camera_alt, size: 36, color: Colors.grey)
+              : null,
+        ),
+      ),
+    );
+  }
+
   /// Renderiza o formulário completo com os dropdowns populados por [options].
   Widget _buildForm(FormOptionsLoaded options) {
     return Form(
@@ -146,6 +220,8 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
+          _buildAvatarPicker(),
+          const SizedBox(height: 20),
           _SectionHeader(title: 'Informações Básicas'),
           const SizedBox(height: 12),
           _buildTextField(

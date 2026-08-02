@@ -109,6 +109,7 @@ extension _CharacterDataMapper on CharacterData {
       maxHp: hpMaximo,
       currentHp: hpAtual,
       attributes: attrData._toDomain(),
+      avatarPath: avatarPath,
     );
   }
 }
@@ -138,6 +139,7 @@ extension _CharacterToCompanion on Character {
       nivel: Value(level),
       hpMaximo: Value(maxHp),
       hpAtual: Value(currentHp),
+      avatarPath: Value(avatarPath),
     );
   }
 }
