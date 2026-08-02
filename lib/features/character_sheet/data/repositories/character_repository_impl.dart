@@ -1,0 +1,140 @@
+import 'package:drift/drift.dart';
+
+import '../../../../core/database/app_database.dart';
+import '../../domain/entities/attribute.dart';
+import '../../domain/entities/character.dart';
+import '../../domain/repositories/i_character_repository.dart';
+
+/// Implementação concreta de [ICharacterRepository] usando o banco SQLite via Drift.
+///
+/// Por que mapear [CharacterData]/[AttributeData] → [Character]/[Attribute]?
+/// As classes geradas pelo Drift são artefatos de infraestrutura: mudar o ORM,
+/// renomear colunas ou trocar de banco impactaria apenas esta camada, nunca
+/// o Domínio. O mapeamento é a fronteira que garante esse isolamento.
+class CharacterRepositoryImpl implements ICharacterRepository {
+  final AppDatabase _db;
+
+  /// Injeta [AppDatabase] via construtor para facilitar testes com mocks/fakes.
+  const CharacterRepositoryImpl(this._db);
+
+  /// Persiste ou atualiza um personagem e seus atributos de forma atômica.
+  ///
+  /// O Drift envolve as duas inserções em uma única [transaction] SQL: se a
+  /// inserção dos atributos falhar, a do personagem é revertida automaticamente,
+  /// mantendo o banco em estado consistente (atomicidade ACID).
+  ///
+  /// [insertOnConflictUpdate] implementa UPSERT nativo:
+  /// `INSERT … ON CONFLICT(id) DO UPDATE SET …`, eliminando a necessidade
+  /// de verificar existência prévia com um SELECT separado.
+  @override
+  Future<void> saveCharacter(Character character) async {
+    await _db.transaction(() async {
+      await _db
+          .into(_db.characters)
+          .insertOnConflictUpdate(character._toCompanion());
+
+      await _db
+          .into(_db.attributes)
+          .insertOnConflictUpdate(
+            character.attributes._toCompanion(character.id),
+          );
+    });
+  }
+
+  /// Retorna todos os personagens com seus atributos via JOIN.
+  ///
+  /// O Drift converte o [select] + [innerJoin] em uma única query SQL, evitando
+  /// o problema N+1 que ocorreria ao buscar atributos individualmente por personagem.
+  /// [TypedResult.readTable] extrai com type-safety cada linha da tabela do resultado.
+  @override
+  Future<List<Character>> getAllCharacters() async {
+    final query = _db.select(_db.characters).join([
+      innerJoin(
+        _db.attributes,
+        _db.attributes.characterId.equalsExp(_db.characters.id),
+      ),
+    ]);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      final charData = row.readTable(_db.characters);
+      final attrData = row.readTable(_db.attributes);
+      return charData._toDomain(attrData);
+    }).toList();
+  }
+
+  /// Remove o personagem identificado por [id].
+  ///
+  /// Graças à `CASCADE` definida em [Attributes.characterId], o SQLite exclui
+  /// automaticamente os atributos relacionados sem queries adicionais.
+  @override
+  Future<void> deleteCharacter(String id) async {
+    await (_db.delete(_db.characters)..where((t) => t.id.equals(id))).go();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mappers privados — mantidos neste arquivo pois são exclusivos da camada de
+// dados. Expô-los em arquivos públicos vazaria detalhes de infraestrutura.
+// ---------------------------------------------------------------------------
+
+extension _CharacterDataMapper on CharacterData {
+  /// Converte a linha gerada pelo Drift para a entidade pura de domínio [Character].
+  Character _toDomain(AttributeData attrData) {
+    return Character(
+      id: id,
+      name: nome,
+      race: raca,
+      characterClass: classe,
+      level: nivel,
+      maxHp: hpMaximo,
+      currentHp: hpAtual,
+      attributes: attrData._toDomain(),
+    );
+  }
+}
+
+extension _AttributeDataMapper on AttributeData {
+  /// Converte a linha gerada pelo Drift para a entidade pura de domínio [Attribute].
+  Attribute _toDomain() {
+    return Attribute(
+      strength: forca,
+      dexterity: destreza,
+      constitution: constituicao,
+      intelligence: inteligencia,
+      wisdom: sabedoria,
+      charisma: carisma,
+    );
+  }
+}
+
+extension _CharacterToCompanion on Character {
+  /// Converte a entidade de domínio [Character] para o [CharactersCompanion] do Drift.
+  CharactersCompanion _toCompanion() {
+    return CharactersCompanion(
+      id: Value(id),
+      nome: Value(name),
+      raca: Value(race),
+      classe: Value(characterClass),
+      nivel: Value(level),
+      hpMaximo: Value(maxHp),
+      hpAtual: Value(currentHp),
+    );
+  }
+}
+
+extension _AttributeToCompanion on Attribute {
+  /// Converte a entidade de domínio [Attribute] para o [AttributesCompanion] do Drift.
+  AttributesCompanion _toCompanion(String characterId) {
+    return AttributesCompanion(
+      characterId: Value(characterId),
+      forca: Value(strength),
+      destreza: Value(dexterity),
+      constituicao: Value(constitution),
+      inteligencia: Value(intelligence),
+      sabedoria: Value(wisdom),
+      carisma: Value(charisma),
+    );
+  }
+}

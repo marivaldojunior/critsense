@@ -1,5 +1,12 @@
 import 'package:get_it/get_it.dart';
 
+import 'package:crit_sense/core/database/app_database.dart';
+import 'package:crit_sense/features/character_sheet/data/repositories/character_repository_impl.dart';
+import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
@@ -26,7 +33,46 @@ final sl = GetIt.instance;
 /// necessário para `LazySingleton` (resolvidos sob demanda), mas torna o
 /// arquivo legível como um grafo de dependências de baixo para cima.
 Future<void> init() async {
-  // ─── Camada de Apresentação ────────────────────────────────────────────────
+  // ─── Infraestrutura ────────────────────────────────────────────────────────
+  //
+  // `AppDatabase` é registrado como `LazySingleton` — única instância global.
+  // O SQLite aplica um lock exclusivo no arquivo `.sqlite` enquanto está aberto:
+  // múltiplas instâncias de `AppDatabase` tentariam abrir o mesmo arquivo ao
+  // mesmo tempo, resultando em erros de "database is locked". Singleton garante
+  // que apenas uma conexão exista durante todo o ciclo de vida do app.
+  sl.registerLazySingleton<AppDatabase>(
+    () => AppDatabase(AppDatabase.openConnection()),
+  );
+
+  // ─── Feature: character_sheet ──────────────────────────────────────────────
+
+  // Apresentação — Factory: cada tela que consuma CharacterBloc recebe sua
+  // própria instância, isolando estado entre rotas distintas.
+  sl.registerFactory<CharacterBloc>(
+    () => CharacterBloc(
+      sl<GetAllCharactersUseCase>(),
+      sl<SaveCharacterUseCase>(),
+      sl<DeleteCharacterUseCase>(),
+    ),
+  );
+
+  // Domínio — Use Cases stateless compartilhados com segurança como singletons.
+  sl.registerLazySingleton<GetAllCharactersUseCase>(
+    () => GetAllCharactersUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<SaveCharacterUseCase>(
+    () => SaveCharacterUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<DeleteCharacterUseCase>(
+    () => DeleteCharacterUseCase(sl<ICharacterRepository>()),
+  );
+
+  // Dados — Implementação concreta amarrada à interface do domínio.
+  sl.registerLazySingleton<ICharacterRepository>(
+    () => CharacterRepositoryImpl(sl<AppDatabase>()),
+  );
+
+  // ─── Feature: dice_roller ──────────────────────────────────────────────────
   //
   // `registerFactory`: cria uma **nova instância** a cada `sl<DiceBloc>()`.
   //
@@ -35,9 +81,6 @@ Future<void> init() async {
   // compartilhariam o mesmo estado — causando bugs difíceis de rastrear.
   // O ciclo de vida do BLoC (criação + dispose) deve espelhar o ciclo de vida
   // do widget que o consome: Factory garante isso.
-  //
-  // Paralelo arquitetural: Factory ≈ `Transient` no .NET DI (nova instância
-  // por solicitação); Singleton ≈ `Singleton` (instância única global).
   sl.registerFactory<DiceBloc>(() => DiceBloc(sl<RollDiceUseCase>()));
 
   // ─── Camada de Domínio (Use Cases) ────────────────────────────────────────
