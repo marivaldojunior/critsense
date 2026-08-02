@@ -1,33 +1,32 @@
-# 🎲 CritSense: Native Hardware RPG Roller
+# 🐉 D&D 5e Mobile Companion
 
-> Um aplicativo de rolagem de dados para RPG focado em imersão sensorial, construído com Flutter (UI/State) e Kotlin (Native Android Hardware).
+Um aplicativo mobile robusto para gerenciamento de fichas de RPG e consulta ao compêndio do Dungeons & Dragons 5e. Construído com **Flutter**, este projeto aplica conceitos de engenharia de software corporativa, focado em performance, previsibilidade de estado e persistência de dados *Offline-First*.
 
-Este projeto foi desenvolvido para demonstrar arquitetura de software avançada no ecossistema mobile, focando em separação de responsabilidades (Clean Architecture), gerenciamento de estado reativo (BLoC) e **comunicação bidirecional profunda com o hardware nativo do Android**.
+## 📱 Funcionalidades
 
-## 🏗️ Arquitetura e Padrões Aplicados
+*   **Ficha de Personagem (CRUD Local):** Criação e gerenciamento de personagens salvos no banco de dados local do dispositivo.
+*   **Formulários Dinâmicos Paralelos:** Consumo simultâneo (`Future.wait`) das APIs de Raças e Classes para alimentar os formulários de criação, otimizando o tempo de resposta.
+*   **Inventário Híbrido (Cross-Feature):** Consulta de equipamentos na API oficial e persistência dos itens escolhidos no banco SQLite (relacionamento *One-to-Many* com o personagem).
+*   **Bestiário com Infinite Scroll:** Consumo da API de monstros com paginação em memória, utilizando `ScrollController` para renderização sob demanda de listas gigantes sem perda de frames.
+*   **Acesso a Hardware Nativo (Avatar):** Integração com a câmera e galeria do dispositivo para personalização do avatar do personagem, salvando a imagem de forma otimizada no diretório de documentos do app.
+*   **Diário de Campanha:** Sistema de anotações por sessão atrelado a cada personagem.
 
-Para garantir resiliência, escalabilidade e facilidade de testes, o projeto segue os princípios da **Clean Architecture**, dividindo a base de código em camadas estritas (`Domain`, `Data`, e `Presentation`).
+## 🏗️ Arquitetura e Tecnologias
 
-*   **Gerenciamento de Estado:** `flutter_bloc`. Uso de `Equatable` para evitar reconstruções desnecessárias na árvore de widgets, garantindo alta performance de UI.
-*   **Injeção de Dependência:** `get_it`. Registro de *Factories* e *LazySingletons* (análogo ao ciclo de vida de contêineres IoC do ecossistema .NET).
-*   **Pattern Matching:** Uso avançado das features do Dart 3 para extração segura de estados.
-*   **Gerenciamento de Ciclo de Vida:** Controle estrito de *Streams* e *Listeners* (`IDisposable` pattern) para evitar *Memory Leaks* ao consumir sensores de hardware.
+O projeto foi desenhado sob os princípios da **Clean Architecture**, dividindo o sistema em camadas de *Domain*, *Data* e *Presentation*, garantindo baixo acoplamento e alta testabilidade (conceitos familiares a ecossistemas como .NET e Java).
 
-## ⚙️ Integração Nativa (Flutter ↔ Android)
+*   **[Flutter & Dart]**: Framework principal e linguagem.
+*   **[BLoC (Business Logic Component)]**: Gerenciamento de estado baseado em Eventos e Estados (padrão arquitetural semelhante ao CQRS).
+*   **[Drift (SQLite)]**: ORM para persistência local de dados com segurança de tipagem e relacionamentos relacionais nativos.
+*   **[Dio]**: Cliente HTTP para consumo da [D&D 5e API](https://www.dnd5eapi.co/).
+*   **[GetIt]**: Service Locator para Injeção de Dependência (DI).
+*   **[Image Picker & Path Provider]**: Acesso nativo aos recursos de hardware e sistema de arquivos.
 
-O grande diferencial tecnológico deste app é a descida para o código nativo (Kotlin) para acessar APIs do sistema operacional que o Flutter não alcança nativamente com a mesma granularidade.
+## 🚀 Como Executar o Projeto
 
-1.  **EventChannel (Giroscópio / Acelerômetro):**
-    *   Implementação do `SensorEventListener` no Android.
-    *   Cálculo de força G com *debounce* nativo para detectar o movimento de chacoalhar o celular (Shake-to-Roll) e enviar eventos contínuos para o Dart.
-2.  **MethodChannel (Haptic Feedback & Câmera):**
-    *   Acionamento assíncrono do `VibratorManager` (com fallback de segurança para SDKs antigos).
-    *   Padrões de forma de onda (Waveform) distintos: Pulsos rápidos para **Acertos Críticos (20)** e vibração densa e contínua para **Falhas Críticas (1)**.
-    *   Acionamento do *Flash* da câmera via `CameraManager` para reforço visual no crítico.
-
-## 🚀 Como Executar
-
-**Nota:** Como este projeto consome sensores físicos (acelerômetro, motor de vibração e câmera), **é altamente recomendado rodar em um dispositivo Android físico** conectado via cabo USB com depuração ativada. Emuladores não reproduzirão a experiência sensorial de hardware.
+**Pré-requisitos:**
+*   Flutter SDK instalado (versão 3.x+).
+*   Emulador Android/iOS configurado ou dispositivo físico conectado.
 
 1. Clone o repositório:
    ```bash
