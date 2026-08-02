@@ -3,12 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/compendium/domain/entities/api_reference.dart';
+
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
+import '../bloc/form_options_bloc.dart';
 
 /// Tela de criação de um novo personagem via formulário.
 ///
+/// Envolve o formulário em um [BlocProvider] de [FormOptionsBloc] para carregar
+/// as listas de raças e classes da API em paralelo assim que a tela é montada.
 /// Usa [StatefulWidget] porque precisa manter [TextEditingController]s
 /// ativos enquanto o widget existir na árvore.
 class CharacterFormScreen extends StatefulWidget {
@@ -32,8 +38,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   // sem dispose(), esses recursos continuam vivos mesmo após o widget ser
   // removido da árvore — causando memory leaks e callbacks em objetos mortos.
   late final TextEditingController _nameCtrl;
-  late final TextEditingController _raceCtrl;
-  late final TextEditingController _classCtrl;
   late final TextEditingController _levelCtrl;
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _dexterityCtrl;
@@ -42,12 +46,16 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   late final TextEditingController _wisdomCtrl;
   late final TextEditingController _charismaCtrl;
 
+  /// Valor selecionado no dropdown de raça; corresponde a [ApiReference.name].
+  String? _selectedRace;
+
+  /// Valor selecionado no dropdown de classe; corresponde a [ApiReference.name].
+  String? _selectedClass;
+
   @override
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController();
-    _raceCtrl = TextEditingController();
-    _classCtrl = TextEditingController();
     _levelCtrl = TextEditingController();
     _strengthCtrl = TextEditingController();
     _dexterityCtrl = TextEditingController();
@@ -61,8 +69,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   void dispose() {
     // Libera os recursos nativos de cada controller na ordem inversa de criação.
     _nameCtrl.dispose();
-    _raceCtrl.dispose();
-    _classCtrl.dispose();
     _levelCtrl.dispose();
     _strengthCtrl.dispose();
     _dexterityCtrl.dispose();
@@ -84,8 +90,8 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     final character = Character(
       id: const Uuid().v4(),
       name: _nameCtrl.text.trim(),
-      race: _raceCtrl.text.trim(),
-      characterClass: _classCtrl.text.trim(),
+      race: _selectedRace!,
+      characterClass: _selectedClass!,
       level: level,
       maxHp: maxHp,
       currentHp: maxHp,
@@ -99,93 +105,120 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       ),
     );
 
+    // Dispara o evento original do CharacterBloc — sem alterar seu contrato.
     context.read<CharacterBloc>().add(SaveCharacterEvent(character));
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Novo Personagem')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            _SectionHeader(title: 'Informações Básicas'),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _nameCtrl,
-              label: 'Nome',
-              validator: _requiredValidator,
-            ),
-            _buildTextField(
-              controller: _raceCtrl,
-              label: 'Raça',
-              validator: _requiredValidator,
-            ),
-            _buildTextField(
-              controller: _classCtrl,
-              label: 'Classe',
-              validator: _requiredValidator,
-            ),
-            _buildTextField(
-              controller: _levelCtrl,
-              label: 'Nível',
-              numeric: true,
-              validator: _positiveIntValidator,
-            ),
-            const SizedBox(height: 24),
-            _SectionHeader(title: 'Atributos'),
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _strengthCtrl,
-              label: 'Força',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            _buildTextField(
-              controller: _dexterityCtrl,
-              label: 'Destreza',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            _buildTextField(
-              controller: _constitutionCtrl,
-              label: 'Constituição',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            _buildTextField(
-              controller: _intelligenceCtrl,
-              label: 'Inteligência',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            _buildTextField(
-              controller: _wisdomCtrl,
-              label: 'Sabedoria',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            _buildTextField(
-              controller: _charismaCtrl,
-              label: 'Carisma',
-              numeric: true,
-              validator: _attributeValidator,
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.save_outlined),
-              label: const Text('Salvar Personagem'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+    return BlocProvider<FormOptionsBloc>(
+      create: (_) => sl<FormOptionsBloc>()..add(LoadFormOptionsEvent()),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Novo Personagem')),
+        body: BlocBuilder<FormOptionsBloc, FormOptionsState>(
+          builder: (context, state) {
+            if (state is FormOptionsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is FormOptionsError) {
+              return Center(
+                child: Text(
+                  'Erro ao carregar opções: ${state.message}',
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final options = state as FormOptionsLoaded;
+            return _buildForm(options);
+          },
         ),
+      ),
+    );
+  }
+
+  /// Renderiza o formulário completo com os dropdowns populados por [options].
+  Widget _buildForm(FormOptionsLoaded options) {
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        children: [
+          _SectionHeader(title: 'Informações Básicas'),
+          const SizedBox(height: 12),
+          _buildTextField(
+            controller: _nameCtrl,
+            label: 'Nome',
+            validator: _requiredValidator,
+          ),
+          _buildDropdown(
+            label: 'Raça',
+            items: options.races,
+            onChanged: (value) => _selectedRace = value,
+          ),
+          _buildDropdown(
+            label: 'Classe',
+            items: options.classes,
+            onChanged: (value) => _selectedClass = value,
+          ),
+          _buildTextField(
+            controller: _levelCtrl,
+            label: 'Nível',
+            numeric: true,
+            validator: _positiveIntValidator,
+          ),
+          const SizedBox(height: 24),
+          _SectionHeader(title: 'Atributos'),
+          const SizedBox(height: 12),
+          _buildTextField(
+            controller: _strengthCtrl,
+            label: 'Força',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          _buildTextField(
+            controller: _dexterityCtrl,
+            label: 'Destreza',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          _buildTextField(
+            controller: _constitutionCtrl,
+            label: 'Constituição',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          _buildTextField(
+            controller: _intelligenceCtrl,
+            label: 'Inteligência',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          _buildTextField(
+            controller: _wisdomCtrl,
+            label: 'Sabedoria',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          _buildTextField(
+            controller: _charismaCtrl,
+            label: 'Carisma',
+            numeric: true,
+            validator: _attributeValidator,
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: _submit,
+            icon: const Icon(Icons.save_outlined),
+            label: const Text('Salvar Personagem'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -209,6 +242,35 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             ? [FilteringTextInputFormatter.digitsOnly]
             : null,
         validator: validator,
+      ),
+    );
+  }
+
+  /// Constrói um [DropdownButtonFormField] a partir de uma lista de [ApiReference].
+  Widget _buildDropdown({
+    required String label,
+    required List<ApiReference> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DropdownButtonFormField<String>(
+        initialValue: null,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: items
+            .map(
+              (ref) => DropdownMenuItem<String>(
+                value: ref.name,
+                child: Text(ref.name),
+              ),
+            )
+            .toList(),
+        onChanged: onChanged,
+        validator: (v) =>
+            (v == null || v.isEmpty) ? 'Selecione uma opção.' : null,
       ),
     );
   }

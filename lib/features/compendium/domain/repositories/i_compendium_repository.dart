@@ -1,9 +1,10 @@
+import '../entities/api_reference.dart';
 import '../entities/equipment_summary.dart';
 import '../entities/monster_summary.dart';
 import '../entities/spell_detail.dart';
 import '../entities/spell_summary.dart';
 
-/// Contrato para acesso ao compêndio de magias do D&D 5e.
+/// Contrato para acesso ao compêndio de recursos do D&D 5e.
 abstract interface class ICompendiumRepository {
   /// Retorna a lista resumida de todas as magias disponíveis na API.
   Future<List<SpellSummary>> getSpells();
@@ -19,4 +20,10 @@ abstract interface class ICompendiumRepository {
     required int offset,
     required int limit,
   });
+
+  /// Retorna a lista de classes jogáveis disponíveis na API.
+  Future<List<ApiReference>> getClasses();
+
+  /// Retorna a lista de raças jogáveis disponíveis na API.
+  Future<List<ApiReference>> getRaces();
 }

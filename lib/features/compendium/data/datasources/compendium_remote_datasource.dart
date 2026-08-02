@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 
+import '../models/api_reference_model.dart';
 import '../models/equipment_summary_model.dart';
 import '../models/monster_summary_model.dart';
 import '../models/spell_detail_model.dart';
 import '../models/spell_summary_model.dart';
 
-/// Contrato para o acesso remoto ao compêndio de magias.
+/// Contrato para o acesso remoto ao compêndio do D&D 5e.
 abstract interface class ICompendiumRemoteDataSource {
   /// Busca a lista de magias na API remota.
   Future<List<SpellSummaryModel>> getSpells();
@@ -18,6 +19,12 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
   Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit);
+
+  /// Busca a lista de classes jogáveis na API remota.
+  Future<List<ApiReferenceModel>> getClasses();
+
+  /// Busca a lista de raças jogáveis na API remota.
+  Future<List<ApiReferenceModel>> getRaces();
 }
 
 /// Implementação do datasource remoto usando Dio.
@@ -31,9 +38,11 @@ abstract interface class ICompendiumRemoteDataSource {
 class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   final Dio _dio;
 
-  // URL base da API pública do D&D 5e.
+  // Endpoints da API pública do D&D 5e.
   static const _spellsEndpoint = 'https://www.dnd5eapi.co/api/spells';
   static const _monstersEndpoint = 'https://www.dnd5eapi.co/api/monsters';
+  static const _classesEndpoint = 'https://www.dnd5eapi.co/api/classes';
+  static const _racesEndpoint = 'https://www.dnd5eapi.co/api/races';
 
   /// Cache em memória de todos os monstros carregados na primeira requisição.
   ///
@@ -104,5 +113,27 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
           .toList();
     }
     return _cachedMonsters!.skip(offset).take(limit).toList();
+  }
+
+  /// Busca todas as classes e mapeia a lista `"results"` do payload para modelos.
+  @override
+  Future<List<ApiReferenceModel>> getClasses() async {
+    final response = await _dio.get<Map<String, dynamic>>(_classesEndpoint);
+    final results = response.data!['results'] as List<dynamic>;
+    return results
+        .cast<Map<String, dynamic>>()
+        .map(ApiReferenceModel.fromJson)
+        .toList();
+  }
+
+  /// Busca todas as raças e mapeia a lista `"results"` do payload para modelos.
+  @override
+  Future<List<ApiReferenceModel>> getRaces() async {
+    final response = await _dio.get<Map<String, dynamic>>(_racesEndpoint);
+    final results = response.data!['results'] as List<dynamic>;
+    return results
+        .cast<Map<String, dynamic>>()
+        .map(ApiReferenceModel.fromJson)
+        .toList();
   }
 }

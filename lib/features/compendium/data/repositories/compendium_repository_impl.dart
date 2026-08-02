@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/api_reference.dart';
 import '../../domain/entities/equipment_summary.dart';
 import '../../domain/entities/monster_summary.dart';
 import '../../domain/entities/spell_detail.dart';
@@ -67,6 +68,30 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   }) async {
     try {
       return await _remoteDataSource.getMonsters(offset, limit);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Erro de rede desconhecido.');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Busca a lista de classes e converte erros de rede em [ServerException].
+  @override
+  Future<List<ApiReference>> getClasses() async {
+    try {
+      return await _remoteDataSource.getClasses();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Erro de rede desconhecido.');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Busca a lista de raças e converte erros de rede em [ServerException].
+  @override
+  Future<List<ApiReference>> getRaces() async {
+    try {
+      return await _remoteDataSource.getRaces();
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {

@@ -8,6 +8,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/delete_chara
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
@@ -16,8 +17,10 @@ import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart
 import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
 import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_classes_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipments_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monsters_usecase.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_races_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spells_usecase.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc.dart';
@@ -70,6 +73,12 @@ Future<void> init() async {
     ),
   );
 
+  // Factory: nova instância por tela, assim o estado de carregamento é limpo
+  // a cada abertura do formulário.
+  sl.registerFactory<FormOptionsBloc>(
+    () => FormOptionsBloc(sl<GetClassesUseCase>(), sl<GetRacesUseCase>()),
+  );
+
   // Domínio — Use Cases stateless compartilhados com segurança como singletons.
   sl.registerLazySingleton<GetAllCharactersUseCase>(
     () => GetAllCharactersUseCase(sl<ICharacterRepository>()),
@@ -120,6 +129,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetMonstersUseCase>(
     () => GetMonstersUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetClassesUseCase>(
+    () => GetClassesUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetRacesUseCase>(
+    () => GetRacesUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<ICompendiumRepository>(
     () => CompendiumRepositoryImpl(sl<ICompendiumRemoteDataSource>()),
