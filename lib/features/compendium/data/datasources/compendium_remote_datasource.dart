@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../models/equipment_summary_model.dart';
+import '../models/monster_summary_model.dart';
 import '../models/spell_detail_model.dart';
 import '../models/spell_summary_model.dart';
 
@@ -14,6 +15,9 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Busca a lista de equipamentos na API remota.
   Future<List<EquipmentSummaryModel>> getEquipments();
+
+  /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
+  Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit);
 }
 
 /// Implementação do datasource remoto usando Dio.
@@ -29,9 +33,21 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
 
   // URL base da API pública do D&D 5e.
   static const _spellsEndpoint = 'https://www.dnd5eapi.co/api/spells';
+  static const _monstersEndpoint = 'https://www.dnd5eapi.co/api/monsters';
+
+  /// Cache em memória de todos os monstros carregados na primeira requisição.
+  ///
+  /// Esta estratégia é equivalente a um `IMemoryCache` do .NET populado na
+  /// primeira chamada e reutilizado nas seguintes — o padrão "cache-aside".
+  /// A paginação subsequente via `.skip(offset).take(limit)` em Dart é análoga
+  /// ao `IQueryable<T>.Skip(offset).Take(limit)` do LINQ sobre Entity Framework,
+  /// com a diferença fundamental de que aqui operamos sobre uma lista já
+  /// materializada em RAM, enquanto o EF traduz `Skip/Take` para
+  /// `OFFSET/FETCH NEXT` no SQL, adiando a materialização para o banco de dados.
+  List<MonsterSummaryModel>? _cachedMonsters;
 
   /// Recebe o [Dio] pré-configurado via construtor para facilitar testes com mocks.
-  const CompendiumRemoteDataSourceImpl(Dio dio) : _dio = dio;
+  CompendiumRemoteDataSourceImpl(Dio dio) : _dio = dio;
 
   /// Busca todas as magias e mapeia a lista `"results"` do payload para modelos.
   @override
@@ -65,5 +81,28 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
         .cast<Map<String, dynamic>>()
         .map(EquipmentSummaryModel.fromJson)
         .toList();
+  }
+
+  /// Retorna uma página de monstros, buscando da API apenas na primeira chamada.
+  ///
+  /// Se [_cachedMonsters] ainda não foi populado, faz um único GET à API e
+  /// armazena o resultado completo. As chamadas seguintes pulam a rede e
+  /// fatiam diretamente a lista em memória com `.skip(offset).take(limit)`.
+  ///
+  /// Em C# com Entity Framework, a paginação equivalente seria:
+  /// `dbContext.Monsters.OrderBy(m => m.Name).Skip(offset).Take(limit).ToListAsync()`
+  /// Aqui, contudo, a coleção já está em RAM, então `skip/take` são operações
+  /// O(n) sobre `Iterable`, sem custo de I/O ou geração de SQL.
+  @override
+  Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit) async {
+    if (_cachedMonsters == null) {
+      final response = await _dio.get<Map<String, dynamic>>(_monstersEndpoint);
+      final results = response.data!['results'] as List<dynamic>;
+      _cachedMonsters = results
+          .cast<Map<String, dynamic>>()
+          .map(MonsterSummaryModel.fromJson)
+          .toList();
+    }
+    return _cachedMonsters!.skip(offset).take(limit).toList();
   }
 }

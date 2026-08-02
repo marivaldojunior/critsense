@@ -17,10 +17,12 @@ import 'package:crit_sense/features/compendium/data/datasources/compendium_remot
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
 import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipments_usecase.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_monsters_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spells_usecase.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/equipment_bloc.dart';
+import 'package:crit_sense/features/compendium/presentation/bloc/monster_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
 import 'package:dio/dio.dart';
 
@@ -106,6 +108,7 @@ Future<void> init() async {
   sl.registerFactory<EquipmentBloc>(
     () => EquipmentBloc(sl<GetEquipmentsUseCase>()),
   );
+  sl.registerFactory<MonsterBloc>(() => MonsterBloc(sl<GetMonstersUseCase>()));
   sl.registerLazySingleton<GetSpellsUseCase>(
     () => GetSpellsUseCase(sl<ICompendiumRepository>()),
   );
@@ -114,6 +117,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetEquipmentsUseCase>(
     () => GetEquipmentsUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetMonstersUseCase>(
+    () => GetMonstersUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<ICompendiumRepository>(
     () => CompendiumRepositoryImpl(sl<ICompendiumRemoteDataSource>()),
