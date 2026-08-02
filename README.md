@@ -27,7 +27,3 @@ O projeto foi desenhado sob os princípios da **Clean Architecture**, dividindo 
 **Pré-requisitos:**
 *   Flutter SDK instalado (versão 3.x+).
 *   Emulador Android/iOS configurado ou dispositivo físico conectado.
-
-1. Clone o repositório:
-   ```bash
-   git clone [https://github.com/marivaldojunior/critsense.git](https://github.com/marivaldojunior/critsense.git)
