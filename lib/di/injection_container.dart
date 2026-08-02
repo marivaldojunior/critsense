@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:crit_sense/core/database/app_database.dart';
 import 'package:crit_sense/features/character_sheet/data/repositories/character_repository_impl.dart';
 import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
@@ -15,9 +16,11 @@ import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart
 import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
 import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_equipments_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spells_usecase.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc.dart';
+import 'package:crit_sense/features/compendium/presentation/bloc/equipment_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
 import 'package:dio/dio.dart';
 
@@ -61,6 +64,7 @@ Future<void> init() async {
       sl<GetAllCharactersUseCase>(),
       sl<SaveCharacterUseCase>(),
       sl<DeleteCharacterUseCase>(),
+      sl<AddInventoryItemUseCase>(),
     ),
   );
 
@@ -73,6 +77,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<DeleteCharacterUseCase>(
     () => DeleteCharacterUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<AddInventoryItemUseCase>(
+    () => AddInventoryItemUseCase(sl<ICharacterRepository>()),
   );
 
   // Dados — Implementação concreta amarrada à interface do domínio.
@@ -96,11 +103,17 @@ Future<void> init() async {
   sl.registerFactory<SpellDetailBloc>(
     () => SpellDetailBloc(sl<GetSpellDetailUseCase>()),
   );
+  sl.registerFactory<EquipmentBloc>(
+    () => EquipmentBloc(sl<GetEquipmentsUseCase>()),
+  );
   sl.registerLazySingleton<GetSpellsUseCase>(
     () => GetSpellsUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<GetSpellDetailUseCase>(
     () => GetSpellDetailUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetEquipmentsUseCase>(
+    () => GetEquipmentsUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<ICompendiumRepository>(
     () => CompendiumRepositoryImpl(sl<ICompendiumRemoteDataSource>()),

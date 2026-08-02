@@ -963,16 +963,406 @@ class AttributesCompanion extends UpdateCompanion<AttributeData> {
   }
 }
 
+class $InventoryItemsTable extends InventoryItems
+    with TableInfo<$InventoryItemsTable, InventoryItemData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _characterIdMeta = const VerificationMeta(
+    'characterId',
+  );
+  @override
+  late final GeneratedColumn<String> characterId = GeneratedColumn<String>(
+    'character_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES characters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _itemIndexMeta = const VerificationMeta(
+    'itemIndex',
+  );
+  @override
+  late final GeneratedColumn<String> itemIndex = GeneratedColumn<String>(
+    'item_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _equipmentCategoryMeta = const VerificationMeta(
+    'equipmentCategory',
+  );
+  @override
+  late final GeneratedColumn<String> equipmentCategory =
+      GeneratedColumn<String>(
+        'equipment_category',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    characterId,
+    itemIndex,
+    name,
+    equipmentCategory,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryItemData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('character_id')) {
+      context.handle(
+        _characterIdMeta,
+        characterId.isAcceptableOrUnknown(
+          data['character_id']!,
+          _characterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_characterIdMeta);
+    }
+    if (data.containsKey('item_index')) {
+      context.handle(
+        _itemIndexMeta,
+        itemIndex.isAcceptableOrUnknown(data['item_index']!, _itemIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIndexMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('equipment_category')) {
+      context.handle(
+        _equipmentCategoryMeta,
+        equipmentCategory.isAcceptableOrUnknown(
+          data['equipment_category']!,
+          _equipmentCategoryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_equipmentCategoryMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryItemData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      characterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}character_id'],
+      )!,
+      itemIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_index'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      equipmentCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}equipment_category'],
+      )!,
+    );
+  }
+
+  @override
+  $InventoryItemsTable createAlias(String alias) {
+    return $InventoryItemsTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryItemData extends DataClass
+    implements Insertable<InventoryItemData> {
+  /// Identificador único do item (UUID gerado no domínio).
+  final String id;
+
+  /// Chave estrangeira para o personagem dono do item.
+  final String characterId;
+
+  /// Identificador do item na API do D&D 5e (ex: "longsword").
+  final String itemIndex;
+
+  /// Nome legível do item (ex: "Longsword").
+  final String name;
+
+  /// Categoria do equipamento (ex: "Weapon", "Armor").
+  final String equipmentCategory;
+  const InventoryItemData({
+    required this.id,
+    required this.characterId,
+    required this.itemIndex,
+    required this.name,
+    required this.equipmentCategory,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['character_id'] = Variable<String>(characterId);
+    map['item_index'] = Variable<String>(itemIndex);
+    map['name'] = Variable<String>(name);
+    map['equipment_category'] = Variable<String>(equipmentCategory);
+    return map;
+  }
+
+  InventoryItemsCompanion toCompanion(bool nullToAbsent) {
+    return InventoryItemsCompanion(
+      id: Value(id),
+      characterId: Value(characterId),
+      itemIndex: Value(itemIndex),
+      name: Value(name),
+      equipmentCategory: Value(equipmentCategory),
+    );
+  }
+
+  factory InventoryItemData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryItemData(
+      id: serializer.fromJson<String>(json['id']),
+      characterId: serializer.fromJson<String>(json['characterId']),
+      itemIndex: serializer.fromJson<String>(json['itemIndex']),
+      name: serializer.fromJson<String>(json['name']),
+      equipmentCategory: serializer.fromJson<String>(json['equipmentCategory']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'characterId': serializer.toJson<String>(characterId),
+      'itemIndex': serializer.toJson<String>(itemIndex),
+      'name': serializer.toJson<String>(name),
+      'equipmentCategory': serializer.toJson<String>(equipmentCategory),
+    };
+  }
+
+  InventoryItemData copyWith({
+    String? id,
+    String? characterId,
+    String? itemIndex,
+    String? name,
+    String? equipmentCategory,
+  }) => InventoryItemData(
+    id: id ?? this.id,
+    characterId: characterId ?? this.characterId,
+    itemIndex: itemIndex ?? this.itemIndex,
+    name: name ?? this.name,
+    equipmentCategory: equipmentCategory ?? this.equipmentCategory,
+  );
+  InventoryItemData copyWithCompanion(InventoryItemsCompanion data) {
+    return InventoryItemData(
+      id: data.id.present ? data.id.value : this.id,
+      characterId: data.characterId.present
+          ? data.characterId.value
+          : this.characterId,
+      itemIndex: data.itemIndex.present ? data.itemIndex.value : this.itemIndex,
+      name: data.name.present ? data.name.value : this.name,
+      equipmentCategory: data.equipmentCategory.present
+          ? data.equipmentCategory.value
+          : this.equipmentCategory,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItemData(')
+          ..write('id: $id, ')
+          ..write('characterId: $characterId, ')
+          ..write('itemIndex: $itemIndex, ')
+          ..write('name: $name, ')
+          ..write('equipmentCategory: $equipmentCategory')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, characterId, itemIndex, name, equipmentCategory);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryItemData &&
+          other.id == this.id &&
+          other.characterId == this.characterId &&
+          other.itemIndex == this.itemIndex &&
+          other.name == this.name &&
+          other.equipmentCategory == this.equipmentCategory);
+}
+
+class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
+  final Value<String> id;
+  final Value<String> characterId;
+  final Value<String> itemIndex;
+  final Value<String> name;
+  final Value<String> equipmentCategory;
+  final Value<int> rowid;
+  const InventoryItemsCompanion({
+    this.id = const Value.absent(),
+    this.characterId = const Value.absent(),
+    this.itemIndex = const Value.absent(),
+    this.name = const Value.absent(),
+    this.equipmentCategory = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryItemsCompanion.insert({
+    required String id,
+    required String characterId,
+    required String itemIndex,
+    required String name,
+    required String equipmentCategory,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       characterId = Value(characterId),
+       itemIndex = Value(itemIndex),
+       name = Value(name),
+       equipmentCategory = Value(equipmentCategory);
+  static Insertable<InventoryItemData> custom({
+    Expression<String>? id,
+    Expression<String>? characterId,
+    Expression<String>? itemIndex,
+    Expression<String>? name,
+    Expression<String>? equipmentCategory,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (characterId != null) 'character_id': characterId,
+      if (itemIndex != null) 'item_index': itemIndex,
+      if (name != null) 'name': name,
+      if (equipmentCategory != null) 'equipment_category': equipmentCategory,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? characterId,
+    Value<String>? itemIndex,
+    Value<String>? name,
+    Value<String>? equipmentCategory,
+    Value<int>? rowid,
+  }) {
+    return InventoryItemsCompanion(
+      id: id ?? this.id,
+      characterId: characterId ?? this.characterId,
+      itemIndex: itemIndex ?? this.itemIndex,
+      name: name ?? this.name,
+      equipmentCategory: equipmentCategory ?? this.equipmentCategory,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (characterId.present) {
+      map['character_id'] = Variable<String>(characterId.value);
+    }
+    if (itemIndex.present) {
+      map['item_index'] = Variable<String>(itemIndex.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (equipmentCategory.present) {
+      map['equipment_category'] = Variable<String>(equipmentCategory.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('characterId: $characterId, ')
+          ..write('itemIndex: $itemIndex, ')
+          ..write('name: $name, ')
+          ..write('equipmentCategory: $equipmentCategory, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CharactersTable characters = $CharactersTable(this);
   late final $AttributesTable attributes = $AttributesTable(this);
+  late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [characters, attributes];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    characters,
+    attributes,
+    inventoryItems,
+  ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
     WritePropagation(
@@ -981,6 +1371,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('attributes', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'characters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('inventory_items', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -1025,6 +1422,24 @@ final class $$CharactersTableReferences
     ).filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_attributesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$InventoryItemsTable, List<InventoryItemData>>
+  _inventoryItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.inventoryItems,
+    aliasName: 'characters__id__inventory_items__character_id',
+  );
+
+  $$InventoryItemsTableProcessedTableManager get inventoryItemsRefs {
+    final manager = $$InventoryItemsTableTableManager(
+      $_db,
+      $_db.inventoryItems,
+    ).filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_inventoryItemsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -1091,6 +1506,31 @@ class $$CharactersTableFilterComposer
           }) => $$AttributesTableFilterComposer(
             $db: $db,
             $table: $db.attributes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> inventoryItemsRefs(
+    Expression<bool> Function($$InventoryItemsTableFilterComposer f) f,
+  ) {
+    final $$InventoryItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inventoryItems,
+      getReferencedColumn: (t) => t.characterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.inventoryItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -1200,6 +1640,31 @@ class $$CharactersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> inventoryItemsRefs<T extends Object>(
+    Expression<T> Function($$InventoryItemsTableAnnotationComposer a) f,
+  ) {
+    final $$InventoryItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inventoryItems,
+      getReferencedColumn: (t) => t.characterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.inventoryItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CharactersTableTableManager
@@ -1215,7 +1680,7 @@ class $$CharactersTableTableManager
           $$CharactersTableUpdateCompanionBuilder,
           (CharacterData, $$CharactersTableReferences),
           CharacterData,
-          PrefetchHooks Function({bool attributesRefs})
+          PrefetchHooks Function({bool attributesRefs, bool inventoryItemsRefs})
         > {
   $$CharactersTableTableManager(_$AppDatabase db, $CharactersTable table)
     : super(
@@ -1276,38 +1741,63 @@ class $$CharactersTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({attributesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (attributesRefs) db.attributes],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (attributesRefs)
-                    await $_getPrefetchedData<
-                      CharacterData,
-                      $CharactersTable,
-                      AttributeData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CharactersTableReferences
-                          ._attributesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CharactersTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).attributesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.characterId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({attributesRefs = false, inventoryItemsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (attributesRefs) db.attributes,
+                    if (inventoryItemsRefs) db.inventoryItems,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (attributesRefs)
+                        await $_getPrefetchedData<
+                          CharacterData,
+                          $CharactersTable,
+                          AttributeData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CharactersTableReferences
+                              ._attributesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CharactersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.characterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (inventoryItemsRefs)
+                        await $_getPrefetchedData<
+                          CharacterData,
+                          $CharactersTable,
+                          InventoryItemData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CharactersTableReferences
+                              ._inventoryItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CharactersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).inventoryItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.characterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -1324,7 +1814,7 @@ typedef $$CharactersTableProcessedTableManager =
       $$CharactersTableUpdateCompanionBuilder,
       (CharacterData, $$CharactersTableReferences),
       CharacterData,
-      PrefetchHooks Function({bool attributesRefs})
+      PrefetchHooks Function({bool attributesRefs, bool inventoryItemsRefs})
     >;
 typedef $$AttributesTableCreateCompanionBuilder =
     AttributesCompanion Function({
@@ -1685,6 +2175,333 @@ typedef $$AttributesTableProcessedTableManager =
       AttributeData,
       PrefetchHooks Function({bool characterId})
     >;
+typedef $$InventoryItemsTableCreateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      required String id,
+      required String characterId,
+      required String itemIndex,
+      required String name,
+      required String equipmentCategory,
+      Value<int> rowid,
+    });
+typedef $$InventoryItemsTableUpdateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      Value<String> id,
+      Value<String> characterId,
+      Value<String> itemIndex,
+      Value<String> name,
+      Value<String> equipmentCategory,
+      Value<int> rowid,
+    });
+
+final class $$InventoryItemsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $InventoryItemsTable, InventoryItemData> {
+  $$InventoryItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CharactersTable _characterIdTable(_$AppDatabase db) => db.characters
+      .createAlias('inventory_items__character_id__characters__id');
+
+  $$CharactersTableProcessedTableManager get characterId {
+    final $_column = $_itemColumn<String>('character_id')!;
+
+    final manager = $$CharactersTableTableManager(
+      $_db,
+      $_db.characters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_characterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InventoryItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemIndex => $composableBuilder(
+    column: $table.itemIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get equipmentCategory => $composableBuilder(
+    column: $table.equipmentCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CharactersTableFilterComposer get characterId {
+    final $$CharactersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableFilterComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemIndex => $composableBuilder(
+    column: $table.itemIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get equipmentCategory => $composableBuilder(
+    column: $table.equipmentCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CharactersTableOrderingComposer get characterId {
+    final $$CharactersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableOrderingComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get itemIndex =>
+      $composableBuilder(column: $table.itemIndex, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get equipmentCategory => $composableBuilder(
+    column: $table.equipmentCategory,
+    builder: (column) => column,
+  );
+
+  $$CharactersTableAnnotationComposer get characterId {
+    final $$CharactersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryItemsTable,
+          InventoryItemData,
+          $$InventoryItemsTableFilterComposer,
+          $$InventoryItemsTableOrderingComposer,
+          $$InventoryItemsTableAnnotationComposer,
+          $$InventoryItemsTableCreateCompanionBuilder,
+          $$InventoryItemsTableUpdateCompanionBuilder,
+          (InventoryItemData, $$InventoryItemsTableReferences),
+          InventoryItemData,
+          PrefetchHooks Function({bool characterId})
+        > {
+  $$InventoryItemsTableTableManager(
+    _$AppDatabase db,
+    $InventoryItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> characterId = const Value.absent(),
+                Value<String> itemIndex = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> equipmentCategory = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion(
+                id: id,
+                characterId: characterId,
+                itemIndex: itemIndex,
+                name: name,
+                equipmentCategory: equipmentCategory,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String characterId,
+                required String itemIndex,
+                required String name,
+                required String equipmentCategory,
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion.insert(
+                id: id,
+                characterId: characterId,
+                itemIndex: itemIndex,
+                name: name,
+                equipmentCategory: equipmentCategory,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InventoryItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({characterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (characterId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.characterId,
+                                referencedTable: $$InventoryItemsTableReferences
+                                    ._characterIdTable(db),
+                                referencedColumn:
+                                    $$InventoryItemsTableReferences
+                                        ._characterIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InventoryItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryItemsTable,
+      InventoryItemData,
+      $$InventoryItemsTableFilterComposer,
+      $$InventoryItemsTableOrderingComposer,
+      $$InventoryItemsTableAnnotationComposer,
+      $$InventoryItemsTableCreateCompanionBuilder,
+      $$InventoryItemsTableUpdateCompanionBuilder,
+      (InventoryItemData, $$InventoryItemsTableReferences),
+      InventoryItemData,
+      PrefetchHooks Function({bool characterId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1693,4 +2510,6 @@ class $AppDatabaseManager {
       $$CharactersTableTableManager(_db, _db.characters);
   $$AttributesTableTableManager get attributes =>
       $$AttributesTableTableManager(_db, _db.attributes);
+  $$InventoryItemsTableTableManager get inventoryItems =>
+      $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
 }

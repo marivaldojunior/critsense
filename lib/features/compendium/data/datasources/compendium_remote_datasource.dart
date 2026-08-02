@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../models/equipment_summary_model.dart';
 import '../models/spell_detail_model.dart';
 import '../models/spell_summary_model.dart';
 
@@ -10,6 +11,9 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Busca os detalhes completos da magia identificada por [index].
   Future<SpellDetailModel> getSpellDetail(String index);
+
+  /// Busca a lista de equipamentos na API remota.
+  Future<List<EquipmentSummaryModel>> getEquipments();
 }
 
 /// Implementação do datasource remoto usando Dio.
@@ -48,5 +52,18 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
       '$_spellsEndpoint/$index',
     );
     return SpellDetailModel.fromJson(response.data!);
+  }
+
+  /// Busca todos os equipamentos e mapeia a lista `"results"` para modelos.
+  @override
+  Future<List<EquipmentSummaryModel>> getEquipments() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      'https://www.dnd5eapi.co/api/equipment',
+    );
+    final results = response.data!['results'] as List<dynamic>;
+    return results
+        .cast<Map<String, dynamic>>()
+        .map(EquipmentSummaryModel.fromJson)
+        .toList();
   }
 }

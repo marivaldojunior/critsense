@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/entities/inventory_item.dart';
 import '../../domain/repositories/i_character_repository.dart';
 
 /// Implementação concreta de [ICharacterRepository] usando o banco SQLite via Drift.
@@ -72,6 +73,23 @@ class CharacterRepositoryImpl implements ICharacterRepository {
   Future<void> deleteCharacter(String id) async {
     await (_db.delete(_db.characters)..where((t) => t.id.equals(id))).go();
   }
+
+  /// Insere um item no inventário usando UPSERT para evitar duplicatas por id.
+  @override
+  Future<void> addInventoryItem(InventoryItem item) async {
+    await _db
+        .into(_db.inventoryItems)
+        .insertOnConflictUpdate(item._toCompanion());
+  }
+
+  /// Retorna todos os itens do personagem via query filtrada por [characterId].
+  @override
+  Future<List<InventoryItem>> getCharacterInventory(String characterId) async {
+    final rows = await (_db.select(
+      _db.inventoryItems,
+    )..where((t) => t.characterId.equals(characterId))).get();
+    return rows.map((row) => row._toDomain()).toList();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -135,6 +153,32 @@ extension _AttributeToCompanion on Attribute {
       inteligencia: Value(intelligence),
       sabedoria: Value(wisdom),
       carisma: Value(charisma),
+    );
+  }
+}
+
+extension _InventoryItemDataMapper on InventoryItemData {
+  /// Converte a linha do Drift para a entidade pura de domínio [InventoryItem].
+  InventoryItem _toDomain() {
+    return InventoryItem(
+      id: id,
+      characterId: characterId,
+      itemIndex: itemIndex,
+      name: name,
+      equipmentCategory: equipmentCategory,
+    );
+  }
+}
+
+extension _InventoryItemToCompanion on InventoryItem {
+  /// Converte a entidade [InventoryItem] para o [InventoryItemsCompanion] do Drift.
+  InventoryItemsCompanion _toCompanion() {
+    return InventoryItemsCompanion(
+      id: Value(id),
+      characterId: Value(characterId),
+      itemIndex: Value(itemIndex),
+      name: Value(name),
+      equipmentCategory: Value(equipmentCategory),
     );
   }
 }

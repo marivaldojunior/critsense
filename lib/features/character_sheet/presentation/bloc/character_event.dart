@@ -25,3 +25,16 @@ final class DeleteCharacterEvent extends CharacterEvent {
 
   const DeleteCharacterEvent(this.id);
 }
+
+/// Solicita ao BLoC que adicione [item] ao inventário do personagem referenciado.
+///
+/// Cross-Feature Command: equivalente a um `IRequest` do MediatR no .NET —
+/// encapsula a intenção de adicionar um item sem que o emissor (feature
+/// `compendium`) precise conhecer a implementação do handler (feature
+/// `character_sheet`).
+final class AddInventoryItemEvent extends CharacterEvent {
+  /// Item a ser persistido no inventário.
+  final InventoryItem item;
+
+  const AddInventoryItemEvent(this.item);
+}

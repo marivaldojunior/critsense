@@ -63,3 +63,40 @@ class Attributes extends Table {
   @override
   Set<Column> get primaryKey => {characterId};
 }
+
+/// Tabela de itens do inventário de um personagem.
+///
+/// Relação 1:N com [Characters]: um personagem possui zero ou mais itens.
+///
+/// No Entity Framework Core (.NET), essa relação seria configurada via Fluent
+/// API: `modelBuilder.Entity<Character>().HasMany(c => c.InventoryItems)
+/// .WithOne(i => i.Character).HasForeignKey(i => i.CharacterId)
+/// .OnDelete(DeleteBehavior.Cascade)`. O EF gerencia a FK e o cascade
+/// automaticamente na migração. No Drift, declaramos a FK explicitamente
+/// com `.references(Characters, #id, onDelete: KeyAction.cascade)`, e o
+/// próprio Drift gera o DDL correspondente em `app_database.g.dart`.
+/// Assim como um `Add-Migration` + `Update-Database` no EF, após qualquer
+/// alteração nas tabelas é necessário rodar:
+/// `dart run build_runner build --delete-conflicting-outputs`
+/// para regenerar o arquivo `.g.dart` e sincronizar o esquema do banco.
+@DataClassName('InventoryItemData')
+class InventoryItems extends Table {
+  /// Identificador único do item (UUID gerado no domínio).
+  TextColumn get id => text()();
+
+  /// Chave estrangeira para o personagem dono do item.
+  TextColumn get characterId =>
+      text().references(Characters, #id, onDelete: KeyAction.cascade)();
+
+  /// Identificador do item na API do D&D 5e (ex: "longsword").
+  TextColumn get itemIndex => text()();
+
+  /// Nome legível do item (ex: "Longsword").
+  TextColumn get name => text()();
+
+  /// Categoria do equipamento (ex: "Weapon", "Armor").
+  TextColumn get equipmentCategory => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

@@ -1,3 +1,4 @@
+import '../entities/equipment_summary.dart';
 import '../entities/spell_detail.dart';
 import '../entities/spell_summary.dart';
 
@@ -8,4 +9,7 @@ abstract interface class ICompendiumRepository {
 
   /// Retorna os detalhes completos da magia identificada por [index].
   Future<SpellDetail> getSpellDetail(String index);
+
+  /// Retorna a lista resumida de todos os equipamentos disponíveis na API.
+  Future<List<EquipmentSummary>> getEquipments();
 }

@@ -15,13 +15,13 @@ part 'app_database.g.dart';
 ///
 /// O Drift gera, a partir das anotações e das [Tables], toda a infraestrutura
 /// de queries type-safe em [app_database.g.dart]. Nunca edite o arquivo `.g.dart`.
-@DriftDatabase(tables: [Characters, Attributes])
+@DriftDatabase(tables: [Characters, Attributes, InventoryItems])
 class AppDatabase extends _$AppDatabase {
   /// Cria a instância recebendo o executor de queries.
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Cria a conexão lazy com o arquivo `critsense.sqlite` no diretório de documentos.
   ///
