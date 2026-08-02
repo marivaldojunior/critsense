@@ -4,6 +4,7 @@ import '../../../../core/database/app_database.dart';
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/inventory_item.dart';
+import '../../domain/entities/session_note.dart';
 import '../../domain/repositories/i_character_repository.dart';
 
 /// Implementação concreta de [ICharacterRepository] usando o banco SQLite via Drift.
@@ -89,6 +90,34 @@ class CharacterRepositoryImpl implements ICharacterRepository {
       _db.inventoryItems,
     )..where((t) => t.characterId.equals(characterId))).get();
     return rows.map((row) => row._toDomain()).toList();
+  }
+
+  /// Retorna as notas de sessão do personagem, ordenadas da mais recente para a mais antiga.
+  @override
+  Future<List<SessionNote>> getSessionNotes(String characterId) async {
+    final rows =
+        await (_db.select(_db.sessionNotes)
+              ..where((t) => t.characterId.equals(characterId))
+              ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+            .get();
+    return rows.map((row) => row._toDomain()).toList();
+  }
+
+  /// Persiste uma nota usando UPSERT para garantir idempotência pelo [SessionNote.id].
+  @override
+  Future<void> addSessionNote(SessionNote note) async {
+    await _db
+        .into(_db.sessionNotes)
+        .insertOnConflictUpdate(note._toCompanion());
+  }
+
+  /// Remove a nota identificada por [noteId]; a CASCADE não é necessária aqui
+  /// pois notas não possuem filhos.
+  @override
+  Future<void> deleteSessionNote(String noteId) async {
+    await (_db.delete(
+      _db.sessionNotes,
+    )..where((t) => t.id.equals(noteId))).go();
   }
 }
 
@@ -181,6 +210,32 @@ extension _InventoryItemToCompanion on InventoryItem {
       itemIndex: Value(itemIndex),
       name: Value(name),
       equipmentCategory: Value(equipmentCategory),
+    );
+  }
+}
+
+extension _SessionNoteDataMapper on SessionNoteData {
+  /// Converte a linha gerada pelo Drift para a entidade pura de domínio [SessionNote].
+  SessionNote _toDomain() {
+    return SessionNote(
+      id: id,
+      characterId: characterId,
+      title: title,
+      content: content,
+      createdAt: createdAt,
+    );
+  }
+}
+
+extension _SessionNoteToCompanion on SessionNote {
+  /// Converte a entidade [SessionNote] para o [SessionNotesCompanion] do Drift.
+  SessionNotesCompanion _toCompanion() {
+    return SessionNotesCompanion(
+      id: Value(id),
+      characterId: Value(characterId),
+      title: Value(title),
+      content: Value(content),
+      createdAt: Value(createdAt),
     );
   }
 }

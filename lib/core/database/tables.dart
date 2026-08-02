@@ -103,3 +103,34 @@ class InventoryItems extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Tabela de notas de sessão de RPG, vinculada 1:N a [Characters].
+///
+/// No EF Core, esta relação seria configurada assim:
+/// `modelBuilder.Entity<Character>().HasMany(c => c.SessionNotes)
+/// .WithOne(n => n.Character).HasForeignKey(n => n.CharacterId)
+/// .OnDelete(DeleteBehavior.Cascade)`.
+/// O EF gerencia a FK e o DDL automaticamente via migração.
+/// No Drift, declaramos a FK explicitamente com `.references(...)` e
+/// executamos `dart run build_runner build` para sincronizar o esquema.
+@DataClassName('SessionNoteData')
+class SessionNotes extends Table {
+  /// Identificador único da nota (UUID gerado no domínio).
+  TextColumn get id => text()();
+
+  /// Chave estrangeira para o personagem dono desta nota.
+  TextColumn get characterId =>
+      text().references(Characters, #id, onDelete: KeyAction.cascade)();
+
+  /// Título resumido da anotação.
+  TextColumn get title => text()();
+
+  /// Corpo completo da anotação.
+  TextColumn get content => text()();
+
+  /// Momento de criação da nota; armazenado como epoch ms pelo Drift.
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

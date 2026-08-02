@@ -15,13 +15,25 @@ part 'app_database.g.dart';
 ///
 /// O Drift gera, a partir das anotações e das [Tables], toda a infraestrutura
 /// de queries type-safe em [app_database.g.dart]. Nunca edite o arquivo `.g.dart`.
-@DriftDatabase(tables: [Characters, Attributes, InventoryItems])
+@DriftDatabase(tables: [Characters, Attributes, InventoryItems, SessionNotes])
 class AppDatabase extends _$AppDatabase {
   /// Cria a instância recebendo o executor de queries.
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
+
+  /// Aplica migrações incrementais quando o banco existente é mais antigo que
+  /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
+  /// apenas as migrations pendentes sem recriar o banco.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 3) {
+        await m.createTable(sessionNotes);
+      }
+    },
+  );
 
   /// Cria a conexão lazy com o arquivo `critsense.sqlite` no diretório de documentos.
   ///

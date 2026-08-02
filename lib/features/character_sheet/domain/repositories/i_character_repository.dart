@@ -1,5 +1,6 @@
 import '../entities/character.dart';
 import '../entities/inventory_item.dart';
+import '../entities/session_note.dart';
 
 /// Contrato para persistência e recuperação de personagens.
 abstract interface class ICharacterRepository {
@@ -17,4 +18,14 @@ abstract interface class ICharacterRepository {
 
   /// Retorna todos os itens do personagem identificado por [characterId].
   Future<List<InventoryItem>> getCharacterInventory(String characterId);
+
+  /// Retorna as notas de sessão do personagem identificado por [characterId],
+  /// ordenadas da mais recente para a mais antiga.
+  Future<List<SessionNote>> getSessionNotes(String characterId);
+
+  /// Persiste [note] vinculada ao personagem referenciado em [SessionNote.characterId].
+  Future<void> addSessionNote(SessionNote note);
+
+  /// Remove a nota identificada por [noteId] do repositório.
+  Future<void> deleteSessionNote(String noteId);
 }
