@@ -12,6 +12,14 @@ import 'package:crit_sense/features/dice_roller/data/repositories/dice_repositor
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
+import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
+import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
+import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_spells_usecase.dart';
+import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc.dart';
+import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
+import 'package:dio/dio.dart';
 
 /// Instância global do service locator.
 ///
@@ -70,6 +78,35 @@ Future<void> init() async {
   // Dados — Implementação concreta amarrada à interface do domínio.
   sl.registerLazySingleton<ICharacterRepository>(
     () => CharacterRepositoryImpl(sl<AppDatabase>()),
+  );
+
+  // ─── Feature: compendium ──────────────────────────────────────────────────────────
+
+  // Dio como LazySingleton reutiliza o pool de conexões HTTP internamente.
+  // No .NET, instanciar `new HttpClient()` a cada requisição esgota os sockets
+  // disponíveis do SO (socket exhaustion) porque o TCP TIME_WAIT mantém a
+  // porta ocupada por até 240s após o fechamento. O mesmo risco existe no Dart:
+  // um único Dio singleton centraliza e reutiliza as conexões abertas.
+  sl.registerLazySingleton<Dio>(() => Dio());
+
+  // Factory: cada tela recebe um BLoC zerado, evitando estado compartilhado.
+  sl.registerFactory<CompendiumBloc>(
+    () => CompendiumBloc(sl<GetSpellsUseCase>()),
+  );
+  sl.registerFactory<SpellDetailBloc>(
+    () => SpellDetailBloc(sl<GetSpellDetailUseCase>()),
+  );
+  sl.registerLazySingleton<GetSpellsUseCase>(
+    () => GetSpellsUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetSpellDetailUseCase>(
+    () => GetSpellDetailUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<ICompendiumRepository>(
+    () => CompendiumRepositoryImpl(sl<ICompendiumRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<ICompendiumRemoteDataSource>(
+    () => CompendiumRemoteDataSourceImpl(sl<Dio>()),
   );
 
   // ─── Feature: dice_roller ──────────────────────────────────────────────────
