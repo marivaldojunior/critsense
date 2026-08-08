@@ -43,7 +43,7 @@ class CritSenseApp extends StatelessWidget {
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: _themeMode,
         builder: (context, mode, _) => MaterialApp(
-          title: 'CritSense',
+          title: 'Crit Sense',
           debugShowCheckedModeBanner: false,
           theme: _buildLightTheme(),
           darkTheme: _buildDarkTheme(),
