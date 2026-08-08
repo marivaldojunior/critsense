@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_shape_icon.dart';
 
 /// Botão de um tipo de dado no painel de montagem do pool: exibe o rótulo
 /// (`d6`, `d20`...) e controles de +/- para a quantidade selecionada.
@@ -44,6 +45,14 @@ class DiceTypeButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              DiceShapeIcon(
+                type: type,
+                color: selected ? colorScheme.primary : colorScheme.outline,
+                fillColor: selected
+                    ? colorScheme.primary.withValues(alpha: 0.15)
+                    : null,
+              ),
+              const SizedBox(height: 4),
               Text(
                 type.label,
                 style: Theme.of(
