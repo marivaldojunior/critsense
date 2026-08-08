@@ -21,11 +21,33 @@ class Characters extends Table {
   /// Nível atual do personagem.
   IntColumn get nivel => integer()();
 
-  /// Pontos de vida máximos.
-  IntColumn get hpMaximo => integer()();
+  // ── Status de Combate ─────────────────────────────────────────────────
+  // Reflete o bloco central da primeira página da ficha oficial (CA,
+  // iniciativa, deslocamento e a caixa de pontos de vida).
 
-  /// Pontos de vida atuais.
-  IntColumn get hpAtual => integer()();
+  /// Classe de Armadura (CA). Default 10: CA base sem armadura no SRD do
+  /// D&D 5e — usado para não quebrar personagens já persistidos antes
+  /// desta coluna existir.
+  IntColumn get armorClass => integer().withDefault(const Constant(10))();
+
+  /// Modificador de iniciativa somado à rolagem de d20 no início do combate.
+  IntColumn get initiative => integer().withDefault(const Constant(0))();
+
+  /// Deslocamento em pés por turno. Default 30: valor padrão da maioria das
+  /// raças jogáveis no SRD do D&D 5e.
+  IntColumn get speed => integer().withDefault(const Constant(30))();
+
+  /// Pontos de vida máximos. Renomeada de `hpMaximo` para alinhar com a
+  /// nomenclatura em inglês do restante do bloco de Status de Combate.
+  IntColumn get maxHitPoints => integer()();
+
+  /// Pontos de vida atuais. Renomeada de `hpAtual`; ver [maxHitPoints].
+  IntColumn get currentHitPoints => integer()();
+
+  /// Pontos de vida temporários — absorvidos antes dos PV atuais, zerados
+  /// (não subtraídos) ao sofrer dano restante, conforme a regra do SRD.
+  IntColumn get temporaryHitPoints =>
+      integer().withDefault(const Constant(0))();
 
   /// Caminho local para a imagem de avatar do personagem; pode ser nulo.
   TextColumn get avatarPath => text().nullable()();
@@ -37,6 +59,37 @@ class Characters extends Table {
   /// Antecedente (background) do personagem. Mesma justificativa de
   /// nullability de [alignment].
   TextColumn get background => text().nullable()();
+
+  // ── Traços de Personalidade ───────────────────────────────────────────
+  // Reflete o bloco lateral esquerdo da primeira página da ficha oficial.
+  // Nullable pelo mesmo motivo de [alignment]/[background]: texto livre
+  // ausente em personagens persistidos antes desta coluna existir.
+
+  /// Traços de personalidade do personagem.
+  TextColumn get personalityTraits => text().nullable()();
+
+  /// Ideais que guiam as ações do personagem.
+  TextColumn get ideals => text().nullable()();
+
+  /// Vínculos (pessoas, lugares ou causas importantes) do personagem.
+  TextColumn get bonds => text().nullable()();
+
+  /// Defeitos ou fraquezas de personalidade do personagem.
+  TextColumn get flaws => text().nullable()();
+
+  // ── Evolução ───────────────────────────────────────────────────────────
+  // Reflete o bloco de progressão da ficha oficial (canto da caixa de
+  // nível/classe): pontos de experiência e o bônus de proficiência
+  // derivado do nível.
+
+  /// Pontos de experiência acumulados. Default 0: início de aventura.
+  IntColumn get experiencePoints =>
+      integer().withDefault(const Constant(0))();
+
+  /// Bônus de proficiência aplicado a testes, ataques e resistências.
+  /// Default 2: valor do SRD do D&D 5e para personagens de nível 1 a 4.
+  IntColumn get proficiencyBonus =>
+      integer().withDefault(const Constant(2))();
 
   @override
   Set<Column> get primaryKey => {id};

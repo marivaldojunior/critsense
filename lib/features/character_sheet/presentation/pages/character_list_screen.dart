@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
 import 'character_form_screen.dart';
-import 'session_notes_screen.dart';
+import 'character_sheet_screen.dart';
 
 /// Tela de listagem de personagens da Ficha de RPG.
 ///
@@ -127,16 +127,17 @@ class _CharacterCard extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         trailing: Chip(
-          label: Text('HP ${character.currentHp}/${character.maxHp}'),
+          label: Text(
+            'HP ${character.currentHitPoints}/${character.maxHitPoints}',
+          ),
           visualDensity: VisualDensity.compact,
         ),
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => SessionNotesScreen(
-              characterId: character.id,
-              characterName: character.name,
-              avatarPath: character.avatarPath,
+            builder: (_) => BlocProvider.value(
+              value: context.read<CharacterBloc>(),
+              child: CharacterSheetScreen(character: character),
             ),
           ),
         ),

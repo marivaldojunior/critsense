@@ -129,10 +129,10 @@ class CharacterRepositoryImpl implements ICharacterRepository {
 extension _CharacterDataMapper on CharacterData {
   /// Converte a linha gerada pelo Drift para a entidade pura de domínio [Character].
   ///
-  /// [alignment]/[background] são nullable no banco (colunas adicionadas em
-  /// uma migração posterior); personagens salvos antes dela viram string
-  /// vazia aqui — o domínio permanece non-null, a infraestrutura absorve a
-  /// lacuna de dados legados.
+  /// [alignment]/[background]/[personalityTraits]/[ideals]/[bonds]/[flaws]
+  /// são nullable no banco (colunas adicionadas em migrações posteriores);
+  /// personagens salvos antes delas viram string vazia aqui — o domínio
+  /// permanece non-null, a infraestrutura absorve a lacuna de dados legados.
   Character _toDomain(AttributeData attrData) {
     return Character(
       id: id,
@@ -140,11 +140,21 @@ extension _CharacterDataMapper on CharacterData {
       race: raca,
       characterClass: classe,
       level: nivel,
-      maxHp: hpMaximo,
-      currentHp: hpAtual,
+      armorClass: armorClass,
+      initiative: initiative,
+      speed: speed,
+      maxHitPoints: maxHitPoints,
+      currentHitPoints: currentHitPoints,
+      temporaryHitPoints: temporaryHitPoints,
       attributes: attrData._toDomain(),
       alignment: alignment ?? '',
       background: background ?? '',
+      personalityTraits: personalityTraits ?? '',
+      ideals: ideals ?? '',
+      bonds: bonds ?? '',
+      flaws: flaws ?? '',
+      experiencePoints: experiencePoints,
+      proficiencyBonus: proficiencyBonus,
       avatarPath: avatarPath,
     );
   }
@@ -173,10 +183,20 @@ extension _CharacterToCompanion on Character {
       raca: Value(race),
       classe: Value(characterClass),
       nivel: Value(level),
-      hpMaximo: Value(maxHp),
-      hpAtual: Value(currentHp),
+      armorClass: Value(armorClass),
+      initiative: Value(initiative),
+      speed: Value(speed),
+      maxHitPoints: Value(maxHitPoints),
+      currentHitPoints: Value(currentHitPoints),
+      temporaryHitPoints: Value(temporaryHitPoints),
       alignment: Value(alignment),
       background: Value(background),
+      personalityTraits: Value(personalityTraits),
+      ideals: Value(ideals),
+      bonds: Value(bonds),
+      flaws: Value(flaws),
+      experiencePoints: Value(experiencePoints),
+      proficiencyBonus: Value(proficiencyBonus),
       avatarPath: Value(avatarPath),
     );
   }

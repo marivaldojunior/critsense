@@ -54,27 +54,72 @@ class $CharactersTable extends Characters
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _hpMaximoMeta = const VerificationMeta(
-    'hpMaximo',
+  static const VerificationMeta _armorClassMeta = const VerificationMeta(
+    'armorClass',
   );
   @override
-  late final GeneratedColumn<int> hpMaximo = GeneratedColumn<int>(
-    'hp_maximo',
+  late final GeneratedColumn<int> armorClass = GeneratedColumn<int>(
+    'armor_class',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _initiativeMeta = const VerificationMeta(
+    'initiative',
+  );
+  @override
+  late final GeneratedColumn<int> initiative = GeneratedColumn<int>(
+    'initiative',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _speedMeta = const VerificationMeta('speed');
+  @override
+  late final GeneratedColumn<int> speed = GeneratedColumn<int>(
+    'speed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _maxHitPointsMeta = const VerificationMeta(
+    'maxHitPoints',
+  );
+  @override
+  late final GeneratedColumn<int> maxHitPoints = GeneratedColumn<int>(
+    'max_hit_points',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _hpAtualMeta = const VerificationMeta(
-    'hpAtual',
+  static const VerificationMeta _currentHitPointsMeta = const VerificationMeta(
+    'currentHitPoints',
   );
   @override
-  late final GeneratedColumn<int> hpAtual = GeneratedColumn<int>(
-    'hp_atual',
+  late final GeneratedColumn<int> currentHitPoints = GeneratedColumn<int>(
+    'current_hit_points',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _temporaryHitPointsMeta =
+      const VerificationMeta('temporaryHitPoints');
+  @override
+  late final GeneratedColumn<int> temporaryHitPoints = GeneratedColumn<int>(
+    'temporary_hit_points',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _avatarPathMeta = const VerificationMeta(
     'avatarPath',
@@ -109,6 +154,69 @@ class $CharactersTable extends Characters
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _personalityTraitsMeta = const VerificationMeta(
+    'personalityTraits',
+  );
+  @override
+  late final GeneratedColumn<String> personalityTraits =
+      GeneratedColumn<String>(
+        'personality_traits',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _idealsMeta = const VerificationMeta('ideals');
+  @override
+  late final GeneratedColumn<String> ideals = GeneratedColumn<String>(
+    'ideals',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bondsMeta = const VerificationMeta('bonds');
+  @override
+  late final GeneratedColumn<String> bonds = GeneratedColumn<String>(
+    'bonds',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _flawsMeta = const VerificationMeta('flaws');
+  @override
+  late final GeneratedColumn<String> flaws = GeneratedColumn<String>(
+    'flaws',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _experiencePointsMeta = const VerificationMeta(
+    'experiencePoints',
+  );
+  @override
+  late final GeneratedColumn<int> experiencePoints = GeneratedColumn<int>(
+    'experience_points',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _proficiencyBonusMeta = const VerificationMeta(
+    'proficiencyBonus',
+  );
+  @override
+  late final GeneratedColumn<int> proficiencyBonus = GeneratedColumn<int>(
+    'proficiency_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -116,11 +224,21 @@ class $CharactersTable extends Characters
     raca,
     classe,
     nivel,
-    hpMaximo,
-    hpAtual,
+    armorClass,
+    initiative,
+    speed,
+    maxHitPoints,
+    currentHitPoints,
+    temporaryHitPoints,
     avatarPath,
     alignment,
     background,
+    personalityTraits,
+    ideals,
+    bonds,
+    flaws,
+    experiencePoints,
+    proficiencyBonus,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -171,21 +289,54 @@ class $CharactersTable extends Characters
     } else if (isInserting) {
       context.missing(_nivelMeta);
     }
-    if (data.containsKey('hp_maximo')) {
+    if (data.containsKey('armor_class')) {
       context.handle(
-        _hpMaximoMeta,
-        hpMaximo.isAcceptableOrUnknown(data['hp_maximo']!, _hpMaximoMeta),
+        _armorClassMeta,
+        armorClass.isAcceptableOrUnknown(data['armor_class']!, _armorClassMeta),
       );
-    } else if (isInserting) {
-      context.missing(_hpMaximoMeta);
     }
-    if (data.containsKey('hp_atual')) {
+    if (data.containsKey('initiative')) {
       context.handle(
-        _hpAtualMeta,
-        hpAtual.isAcceptableOrUnknown(data['hp_atual']!, _hpAtualMeta),
+        _initiativeMeta,
+        initiative.isAcceptableOrUnknown(data['initiative']!, _initiativeMeta),
+      );
+    }
+    if (data.containsKey('speed')) {
+      context.handle(
+        _speedMeta,
+        speed.isAcceptableOrUnknown(data['speed']!, _speedMeta),
+      );
+    }
+    if (data.containsKey('max_hit_points')) {
+      context.handle(
+        _maxHitPointsMeta,
+        maxHitPoints.isAcceptableOrUnknown(
+          data['max_hit_points']!,
+          _maxHitPointsMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_hpAtualMeta);
+      context.missing(_maxHitPointsMeta);
+    }
+    if (data.containsKey('current_hit_points')) {
+      context.handle(
+        _currentHitPointsMeta,
+        currentHitPoints.isAcceptableOrUnknown(
+          data['current_hit_points']!,
+          _currentHitPointsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currentHitPointsMeta);
+    }
+    if (data.containsKey('temporary_hit_points')) {
+      context.handle(
+        _temporaryHitPointsMeta,
+        temporaryHitPoints.isAcceptableOrUnknown(
+          data['temporary_hit_points']!,
+          _temporaryHitPointsMeta,
+        ),
+      );
     }
     if (data.containsKey('avatar_path')) {
       context.handle(
@@ -203,6 +354,51 @@ class $CharactersTable extends Characters
       context.handle(
         _backgroundMeta,
         background.isAcceptableOrUnknown(data['background']!, _backgroundMeta),
+      );
+    }
+    if (data.containsKey('personality_traits')) {
+      context.handle(
+        _personalityTraitsMeta,
+        personalityTraits.isAcceptableOrUnknown(
+          data['personality_traits']!,
+          _personalityTraitsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ideals')) {
+      context.handle(
+        _idealsMeta,
+        ideals.isAcceptableOrUnknown(data['ideals']!, _idealsMeta),
+      );
+    }
+    if (data.containsKey('bonds')) {
+      context.handle(
+        _bondsMeta,
+        bonds.isAcceptableOrUnknown(data['bonds']!, _bondsMeta),
+      );
+    }
+    if (data.containsKey('flaws')) {
+      context.handle(
+        _flawsMeta,
+        flaws.isAcceptableOrUnknown(data['flaws']!, _flawsMeta),
+      );
+    }
+    if (data.containsKey('experience_points')) {
+      context.handle(
+        _experiencePointsMeta,
+        experiencePoints.isAcceptableOrUnknown(
+          data['experience_points']!,
+          _experiencePointsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('proficiency_bonus')) {
+      context.handle(
+        _proficiencyBonusMeta,
+        proficiencyBonus.isAcceptableOrUnknown(
+          data['proficiency_bonus']!,
+          _proficiencyBonusMeta,
+        ),
       );
     }
     return context;
@@ -234,13 +430,29 @@ class $CharactersTable extends Characters
         DriftSqlType.int,
         data['${effectivePrefix}nivel'],
       )!,
-      hpMaximo: attachedDatabase.typeMapping.read(
+      armorClass: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}hp_maximo'],
+        data['${effectivePrefix}armor_class'],
       )!,
-      hpAtual: attachedDatabase.typeMapping.read(
+      initiative: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}hp_atual'],
+        data['${effectivePrefix}initiative'],
+      )!,
+      speed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}speed'],
+      )!,
+      maxHitPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_hit_points'],
+      )!,
+      currentHitPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_hit_points'],
+      )!,
+      temporaryHitPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temporary_hit_points'],
       )!,
       avatarPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -254,6 +466,30 @@ class $CharactersTable extends Characters
         DriftSqlType.string,
         data['${effectivePrefix}background'],
       ),
+      personalityTraits: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}personality_traits'],
+      ),
+      ideals: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ideals'],
+      ),
+      bonds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bonds'],
+      ),
+      flaws: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}flaws'],
+      ),
+      experiencePoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}experience_points'],
+      )!,
+      proficiencyBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}proficiency_bonus'],
+      )!,
     );
   }
 
@@ -279,11 +515,28 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   /// Nível atual do personagem.
   final int nivel;
 
-  /// Pontos de vida máximos.
-  final int hpMaximo;
+  /// Classe de Armadura (CA). Default 10: CA base sem armadura no SRD do
+  /// D&D 5e — usado para não quebrar personagens já persistidos antes
+  /// desta coluna existir.
+  final int armorClass;
 
-  /// Pontos de vida atuais.
-  final int hpAtual;
+  /// Modificador de iniciativa somado à rolagem de d20 no início do combate.
+  final int initiative;
+
+  /// Deslocamento em pés por turno. Default 30: valor padrão da maioria das
+  /// raças jogáveis no SRD do D&D 5e.
+  final int speed;
+
+  /// Pontos de vida máximos. Renomeada de `hpMaximo` para alinhar com a
+  /// nomenclatura em inglês do restante do bloco de Status de Combate.
+  final int maxHitPoints;
+
+  /// Pontos de vida atuais. Renomeada de `hpAtual`; ver [maxHitPoints].
+  final int currentHitPoints;
+
+  /// Pontos de vida temporários — absorvidos antes dos PV atuais, zerados
+  /// (não subtraídos) ao sofrer dano restante, conforme a regra do SRD.
+  final int temporaryHitPoints;
 
   /// Caminho local para a imagem de avatar do personagem; pode ser nulo.
   final String? avatarPath;
@@ -295,17 +548,46 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   /// Antecedente (background) do personagem. Mesma justificativa de
   /// nullability de [alignment].
   final String? background;
+
+  /// Traços de personalidade do personagem.
+  final String? personalityTraits;
+
+  /// Ideais que guiam as ações do personagem.
+  final String? ideals;
+
+  /// Vínculos (pessoas, lugares ou causas importantes) do personagem.
+  final String? bonds;
+
+  /// Defeitos ou fraquezas de personalidade do personagem.
+  final String? flaws;
+
+  /// Pontos de experiência acumulados. Default 0: início de aventura.
+  final int experiencePoints;
+
+  /// Bônus de proficiência aplicado a testes, ataques e resistências.
+  /// Default 2: valor do SRD do D&D 5e para personagens de nível 1 a 4.
+  final int proficiencyBonus;
   const CharacterData({
     required this.id,
     required this.nome,
     required this.raca,
     required this.classe,
     required this.nivel,
-    required this.hpMaximo,
-    required this.hpAtual,
+    required this.armorClass,
+    required this.initiative,
+    required this.speed,
+    required this.maxHitPoints,
+    required this.currentHitPoints,
+    required this.temporaryHitPoints,
     this.avatarPath,
     this.alignment,
     this.background,
+    this.personalityTraits,
+    this.ideals,
+    this.bonds,
+    this.flaws,
+    required this.experiencePoints,
+    required this.proficiencyBonus,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -315,8 +597,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     map['raca'] = Variable<String>(raca);
     map['classe'] = Variable<String>(classe);
     map['nivel'] = Variable<int>(nivel);
-    map['hp_maximo'] = Variable<int>(hpMaximo);
-    map['hp_atual'] = Variable<int>(hpAtual);
+    map['armor_class'] = Variable<int>(armorClass);
+    map['initiative'] = Variable<int>(initiative);
+    map['speed'] = Variable<int>(speed);
+    map['max_hit_points'] = Variable<int>(maxHitPoints);
+    map['current_hit_points'] = Variable<int>(currentHitPoints);
+    map['temporary_hit_points'] = Variable<int>(temporaryHitPoints);
     if (!nullToAbsent || avatarPath != null) {
       map['avatar_path'] = Variable<String>(avatarPath);
     }
@@ -326,6 +612,20 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     if (!nullToAbsent || background != null) {
       map['background'] = Variable<String>(background);
     }
+    if (!nullToAbsent || personalityTraits != null) {
+      map['personality_traits'] = Variable<String>(personalityTraits);
+    }
+    if (!nullToAbsent || ideals != null) {
+      map['ideals'] = Variable<String>(ideals);
+    }
+    if (!nullToAbsent || bonds != null) {
+      map['bonds'] = Variable<String>(bonds);
+    }
+    if (!nullToAbsent || flaws != null) {
+      map['flaws'] = Variable<String>(flaws);
+    }
+    map['experience_points'] = Variable<int>(experiencePoints);
+    map['proficiency_bonus'] = Variable<int>(proficiencyBonus);
     return map;
   }
 
@@ -336,8 +636,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       raca: Value(raca),
       classe: Value(classe),
       nivel: Value(nivel),
-      hpMaximo: Value(hpMaximo),
-      hpAtual: Value(hpAtual),
+      armorClass: Value(armorClass),
+      initiative: Value(initiative),
+      speed: Value(speed),
+      maxHitPoints: Value(maxHitPoints),
+      currentHitPoints: Value(currentHitPoints),
+      temporaryHitPoints: Value(temporaryHitPoints),
       avatarPath: avatarPath == null && nullToAbsent
           ? const Value.absent()
           : Value(avatarPath),
@@ -347,6 +651,20 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       background: background == null && nullToAbsent
           ? const Value.absent()
           : Value(background),
+      personalityTraits: personalityTraits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personalityTraits),
+      ideals: ideals == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ideals),
+      bonds: bonds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bonds),
+      flaws: flaws == null && nullToAbsent
+          ? const Value.absent()
+          : Value(flaws),
+      experiencePoints: Value(experiencePoints),
+      proficiencyBonus: Value(proficiencyBonus),
     );
   }
 
@@ -361,11 +679,23 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       raca: serializer.fromJson<String>(json['raca']),
       classe: serializer.fromJson<String>(json['classe']),
       nivel: serializer.fromJson<int>(json['nivel']),
-      hpMaximo: serializer.fromJson<int>(json['hpMaximo']),
-      hpAtual: serializer.fromJson<int>(json['hpAtual']),
+      armorClass: serializer.fromJson<int>(json['armorClass']),
+      initiative: serializer.fromJson<int>(json['initiative']),
+      speed: serializer.fromJson<int>(json['speed']),
+      maxHitPoints: serializer.fromJson<int>(json['maxHitPoints']),
+      currentHitPoints: serializer.fromJson<int>(json['currentHitPoints']),
+      temporaryHitPoints: serializer.fromJson<int>(json['temporaryHitPoints']),
       avatarPath: serializer.fromJson<String?>(json['avatarPath']),
       alignment: serializer.fromJson<String?>(json['alignment']),
       background: serializer.fromJson<String?>(json['background']),
+      personalityTraits: serializer.fromJson<String?>(
+        json['personalityTraits'],
+      ),
+      ideals: serializer.fromJson<String?>(json['ideals']),
+      bonds: serializer.fromJson<String?>(json['bonds']),
+      flaws: serializer.fromJson<String?>(json['flaws']),
+      experiencePoints: serializer.fromJson<int>(json['experiencePoints']),
+      proficiencyBonus: serializer.fromJson<int>(json['proficiencyBonus']),
     );
   }
   @override
@@ -377,11 +707,21 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'raca': serializer.toJson<String>(raca),
       'classe': serializer.toJson<String>(classe),
       'nivel': serializer.toJson<int>(nivel),
-      'hpMaximo': serializer.toJson<int>(hpMaximo),
-      'hpAtual': serializer.toJson<int>(hpAtual),
+      'armorClass': serializer.toJson<int>(armorClass),
+      'initiative': serializer.toJson<int>(initiative),
+      'speed': serializer.toJson<int>(speed),
+      'maxHitPoints': serializer.toJson<int>(maxHitPoints),
+      'currentHitPoints': serializer.toJson<int>(currentHitPoints),
+      'temporaryHitPoints': serializer.toJson<int>(temporaryHitPoints),
       'avatarPath': serializer.toJson<String?>(avatarPath),
       'alignment': serializer.toJson<String?>(alignment),
       'background': serializer.toJson<String?>(background),
+      'personalityTraits': serializer.toJson<String?>(personalityTraits),
+      'ideals': serializer.toJson<String?>(ideals),
+      'bonds': serializer.toJson<String?>(bonds),
+      'flaws': serializer.toJson<String?>(flaws),
+      'experiencePoints': serializer.toJson<int>(experiencePoints),
+      'proficiencyBonus': serializer.toJson<int>(proficiencyBonus),
     };
   }
 
@@ -391,22 +731,44 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     String? raca,
     String? classe,
     int? nivel,
-    int? hpMaximo,
-    int? hpAtual,
+    int? armorClass,
+    int? initiative,
+    int? speed,
+    int? maxHitPoints,
+    int? currentHitPoints,
+    int? temporaryHitPoints,
     Value<String?> avatarPath = const Value.absent(),
     Value<String?> alignment = const Value.absent(),
     Value<String?> background = const Value.absent(),
+    Value<String?> personalityTraits = const Value.absent(),
+    Value<String?> ideals = const Value.absent(),
+    Value<String?> bonds = const Value.absent(),
+    Value<String?> flaws = const Value.absent(),
+    int? experiencePoints,
+    int? proficiencyBonus,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
     raca: raca ?? this.raca,
     classe: classe ?? this.classe,
     nivel: nivel ?? this.nivel,
-    hpMaximo: hpMaximo ?? this.hpMaximo,
-    hpAtual: hpAtual ?? this.hpAtual,
+    armorClass: armorClass ?? this.armorClass,
+    initiative: initiative ?? this.initiative,
+    speed: speed ?? this.speed,
+    maxHitPoints: maxHitPoints ?? this.maxHitPoints,
+    currentHitPoints: currentHitPoints ?? this.currentHitPoints,
+    temporaryHitPoints: temporaryHitPoints ?? this.temporaryHitPoints,
     avatarPath: avatarPath.present ? avatarPath.value : this.avatarPath,
     alignment: alignment.present ? alignment.value : this.alignment,
     background: background.present ? background.value : this.background,
+    personalityTraits: personalityTraits.present
+        ? personalityTraits.value
+        : this.personalityTraits,
+    ideals: ideals.present ? ideals.value : this.ideals,
+    bonds: bonds.present ? bonds.value : this.bonds,
+    flaws: flaws.present ? flaws.value : this.flaws,
+    experiencePoints: experiencePoints ?? this.experiencePoints,
+    proficiencyBonus: proficiencyBonus ?? this.proficiencyBonus,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -415,8 +777,22 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       raca: data.raca.present ? data.raca.value : this.raca,
       classe: data.classe.present ? data.classe.value : this.classe,
       nivel: data.nivel.present ? data.nivel.value : this.nivel,
-      hpMaximo: data.hpMaximo.present ? data.hpMaximo.value : this.hpMaximo,
-      hpAtual: data.hpAtual.present ? data.hpAtual.value : this.hpAtual,
+      armorClass: data.armorClass.present
+          ? data.armorClass.value
+          : this.armorClass,
+      initiative: data.initiative.present
+          ? data.initiative.value
+          : this.initiative,
+      speed: data.speed.present ? data.speed.value : this.speed,
+      maxHitPoints: data.maxHitPoints.present
+          ? data.maxHitPoints.value
+          : this.maxHitPoints,
+      currentHitPoints: data.currentHitPoints.present
+          ? data.currentHitPoints.value
+          : this.currentHitPoints,
+      temporaryHitPoints: data.temporaryHitPoints.present
+          ? data.temporaryHitPoints.value
+          : this.temporaryHitPoints,
       avatarPath: data.avatarPath.present
           ? data.avatarPath.value
           : this.avatarPath,
@@ -424,6 +800,18 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       background: data.background.present
           ? data.background.value
           : this.background,
+      personalityTraits: data.personalityTraits.present
+          ? data.personalityTraits.value
+          : this.personalityTraits,
+      ideals: data.ideals.present ? data.ideals.value : this.ideals,
+      bonds: data.bonds.present ? data.bonds.value : this.bonds,
+      flaws: data.flaws.present ? data.flaws.value : this.flaws,
+      experiencePoints: data.experiencePoints.present
+          ? data.experiencePoints.value
+          : this.experiencePoints,
+      proficiencyBonus: data.proficiencyBonus.present
+          ? data.proficiencyBonus.value
+          : this.proficiencyBonus,
     );
   }
 
@@ -435,11 +823,21 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('raca: $raca, ')
           ..write('classe: $classe, ')
           ..write('nivel: $nivel, ')
-          ..write('hpMaximo: $hpMaximo, ')
-          ..write('hpAtual: $hpAtual, ')
+          ..write('armorClass: $armorClass, ')
+          ..write('initiative: $initiative, ')
+          ..write('speed: $speed, ')
+          ..write('maxHitPoints: $maxHitPoints, ')
+          ..write('currentHitPoints: $currentHitPoints, ')
+          ..write('temporaryHitPoints: $temporaryHitPoints, ')
           ..write('avatarPath: $avatarPath, ')
           ..write('alignment: $alignment, ')
-          ..write('background: $background')
+          ..write('background: $background, ')
+          ..write('personalityTraits: $personalityTraits, ')
+          ..write('ideals: $ideals, ')
+          ..write('bonds: $bonds, ')
+          ..write('flaws: $flaws, ')
+          ..write('experiencePoints: $experiencePoints, ')
+          ..write('proficiencyBonus: $proficiencyBonus')
           ..write(')'))
         .toString();
   }
@@ -451,11 +849,21 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     raca,
     classe,
     nivel,
-    hpMaximo,
-    hpAtual,
+    armorClass,
+    initiative,
+    speed,
+    maxHitPoints,
+    currentHitPoints,
+    temporaryHitPoints,
     avatarPath,
     alignment,
     background,
+    personalityTraits,
+    ideals,
+    bonds,
+    flaws,
+    experiencePoints,
+    proficiencyBonus,
   );
   @override
   bool operator ==(Object other) =>
@@ -466,11 +874,21 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.raca == this.raca &&
           other.classe == this.classe &&
           other.nivel == this.nivel &&
-          other.hpMaximo == this.hpMaximo &&
-          other.hpAtual == this.hpAtual &&
+          other.armorClass == this.armorClass &&
+          other.initiative == this.initiative &&
+          other.speed == this.speed &&
+          other.maxHitPoints == this.maxHitPoints &&
+          other.currentHitPoints == this.currentHitPoints &&
+          other.temporaryHitPoints == this.temporaryHitPoints &&
           other.avatarPath == this.avatarPath &&
           other.alignment == this.alignment &&
-          other.background == this.background);
+          other.background == this.background &&
+          other.personalityTraits == this.personalityTraits &&
+          other.ideals == this.ideals &&
+          other.bonds == this.bonds &&
+          other.flaws == this.flaws &&
+          other.experiencePoints == this.experiencePoints &&
+          other.proficiencyBonus == this.proficiencyBonus);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -479,11 +897,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<String> raca;
   final Value<String> classe;
   final Value<int> nivel;
-  final Value<int> hpMaximo;
-  final Value<int> hpAtual;
+  final Value<int> armorClass;
+  final Value<int> initiative;
+  final Value<int> speed;
+  final Value<int> maxHitPoints;
+  final Value<int> currentHitPoints;
+  final Value<int> temporaryHitPoints;
   final Value<String?> avatarPath;
   final Value<String?> alignment;
   final Value<String?> background;
+  final Value<String?> personalityTraits;
+  final Value<String?> ideals;
+  final Value<String?> bonds;
+  final Value<String?> flaws;
+  final Value<int> experiencePoints;
+  final Value<int> proficiencyBonus;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -491,11 +919,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.raca = const Value.absent(),
     this.classe = const Value.absent(),
     this.nivel = const Value.absent(),
-    this.hpMaximo = const Value.absent(),
-    this.hpAtual = const Value.absent(),
+    this.armorClass = const Value.absent(),
+    this.initiative = const Value.absent(),
+    this.speed = const Value.absent(),
+    this.maxHitPoints = const Value.absent(),
+    this.currentHitPoints = const Value.absent(),
+    this.temporaryHitPoints = const Value.absent(),
     this.avatarPath = const Value.absent(),
     this.alignment = const Value.absent(),
     this.background = const Value.absent(),
+    this.personalityTraits = const Value.absent(),
+    this.ideals = const Value.absent(),
+    this.bonds = const Value.absent(),
+    this.flaws = const Value.absent(),
+    this.experiencePoints = const Value.absent(),
+    this.proficiencyBonus = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -504,30 +942,50 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     required String raca,
     required String classe,
     required int nivel,
-    required int hpMaximo,
-    required int hpAtual,
+    this.armorClass = const Value.absent(),
+    this.initiative = const Value.absent(),
+    this.speed = const Value.absent(),
+    required int maxHitPoints,
+    required int currentHitPoints,
+    this.temporaryHitPoints = const Value.absent(),
     this.avatarPath = const Value.absent(),
     this.alignment = const Value.absent(),
     this.background = const Value.absent(),
+    this.personalityTraits = const Value.absent(),
+    this.ideals = const Value.absent(),
+    this.bonds = const Value.absent(),
+    this.flaws = const Value.absent(),
+    this.experiencePoints = const Value.absent(),
+    this.proficiencyBonus = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
        raca = Value(raca),
        classe = Value(classe),
        nivel = Value(nivel),
-       hpMaximo = Value(hpMaximo),
-       hpAtual = Value(hpAtual);
+       maxHitPoints = Value(maxHitPoints),
+       currentHitPoints = Value(currentHitPoints);
   static Insertable<CharacterData> custom({
     Expression<String>? id,
     Expression<String>? nome,
     Expression<String>? raca,
     Expression<String>? classe,
     Expression<int>? nivel,
-    Expression<int>? hpMaximo,
-    Expression<int>? hpAtual,
+    Expression<int>? armorClass,
+    Expression<int>? initiative,
+    Expression<int>? speed,
+    Expression<int>? maxHitPoints,
+    Expression<int>? currentHitPoints,
+    Expression<int>? temporaryHitPoints,
     Expression<String>? avatarPath,
     Expression<String>? alignment,
     Expression<String>? background,
+    Expression<String>? personalityTraits,
+    Expression<String>? ideals,
+    Expression<String>? bonds,
+    Expression<String>? flaws,
+    Expression<int>? experiencePoints,
+    Expression<int>? proficiencyBonus,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -536,11 +994,22 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (raca != null) 'raca': raca,
       if (classe != null) 'classe': classe,
       if (nivel != null) 'nivel': nivel,
-      if (hpMaximo != null) 'hp_maximo': hpMaximo,
-      if (hpAtual != null) 'hp_atual': hpAtual,
+      if (armorClass != null) 'armor_class': armorClass,
+      if (initiative != null) 'initiative': initiative,
+      if (speed != null) 'speed': speed,
+      if (maxHitPoints != null) 'max_hit_points': maxHitPoints,
+      if (currentHitPoints != null) 'current_hit_points': currentHitPoints,
+      if (temporaryHitPoints != null)
+        'temporary_hit_points': temporaryHitPoints,
       if (avatarPath != null) 'avatar_path': avatarPath,
       if (alignment != null) 'alignment': alignment,
       if (background != null) 'background': background,
+      if (personalityTraits != null) 'personality_traits': personalityTraits,
+      if (ideals != null) 'ideals': ideals,
+      if (bonds != null) 'bonds': bonds,
+      if (flaws != null) 'flaws': flaws,
+      if (experiencePoints != null) 'experience_points': experiencePoints,
+      if (proficiencyBonus != null) 'proficiency_bonus': proficiencyBonus,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -551,11 +1020,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<String>? raca,
     Value<String>? classe,
     Value<int>? nivel,
-    Value<int>? hpMaximo,
-    Value<int>? hpAtual,
+    Value<int>? armorClass,
+    Value<int>? initiative,
+    Value<int>? speed,
+    Value<int>? maxHitPoints,
+    Value<int>? currentHitPoints,
+    Value<int>? temporaryHitPoints,
     Value<String?>? avatarPath,
     Value<String?>? alignment,
     Value<String?>? background,
+    Value<String?>? personalityTraits,
+    Value<String?>? ideals,
+    Value<String?>? bonds,
+    Value<String?>? flaws,
+    Value<int>? experiencePoints,
+    Value<int>? proficiencyBonus,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -564,11 +1043,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       raca: raca ?? this.raca,
       classe: classe ?? this.classe,
       nivel: nivel ?? this.nivel,
-      hpMaximo: hpMaximo ?? this.hpMaximo,
-      hpAtual: hpAtual ?? this.hpAtual,
+      armorClass: armorClass ?? this.armorClass,
+      initiative: initiative ?? this.initiative,
+      speed: speed ?? this.speed,
+      maxHitPoints: maxHitPoints ?? this.maxHitPoints,
+      currentHitPoints: currentHitPoints ?? this.currentHitPoints,
+      temporaryHitPoints: temporaryHitPoints ?? this.temporaryHitPoints,
       avatarPath: avatarPath ?? this.avatarPath,
       alignment: alignment ?? this.alignment,
       background: background ?? this.background,
+      personalityTraits: personalityTraits ?? this.personalityTraits,
+      ideals: ideals ?? this.ideals,
+      bonds: bonds ?? this.bonds,
+      flaws: flaws ?? this.flaws,
+      experiencePoints: experiencePoints ?? this.experiencePoints,
+      proficiencyBonus: proficiencyBonus ?? this.proficiencyBonus,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -591,11 +1080,23 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (nivel.present) {
       map['nivel'] = Variable<int>(nivel.value);
     }
-    if (hpMaximo.present) {
-      map['hp_maximo'] = Variable<int>(hpMaximo.value);
+    if (armorClass.present) {
+      map['armor_class'] = Variable<int>(armorClass.value);
     }
-    if (hpAtual.present) {
-      map['hp_atual'] = Variable<int>(hpAtual.value);
+    if (initiative.present) {
+      map['initiative'] = Variable<int>(initiative.value);
+    }
+    if (speed.present) {
+      map['speed'] = Variable<int>(speed.value);
+    }
+    if (maxHitPoints.present) {
+      map['max_hit_points'] = Variable<int>(maxHitPoints.value);
+    }
+    if (currentHitPoints.present) {
+      map['current_hit_points'] = Variable<int>(currentHitPoints.value);
+    }
+    if (temporaryHitPoints.present) {
+      map['temporary_hit_points'] = Variable<int>(temporaryHitPoints.value);
     }
     if (avatarPath.present) {
       map['avatar_path'] = Variable<String>(avatarPath.value);
@@ -605,6 +1106,24 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     }
     if (background.present) {
       map['background'] = Variable<String>(background.value);
+    }
+    if (personalityTraits.present) {
+      map['personality_traits'] = Variable<String>(personalityTraits.value);
+    }
+    if (ideals.present) {
+      map['ideals'] = Variable<String>(ideals.value);
+    }
+    if (bonds.present) {
+      map['bonds'] = Variable<String>(bonds.value);
+    }
+    if (flaws.present) {
+      map['flaws'] = Variable<String>(flaws.value);
+    }
+    if (experiencePoints.present) {
+      map['experience_points'] = Variable<int>(experiencePoints.value);
+    }
+    if (proficiencyBonus.present) {
+      map['proficiency_bonus'] = Variable<int>(proficiencyBonus.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -620,11 +1139,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('raca: $raca, ')
           ..write('classe: $classe, ')
           ..write('nivel: $nivel, ')
-          ..write('hpMaximo: $hpMaximo, ')
-          ..write('hpAtual: $hpAtual, ')
+          ..write('armorClass: $armorClass, ')
+          ..write('initiative: $initiative, ')
+          ..write('speed: $speed, ')
+          ..write('maxHitPoints: $maxHitPoints, ')
+          ..write('currentHitPoints: $currentHitPoints, ')
+          ..write('temporaryHitPoints: $temporaryHitPoints, ')
           ..write('avatarPath: $avatarPath, ')
           ..write('alignment: $alignment, ')
           ..write('background: $background, ')
+          ..write('personalityTraits: $personalityTraits, ')
+          ..write('ideals: $ideals, ')
+          ..write('bonds: $bonds, ')
+          ..write('flaws: $flaws, ')
+          ..write('experiencePoints: $experiencePoints, ')
+          ..write('proficiencyBonus: $proficiencyBonus, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1929,11 +2458,21 @@ typedef $$CharactersTableCreateCompanionBuilder =
       required String raca,
       required String classe,
       required int nivel,
-      required int hpMaximo,
-      required int hpAtual,
+      Value<int> armorClass,
+      Value<int> initiative,
+      Value<int> speed,
+      required int maxHitPoints,
+      required int currentHitPoints,
+      Value<int> temporaryHitPoints,
       Value<String?> avatarPath,
       Value<String?> alignment,
       Value<String?> background,
+      Value<String?> personalityTraits,
+      Value<String?> ideals,
+      Value<String?> bonds,
+      Value<String?> flaws,
+      Value<int> experiencePoints,
+      Value<int> proficiencyBonus,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -1943,11 +2482,21 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<String> raca,
       Value<String> classe,
       Value<int> nivel,
-      Value<int> hpMaximo,
-      Value<int> hpAtual,
+      Value<int> armorClass,
+      Value<int> initiative,
+      Value<int> speed,
+      Value<int> maxHitPoints,
+      Value<int> currentHitPoints,
+      Value<int> temporaryHitPoints,
       Value<String?> avatarPath,
       Value<String?> alignment,
       Value<String?> background,
+      Value<String?> personalityTraits,
+      Value<String?> ideals,
+      Value<String?> bonds,
+      Value<String?> flaws,
+      Value<int> experiencePoints,
+      Value<int> proficiencyBonus,
       Value<int> rowid,
     });
 
@@ -2044,13 +2593,33 @@ class $$CharactersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get hpMaximo => $composableBuilder(
-    column: $table.hpMaximo,
+  ColumnFilters<int> get armorClass => $composableBuilder(
+    column: $table.armorClass,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get hpAtual => $composableBuilder(
-    column: $table.hpAtual,
+  ColumnFilters<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get speed => $composableBuilder(
+    column: $table.speed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxHitPoints => $composableBuilder(
+    column: $table.maxHitPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentHitPoints => $composableBuilder(
+    column: $table.currentHitPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get temporaryHitPoints => $composableBuilder(
+    column: $table.temporaryHitPoints,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2066,6 +2635,36 @@ class $$CharactersTableFilterComposer
 
   ColumnFilters<String> get background => $composableBuilder(
     column: $table.background,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get personalityTraits => $composableBuilder(
+    column: $table.personalityTraits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ideals => $composableBuilder(
+    column: $table.ideals,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bonds => $composableBuilder(
+    column: $table.bonds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get flaws => $composableBuilder(
+    column: $table.flaws,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get experiencePoints => $composableBuilder(
+    column: $table.experiencePoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get proficiencyBonus => $composableBuilder(
+    column: $table.proficiencyBonus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2179,13 +2778,33 @@ class $$CharactersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get hpMaximo => $composableBuilder(
-    column: $table.hpMaximo,
+  ColumnOrderings<int> get armorClass => $composableBuilder(
+    column: $table.armorClass,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get hpAtual => $composableBuilder(
-    column: $table.hpAtual,
+  ColumnOrderings<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get speed => $composableBuilder(
+    column: $table.speed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxHitPoints => $composableBuilder(
+    column: $table.maxHitPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentHitPoints => $composableBuilder(
+    column: $table.currentHitPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get temporaryHitPoints => $composableBuilder(
+    column: $table.temporaryHitPoints,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2201,6 +2820,36 @@ class $$CharactersTableOrderingComposer
 
   ColumnOrderings<String> get background => $composableBuilder(
     column: $table.background,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get personalityTraits => $composableBuilder(
+    column: $table.personalityTraits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ideals => $composableBuilder(
+    column: $table.ideals,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bonds => $composableBuilder(
+    column: $table.bonds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get flaws => $composableBuilder(
+    column: $table.flaws,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get experiencePoints => $composableBuilder(
+    column: $table.experiencePoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get proficiencyBonus => $composableBuilder(
+    column: $table.proficiencyBonus,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2229,11 +2878,33 @@ class $$CharactersTableAnnotationComposer
   GeneratedColumn<int> get nivel =>
       $composableBuilder(column: $table.nivel, builder: (column) => column);
 
-  GeneratedColumn<int> get hpMaximo =>
-      $composableBuilder(column: $table.hpMaximo, builder: (column) => column);
+  GeneratedColumn<int> get armorClass => $composableBuilder(
+    column: $table.armorClass,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<int> get hpAtual =>
-      $composableBuilder(column: $table.hpAtual, builder: (column) => column);
+  GeneratedColumn<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get speed =>
+      $composableBuilder(column: $table.speed, builder: (column) => column);
+
+  GeneratedColumn<int> get maxHitPoints => $composableBuilder(
+    column: $table.maxHitPoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get currentHitPoints => $composableBuilder(
+    column: $table.currentHitPoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get temporaryHitPoints => $composableBuilder(
+    column: $table.temporaryHitPoints,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get avatarPath => $composableBuilder(
     column: $table.avatarPath,
@@ -2245,6 +2916,30 @@ class $$CharactersTableAnnotationComposer
 
   GeneratedColumn<String> get background => $composableBuilder(
     column: $table.background,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get personalityTraits => $composableBuilder(
+    column: $table.personalityTraits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ideals =>
+      $composableBuilder(column: $table.ideals, builder: (column) => column);
+
+  GeneratedColumn<String> get bonds =>
+      $composableBuilder(column: $table.bonds, builder: (column) => column);
+
+  GeneratedColumn<String> get flaws =>
+      $composableBuilder(column: $table.flaws, builder: (column) => column);
+
+  GeneratedColumn<int> get experiencePoints => $composableBuilder(
+    column: $table.experiencePoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get proficiencyBonus => $composableBuilder(
+    column: $table.proficiencyBonus,
     builder: (column) => column,
   );
 
@@ -2361,11 +3056,21 @@ class $$CharactersTableTableManager
                 Value<String> raca = const Value.absent(),
                 Value<String> classe = const Value.absent(),
                 Value<int> nivel = const Value.absent(),
-                Value<int> hpMaximo = const Value.absent(),
-                Value<int> hpAtual = const Value.absent(),
+                Value<int> armorClass = const Value.absent(),
+                Value<int> initiative = const Value.absent(),
+                Value<int> speed = const Value.absent(),
+                Value<int> maxHitPoints = const Value.absent(),
+                Value<int> currentHitPoints = const Value.absent(),
+                Value<int> temporaryHitPoints = const Value.absent(),
                 Value<String?> avatarPath = const Value.absent(),
                 Value<String?> alignment = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                Value<String?> personalityTraits = const Value.absent(),
+                Value<String?> ideals = const Value.absent(),
+                Value<String?> bonds = const Value.absent(),
+                Value<String?> flaws = const Value.absent(),
+                Value<int> experiencePoints = const Value.absent(),
+                Value<int> proficiencyBonus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -2373,11 +3078,21 @@ class $$CharactersTableTableManager
                 raca: raca,
                 classe: classe,
                 nivel: nivel,
-                hpMaximo: hpMaximo,
-                hpAtual: hpAtual,
+                armorClass: armorClass,
+                initiative: initiative,
+                speed: speed,
+                maxHitPoints: maxHitPoints,
+                currentHitPoints: currentHitPoints,
+                temporaryHitPoints: temporaryHitPoints,
                 avatarPath: avatarPath,
                 alignment: alignment,
                 background: background,
+                personalityTraits: personalityTraits,
+                ideals: ideals,
+                bonds: bonds,
+                flaws: flaws,
+                experiencePoints: experiencePoints,
+                proficiencyBonus: proficiencyBonus,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2387,11 +3102,21 @@ class $$CharactersTableTableManager
                 required String raca,
                 required String classe,
                 required int nivel,
-                required int hpMaximo,
-                required int hpAtual,
+                Value<int> armorClass = const Value.absent(),
+                Value<int> initiative = const Value.absent(),
+                Value<int> speed = const Value.absent(),
+                required int maxHitPoints,
+                required int currentHitPoints,
+                Value<int> temporaryHitPoints = const Value.absent(),
                 Value<String?> avatarPath = const Value.absent(),
                 Value<String?> alignment = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                Value<String?> personalityTraits = const Value.absent(),
+                Value<String?> ideals = const Value.absent(),
+                Value<String?> bonds = const Value.absent(),
+                Value<String?> flaws = const Value.absent(),
+                Value<int> experiencePoints = const Value.absent(),
+                Value<int> proficiencyBonus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -2399,11 +3124,21 @@ class $$CharactersTableTableManager
                 raca: raca,
                 classe: classe,
                 nivel: nivel,
-                hpMaximo: hpMaximo,
-                hpAtual: hpAtual,
+                armorClass: armorClass,
+                initiative: initiative,
+                speed: speed,
+                maxHitPoints: maxHitPoints,
+                currentHitPoints: currentHitPoints,
+                temporaryHitPoints: temporaryHitPoints,
                 avatarPath: avatarPath,
                 alignment: alignment,
                 background: background,
+                personalityTraits: personalityTraits,
+                ideals: ideals,
+                bonds: bonds,
+                flaws: flaws,
+                experiencePoints: experiencePoints,
+                proficiencyBonus: proficiencyBonus,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

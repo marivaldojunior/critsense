@@ -26,6 +26,23 @@ final class DeleteCharacterEvent extends CharacterEvent {
   const DeleteCharacterEvent(this.id);
 }
 
+/// Solicita ao BLoC que marque/desmarque [proficiency] para o personagem
+/// [characterId], persistindo o resultado.
+///
+/// Alterna (toggle) em vez de "setar": a UI (checkbox de perícia/teste de
+/// resistência) não sabe o estado atual com certeza no momento do toque —
+/// é o BLoC quem decide se a proficiência entra ou sai da lista, evitando
+/// uma corrida entre o valor exibido e o valor persistido.
+final class ToggleProficiencyEvent extends CharacterEvent {
+  /// Personagem cuja lista de proficiências será alterada.
+  final String characterId;
+
+  /// Proficiência (perícia ou teste de resistência) a alternar.
+  final Proficiency proficiency;
+
+  const ToggleProficiencyEvent(this.characterId, this.proficiency);
+}
+
 /// Solicita ao BLoC que adicione [item] ao inventário do personagem referenciado.
 ///
 /// Cross-Feature Command: equivalente a um `IRequest` do MediatR no .NET —

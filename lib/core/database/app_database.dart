@@ -21,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -35,6 +35,23 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(characters, characters.alignment);
         await m.addColumn(characters, characters.background);
+      }
+      if (from < 5) {
+        // `hpMaximo`/`hpAtual` viram `maxHitPoints`/`currentHitPoints` para
+        // alinhar com a nomenclatura em inglês do restante do bloco de
+        // Status de Combate — mesmo dado, só o nome da coluna muda.
+        await m.renameColumn(characters, 'hp_maximo', characters.maxHitPoints);
+        await m.renameColumn(characters, 'hp_atual', characters.currentHitPoints);
+        await m.addColumn(characters, characters.armorClass);
+        await m.addColumn(characters, characters.initiative);
+        await m.addColumn(characters, characters.speed);
+        await m.addColumn(characters, characters.temporaryHitPoints);
+        await m.addColumn(characters, characters.personalityTraits);
+        await m.addColumn(characters, characters.ideals);
+        await m.addColumn(characters, characters.bonds);
+        await m.addColumn(characters, characters.flaws);
+        await m.addColumn(characters, characters.experiencePoints);
+        await m.addColumn(characters, characters.proficiencyBonus);
       }
     },
   );
