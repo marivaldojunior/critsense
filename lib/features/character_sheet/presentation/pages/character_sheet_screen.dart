@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../domain/entities/character.dart';
 import 'character_sheet_tabs/inventory_spells_tab.dart';
 import 'character_sheet_tabs/status_combat_tab.dart';
@@ -29,7 +31,10 @@ class CharacterSheetScreen extends StatelessWidget {
           title: Text(character.name),
           actions: [
             IconButton(
-              icon: const Icon(Icons.menu_book_outlined),
+              icon: const DnDIcon(
+                assetPath: 'assets/icons/entity/book.svg',
+                size: 26,
+              ),
               tooltip: 'Diário de Campanha',
               onPressed: () => Navigator.push(
                 context,

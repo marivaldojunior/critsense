@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import '../../domain/entities/session_note.dart';
 import '../../domain/usecases/add_session_note_usecase.dart';
@@ -166,8 +167,8 @@ class _SessionNotesScreenState extends State<SessionNotesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.menu_book_outlined,
+                  DnDIcon(
+                    assetPath: 'assets/icons/entity/book.svg',
                     size: 64,
                     color: theme.colorScheme.outlineVariant,
                   ),

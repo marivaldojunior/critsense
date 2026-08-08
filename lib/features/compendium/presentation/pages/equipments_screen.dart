@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../../../di/injection_container.dart';
 import '../../../character_sheet/domain/entities/inventory_item.dart';
 import '../../../character_sheet/presentation/bloc/character_bloc.dart';
@@ -82,7 +84,10 @@ class _EquipmentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.shield_outlined),
+      leading: const DnDIcon(
+        assetPath: 'assets/icons/entity/weapon.svg',
+        size: 26,
+      ),
       title: Text(equipment.name),
       subtitle: Text(
         equipment.index,
@@ -132,7 +137,10 @@ class _EquipmentTile extends StatelessWidget {
                     itemBuilder: (_, index) {
                       final character = state.characters[index];
                       return ListTile(
-                        leading: const Icon(Icons.person_outline),
+                        leading: const DnDIcon(
+                          assetPath: 'assets/icons/game/character.svg',
+                          size: 26,
+                        ),
                         title: Text(character.name),
                         subtitle: Text(
                           '${character.characterClass} • Nível ${character.level}',

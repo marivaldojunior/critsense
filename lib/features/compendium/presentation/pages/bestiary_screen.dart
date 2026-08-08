@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../../../di/injection_container.dart';
 import '../bloc/monster_bloc.dart';
 
@@ -105,7 +107,10 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
                   }
                   final monster = state.monsters[index];
                   return ListTile(
-                    leading: const Icon(Icons.shield),
+                    leading: const DnDIcon(
+                      assetPath: 'assets/icons/game/monster.svg',
+                      size: 26,
+                    ),
                     title: Text(monster.name),
                     subtitle: Text(
                       monster.index,

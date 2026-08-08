@@ -131,7 +131,10 @@ class _DiceViewState extends State<_DiceView> {
                           state.d20Mode == D20RollMode.normal
                       ? null
                       : () => bloc.add(const PoolCleared()),
-                  icon: const Icon(Icons.clear_all),
+                  icon: const DnDIcon(
+                    assetPath: 'assets/icons/util/cross.svg',
+                    size: 20,
+                  ),
                   label: const Text('Limpar Pool'),
                 ),
                 const SizedBox(height: 20),

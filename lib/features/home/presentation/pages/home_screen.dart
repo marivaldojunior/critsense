@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/features/character_sheet/presentation/pages/character_list_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/bestiary_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/equipments_screen.dart';
@@ -25,31 +26,31 @@ class HomeScreen extends StatelessWidget {
     _FeatureItem(
       title: 'Dados',
       subtitle: 'Monte um pool e role múltiplos dados',
-      icon: Icons.casino_outlined,
+      iconAsset: 'assets/icons/dice/d20.svg',
       builder: (_) => const DiceScreen(),
     ),
     _FeatureItem(
       title: 'Personagens',
       subtitle: 'Fichas, inventário e notas de sessão',
-      icon: Icons.badge_outlined,
+      iconAsset: 'assets/icons/game/character.svg',
       builder: (_) => const CharacterListScreen(),
     ),
     _FeatureItem(
       title: 'Bestiário',
       subtitle: 'Consulte monstros do compêndio',
-      icon: Icons.pets_outlined,
+      iconAsset: 'assets/icons/game/monster.svg',
       builder: (_) => const BestiaryScreen(),
     ),
     _FeatureItem(
       title: 'Equipamentos',
       subtitle: 'Adicione itens ao inventário',
-      icon: Icons.shield_outlined,
+      iconAsset: 'assets/icons/entity/weapon.svg',
       builder: (_) => const EquipmentsScreen(),
     ),
     _FeatureItem(
       title: 'Magias',
       subtitle: 'Explore o compêndio de magias',
-      icon: Icons.auto_fix_high_outlined,
+      iconAsset: 'assets/icons/game/spell.svg',
       builder: (_) => const SpellsScreen(),
     ),
   ];
@@ -93,13 +94,13 @@ class HomeScreen extends StatelessWidget {
 class _FeatureItem {
   final String title;
   final String subtitle;
-  final IconData icon;
+  final String iconAsset;
   final WidgetBuilder builder;
 
   const _FeatureItem({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    required this.iconAsset,
     required this.builder,
   });
 }
@@ -126,7 +127,11 @@ class _FeatureCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(feature.icon, size: 40, color: theme.colorScheme.secondary),
+              DnDIcon(
+                assetPath: feature.iconAsset,
+                size: 40,
+                color: theme.colorScheme.secondary,
+              ),
               const SizedBox(height: 12),
               Text(
                 feature.title,

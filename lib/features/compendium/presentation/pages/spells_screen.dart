@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../../../di/injection_container.dart';
 import '../bloc/compendium_bloc.dart';
 import 'spell_detail_screen.dart';
@@ -33,7 +35,10 @@ class SpellsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final spell = spells[index];
                   return ListTile(
-                    leading: const Icon(Icons.menu_book),
+                    leading: const DnDIcon(
+                      assetPath: 'assets/icons/game/spell.svg',
+                      size: 26,
+                    ),
                     title: Text(spell.name),
                     subtitle: Text(
                       spell.index,
