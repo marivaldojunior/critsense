@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../domain/entities/character.dart';
+import '../widgets/character_avatar.dart';
 import 'character_sheet_tabs/inventory_spells_tab.dart';
 import 'character_sheet_tabs/status_combat_tab.dart';
 import 'character_sheet_tabs/traits_lore_tab.dart';
@@ -28,7 +29,15 @@ class CharacterSheetScreen extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(character.name),
+          title: Row(
+            children: [
+              CharacterAvatar(character: character, radius: 18),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(character.name, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
           actions: [
             IconButton(
               icon: const DnDIcon(

@@ -108,9 +108,12 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
                   }
                   final monster = state.monsters[index];
                   return ListTile(
-                    leading: const DnDIcon(
-                      assetPath: 'assets/icons/game/monster.svg',
-                      size: 26,
+                    leading: Hero(
+                      tag: 'monster-icon-${monster.index}',
+                      child: const DnDIcon(
+                        assetPath: 'assets/icons/game/monster.svg',
+                        size: 26,
+                      ),
                     ),
                     title: Text(monster.name),
                     subtitle: Text(

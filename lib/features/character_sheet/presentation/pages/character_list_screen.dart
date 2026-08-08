@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
+import '../widgets/character_avatar.dart';
 import 'character_form_screen.dart';
 import 'character_sheet_screen.dart';
 
@@ -116,6 +117,7 @@ class _CharacterCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CharacterAvatar(character: character),
         title: Text(
           character.name,
           style: theme.textTheme.titleMedium?.copyWith(

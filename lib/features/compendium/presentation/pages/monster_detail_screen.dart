@@ -117,10 +117,13 @@ class _MonsterDetailBody extends StatelessWidget {
           Row(
             children: [
               if (typeIconAsset != null) ...[
-                DnDIcon(
-                  assetPath: typeIconAsset,
-                  size: 28,
-                  color: theme.colorScheme.secondary,
+                Hero(
+                  tag: 'monster-icon-${monster.index}',
+                  child: DnDIcon(
+                    assetPath: typeIconAsset,
+                    size: 28,
+                    color: theme.colorScheme.secondary,
+                  ),
                 ),
                 const SizedBox(width: 8),
               ],
