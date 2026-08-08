@@ -21,10 +21,12 @@ class PointBuySection extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<PointBuyCubit>();
         final remaining = state.pointsRemaining;
-        // 0 restante é o desfecho normal de um Point Buy bem alocado, não um
-        // erro — por isso cinza neutro, não vermelho, quando chega a zero.
+        // Verde/vermelho ficam reservados para sucesso/falha de rolagem
+        // (crítico no d20) — pontos restantes é só um contador, então usa
+        // o acento neutro do tema; ao chegar a zero (Point Buy concluído
+        // com sucesso, não um erro) some para o cinza neutro do texto.
         final remainingColor = remaining > 0
-            ? Colors.green.shade600
+            ? theme.colorScheme.primary
             : theme.colorScheme.onSurface.withValues(alpha: 0.5);
 
         return Column(

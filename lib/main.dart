@@ -57,65 +57,74 @@ class CritSenseApp extends StatelessWidget {
     );
   }
 
-  /// Constrói o tema claro com paleta de RPG de mesa: fundo em tom de
-  /// pergaminho, vermelho sangue como cor primária e dourado escurecido
-  /// para manter contraste legível sobre fundo claro.
+  /// Constrói o tema claro com paleta neutra de ficha de RPG: fundo em tom
+  /// de pergaminho e acentos em marrom-acinzentado/sépia pastel.
+  ///
+  /// A paleta é deliberadamente restrita a branco, preto, cinzas e tons
+  /// pastel — vermelho e verde ficam reservados para sinalizar sucesso e
+  /// falha (crítico/falha crítica no d20, exclusão de itens, erros),
+  /// nunca como cor decorativa de marca.
   ThemeData _buildLightTheme() {
     const rpgParchment = Color(0xFFFBF5E9);
     const rpgSurfaceLight = Color(0xFFF0E6D2);
-    const rpgRed = Color(0xFFB71C1C);
-    const rpgGoldDark = Color(0xFF8A6D00);
+    const rpgAccentPrimary = Color(0xFF6B5F4F);
+    const rpgAccentSecondary = Color(0xFFC9B896);
+    const rpgAccentTertiary = Color(0xFFA8998A);
+    const rpgError = Color(0xFFB71C1C);
 
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: rpgParchment,
       colorScheme: const ColorScheme.light(
-        primary: rpgRed,
-        secondary: rpgGoldDark,
+        primary: rpgAccentPrimary,
+        secondary: rpgAccentSecondary,
+        tertiary: rpgAccentTertiary,
         surface: rpgSurfaceLight,
+        error: rpgError,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: rpgRed,
+        backgroundColor: rpgAccentPrimary,
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: rpgRed,
+        backgroundColor: rpgAccentPrimary,
         foregroundColor: Colors.white,
       ),
     );
   }
 
-  /// Constrói o tema escuro com paleta de RPG de mesa.
-  ///
-  /// Cores escolhidas por associação semântica ao gênero:
-  /// - Fundo quase-preto com tom azulado: ambientação de masmorra/noturna.
-  /// - Vermelho sangue como cor primária: perigo, combate, críticos.
-  /// - Dourado como cor secundária: sucesso, recompensa, raridade.
+  /// Constrói o tema escuro com a mesma paleta neutra, invertida em
+  /// luminância: fundo cinza quase-preto (sem matiz de cor) e acentos em
+  /// bege/sépia pastel claro para manter contraste legível.
   ThemeData _buildDarkTheme() {
-    const rpgBackground = Color(0xFF0D0D1A);
-    const rpgSurface = Color(0xFF1A1A2E);
-    const rpgRed = Color(0xFFB71C1C);
-    const rpgGold = Color(0xFFFFD700);
+    const rpgBackground = Color(0xFF121212);
+    const rpgSurface = Color(0xFF1E1E1E);
+    const rpgAccentPrimary = Color(0xFFD8CFC0);
+    const rpgAccentSecondary = Color(0xFF9C8F76);
+    const rpgAccentTertiary = Color(0xFFB0A99E);
+    const rpgError = Color(0xFFEF5350);
 
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: rpgBackground,
       colorScheme: const ColorScheme.dark(
-        primary: rpgRed,
-        secondary: rpgGold,
+        primary: rpgAccentPrimary,
+        secondary: rpgAccentSecondary,
+        tertiary: rpgAccentTertiary,
         surface: rpgSurface,
+        error: rpgError,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: rpgSurface,
-        foregroundColor: rpgGold,
+        foregroundColor: rpgAccentPrimary,
         centerTitle: true,
         elevation: 0,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: rpgRed,
-        foregroundColor: Colors.white,
+        backgroundColor: rpgAccentPrimary,
+        foregroundColor: rpgSurface,
       ),
     );
   }
