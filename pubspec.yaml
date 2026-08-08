@@ -61,7 +61,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
   drift_dev: ^2.34.5
-  
+  flutter_launcher_icons: ^0.14.4
+
 dependency_overrides:
   test_api: 0.7.11
   analyzer: ^13.0.0
@@ -80,6 +81,7 @@ flutter:
   # (não recursivamente) — cada subpasta de assets/icons/ precisa de uma
   # entrada própria, senão os SVGs dela não são empacotados no app.
   assets:
+    - assets/app_icon.svg
     - assets/icons/
     - assets/icons/ability/
     - assets/icons/attribute/
@@ -135,3 +137,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"
+  min_sdk_android: 21
