@@ -1,65 +1,44 @@
-import 'package:equatable/equatable.dart';
+part of 'dice_bloc.dart';
 
-import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
+enum DiceRollStatus { idle, rolling }
 
-/// Classe base selada para todos os estados do [DiceBloc].
+/// Estado único do [DiceBloc], atualizado via [copyWith].
 ///
-/// **Por que [Equatable] é fundamental nos Estados?**
-///
-/// O `flutter_bloc` só reconstrói widgets (`BlocBuilder`) quando o estado
-/// **muda**. Para determinar mudança, ele usa `==`. Sem [Equatable], `==`
-/// compara referências de memória, e dois estados idênticos como
-/// `DiceRolling() == DiceRolling()` retornam `false` (objetos distintos),
-/// forçando um rebuild desnecessário a cada emissão.
-///
-/// [Equatable] gera `==` e `hashCode` baseados nos campos listados em
-/// [props], tornando a comparação **por valor**. Isso garante que o Flutter
-/// só redesenhe a tela quando o conteúdo do estado realmente diferir —
-/// equivalente ao `IEquatable<T>` do C# ou `equals()` do Java com
-/// campos explicitamente listados.
-abstract class DiceState extends Equatable {
-  const DiceState();
-}
+/// Uma única classe (em vez de hierarquia `sealed`) porque o pool e o
+/// modificador precisam persistir através das transições de rolagem —
+/// mesmo padrão adotado em [MonsterState] para estado acumulativo.
+class DiceState {
+  /// Quantidade de cada tipo de dado selecionado para a próxima rolagem.
+  final Map<DiceType, int> pool;
 
-/// Estado inicial: nenhum dado foi lançado ainda nesta sessão.
-///
-/// Emitido uma única vez, ao criar o BLoC. Serve como estado neutro
-/// para que a UI possa renderizar uma tela de "aguardando ação".
-class DiceInitial extends DiceState {
-  const DiceInitial();
+  final int modifier;
 
-  @override
-  List<Object?> get props => [];
-}
+  final DiceRollStatus status;
 
-/// Estado transitório: o dado está sendo "lançado" (animação em progresso).
-///
-/// A UI deve exibir uma animação de rolagem enquanto este estado estiver
-/// ativo. Não carrega dados porque o resultado ainda não é conhecido.
-class DiceRolling extends DiceState {
-  const DiceRolling();
+  /// Resultado da última rolagem concluída, ou `null` antes da primeira.
+  final DiceRollResult? lastResult;
 
-  // Lista vazia: dois estados `DiceRolling` são sempre iguais.
-  // O BLoC não emitirá um segundo `DiceRolling` consecutivo graças a isso.
-  @override
-  List<Object?> get props => [];
-}
+  const DiceState({
+    this.pool = const {},
+    this.modifier = 0,
+    this.status = DiceRollStatus.idle,
+    this.lastResult,
+  });
 
-/// Estado final: o dado foi lançado e o resultado está disponível.
-///
-/// Carrega a entidade [DiceResult] com o valor e os flags de crítico.
-/// A UI deve ler [result] para exibir o número e reagir visualmente
-/// a [DiceResult.isCriticalSuccess] ou [DiceResult.isCriticalFailure].
-class DiceRolled extends DiceState {
-  /// O resultado completo do lançamento, incluindo flags de crítico.
-  final DiceResult result;
+  int get totalDiceCount =>
+      pool.values.fold(0, (sum, quantity) => sum + quantity);
 
-  const DiceRolled(this.result);
-
-  // `result` em `props` garante que dois `DiceRolled` com valores
-  // distintos sejam considerados estados diferentes, acionando rebuild.
-  // Se o mesmo número sair duas vezes seguidas, `DiceResult.==` (que
-  // compara `value`) os tornará iguais e o BLoC suprimirá o segundo emit.
-  @override
-  List<Object?> get props => [result];
+  DiceState copyWith({
+    Map<DiceType, int>? pool,
+    int? modifier,
+    DiceRollStatus? status,
+    DiceRollResult? lastResult,
+  }) {
+    return DiceState(
+      pool: pool ?? this.pool,
+      modifier: modifier ?? this.modifier,
+      status: status ?? this.status,
+      lastResult: lastResult ?? this.lastResult,
+    );
+  }
 }

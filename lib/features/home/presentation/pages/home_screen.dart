@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
   static final List<_FeatureItem> _features = [
     _FeatureItem(
       title: 'Dados',
-      subtitle: 'Chacoalhe ou toque para rolar o d20',
+      subtitle: 'Monte um pool e role múltiplos dados',
       icon: Icons.casino_outlined,
       builder: (_) => const DiceScreen(),
     ),

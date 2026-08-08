@@ -1,38 +1,40 @@
-import 'package:equatable/equatable.dart';
+part of 'dice_bloc.dart';
 
-/// Classe base selada para todos os eventos do [DiceBloc].
-///
-/// Estender [Equatable] nos eventos permite que o BLoC (e os testes)
-/// comparem dois eventos por **valor** e não por **referência de memória**.
-/// Sem isso, `DiceRollRequested() == DiceRollRequested()` seria `false`,
-/// pois seriam objetos diferentes — o mesmo problema que `==` de `Object`.
-abstract class DiceEvent extends Equatable {
+sealed class DiceEvent {
   const DiceEvent();
 }
 
-/// Evento disparado quando o usuário solicita um lançamento manual do dado.
-///
-/// Não carrega payload: a intenção ("rolar") é toda a informação necessária.
-/// O resultado será computado pelo Use Case dentro do BLoC.
-class DiceRollRequested extends DiceEvent {
-  const DiceRollRequested();
-
-  // Lista vazia: sem campos a comparar. Dois `DiceRollRequested` são
-  // sempre iguais — o que é correto, pois representam a mesma intenção.
-  @override
-  List<Object?> get props => [];
+/// Adiciona uma unidade de [type] ao pool.
+final class DiceTypeAdded extends DiceEvent {
+  final DiceType type;
+  const DiceTypeAdded(this.type);
 }
 
-/// Evento disparado quando o sensor nativo detecta um shake no dispositivo.
-///
-/// Separar `DiceShakeDetected` de `DiceRollRequested` segue o princípio
-/// de **causa ≠ ação**: a origem do gesto (shake físico) é diferente da
-/// ação de negócio (rolar o dado), mesmo que a resposta seja a mesma.
-/// Isso facilita adicionar lógica específica para cada gatilho no futuro
-/// (ex: animações diferentes, analytics distintos).
-class DiceShakeDetected extends DiceEvent {
-  const DiceShakeDetected();
+/// Remove uma unidade de [type] do pool (sem efeito se já estiver em zero).
+final class DiceTypeRemoved extends DiceEvent {
+  final DiceType type;
+  const DiceTypeRemoved(this.type);
+}
 
-  @override
-  List<Object?> get props => [];
+final class ModifierIncremented extends DiceEvent {
+  const ModifierIncremented();
+}
+
+final class ModifierDecremented extends DiceEvent {
+  const ModifierDecremented();
+}
+
+/// Reseta pool, modificador e último resultado.
+final class PoolCleared extends DiceEvent {
+  const PoolCleared();
+}
+
+/// Solicita a rolagem do pool atual.
+final class DiceRollRequested extends DiceEvent {
+  const DiceRollRequested();
+}
+
+/// Disparado quando o sensor nativo detecta um shake do dispositivo.
+final class DiceShakeDetected extends DiceEvent {
+  const DiceShakeDetected();
 }
