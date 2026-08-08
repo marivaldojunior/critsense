@@ -243,7 +243,7 @@ class _ProficienciesPanel extends StatelessWidget {
             const Divider(),
             for (final attribute in AttributeType.values)
               _ProficiencyRow(
-                iconAsset: 'assets/icons/attribute/saving-throw.svg',
+                iconAsset: attribute.iconAsset,
                 label: attribute.label,
                 modifier: bloc.savingThrowModifier(liveCharacter, attribute),
                 checked: liveCharacter.proficiencies.contains(

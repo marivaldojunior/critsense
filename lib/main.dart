@@ -57,8 +57,9 @@ class CritSenseApp extends StatelessWidget {
           builder: (context, child) =>
               SafeArea(top: false, child: child ?? const SizedBox.shrink()),
           home: HomeScreen(
-            onToggleTheme: () => _themeMode.value =
-                mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+            onToggleTheme: () => _themeMode.value = mode == ThemeMode.dark
+                ? ThemeMode.light
+                : ThemeMode.dark,
           ),
         ),
       ),
@@ -96,6 +97,11 @@ class CritSenseApp extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: Colors.white,
+      ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: rpgAccentPrimary,
         foregroundColor: Colors.white,
@@ -129,6 +135,11 @@ class CritSenseApp extends StatelessWidget {
         foregroundColor: rpgAccentPrimary,
         centerTitle: true,
         elevation: 0,
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: rpgAccentPrimary,
+        unselectedLabelColor: rpgAccentPrimary.withValues(alpha: 0.7),
+        indicatorColor: rpgAccentPrimary,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: rpgAccentPrimary,
