@@ -1,3 +1,15 @@
+// Script manual, não um teste automatizado — por isso mora em tool/ (fora de
+// test/), onde `flutter test` não o descobre nem o executa por padrão.
+//
+// Regenera `assets/app_icon.png` a partir de `assets/app_icon.svg`, usado
+// pelo `flutter_launcher_icons` (ver pubspec.yaml) para gerar os ícones
+// nativos do app. Rode manualmente sempre que o SVG do ícone mudar:
+//
+//   flutter test tool/generate_app_icon.dart
+//
+// (usa `flutter_test`/`testWidgets` como forma de rasterizar o SVG dentro
+// do binding de widgets do Flutter — não é um teste no sentido de asserção).
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
