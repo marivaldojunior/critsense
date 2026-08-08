@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
+import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/d20_mode_selector.dart';
@@ -56,7 +57,16 @@ class _DiceViewState extends State<_DiceView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Rolador de Dados')),
-      body: BlocBuilder<DiceBloc, DiceState>(
+      body: BlocConsumer<DiceBloc, DiceState>(
+        // Só dispara quando uma rolagem termina (rolling -> idle com
+        // resultado novo) — evita reabrir o popup em mudanças de pool,
+        // modificador ou modo do d20.
+        listenWhen: (previous, current) =>
+            previous.status == DiceRollStatus.rolling &&
+            current.status == DiceRollStatus.idle &&
+            current.lastResult != null,
+        listener: (context, state) =>
+            _showResultDialog(context, state.lastResult!),
         builder: (context, state) {
           final bloc = context.read<DiceBloc>();
           final isRolling = state.status == DiceRollStatus.rolling;
@@ -142,16 +152,33 @@ class _DiceViewState extends State<_DiceView> {
       );
     }
 
-    if (state.lastResult != null) {
-      return RollResultPanel(result: state.lastResult!);
-    }
-
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Text(
-        'Monte seu pool de dados e toque em "Rolar Dados".',
+        state.lastResult != null
+            ? 'Toque em "Rolar Dados" para rolar novamente.'
+            : 'Monte seu pool de dados e toque em "Rolar Dados".',
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
+      ),
+    );
+  }
+
+  /// Exibe o resultado da rolagem em um popup: fecha tocando fora
+  /// ([barrierDismissible]) ou no botão "Ok".
+  void _showResultDialog(BuildContext context, DiceRollResult result) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        content: RollResultPanel(result: result),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Ok'),
+          ),
+        ],
       ),
     );
   }

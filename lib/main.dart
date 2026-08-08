@@ -48,6 +48,14 @@ class CritSenseApp extends StatelessWidget {
           theme: _buildLightTheme(),
           darkTheme: _buildDarkTheme(),
           themeMode: mode,
+          // Envolve toda rota em um SafeArea: no Android com navegação por
+          // gestos/botões, o conteúdo (ex: botões no fim da tela) fica sob
+          // a barra do sistema sem isso, já que o Scaffold não aplica esse
+          // inset sozinho. `top: false` porque o topo já é tratado pela
+          // AppBar de cada tela — aplicar de novo aqui empurraria tudo
+          // para baixo, deixando um espaço em branco acima da AppBar.
+          builder: (context, child) =>
+              SafeArea(top: false, child: child ?? const SizedBox.shrink()),
           home: HomeScreen(
             onToggleTheme: () => _themeMode.value =
                 mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,

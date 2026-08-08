@@ -8,6 +8,9 @@ import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 ///
 /// O valor de um d20 que rolou 20 ou 1 é destacado em verde/vermelho
 /// dentro da própria fórmula, mesmo entre outros dados do pool.
+///
+/// Não traz superfície própria (sem [Card]): é exibido dentro de um
+/// [AlertDialog] pelo chamador, que já fornece o fundo/elevação.
 class RollResultPanel extends StatelessWidget {
   const RollResultPanel({super.key, required this.result});
 
@@ -27,45 +30,42 @@ class RollResultPanel extends StatelessWidget {
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Column(
-          children: [
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${result.total}',
+            style: theme.textTheme.displayMedium?.copyWith(
+              color: totalColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (hasCriticalSuccess)
             Text(
-              '${result.total}',
-              style: theme.textTheme.displayMedium?.copyWith(
-                color: totalColor,
+              'ACERTO CRÍTICO!',
+              style: TextStyle(
+                color: _criticalSuccessColor,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            )
+          else if (hasCriticalFailure)
+            Text(
+              'FALHA CRÍTICA!',
+              style: TextStyle(
+                color: theme.colorScheme.error,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
               ),
             ),
-            if (hasCriticalSuccess)
-              Text(
-                'ACERTO CRÍTICO!',
-                style: TextStyle(
-                  color: _criticalSuccessColor,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              )
-            else if (hasCriticalFailure)
-              Text(
-                'FALHA CRÍTICA!',
-                style: TextStyle(
-                  color: theme.colorScheme.error,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Text.rich(
-                TextSpan(children: _buildFormulaSpans(theme)),
-              ),
-            ),
-          ],
-        ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Text.rich(TextSpan(children: _buildFormulaSpans(theme))),
+          ),
+        ],
       ),
     );
   }
