@@ -1,6 +1,7 @@
 import '../entities/api_reference.dart';
 import '../entities/equipment_detail.dart';
 import '../entities/equipment_summary.dart';
+import '../entities/monster_detail.dart';
 import '../entities/monster_summary.dart';
 import '../entities/spell_detail.dart';
 import '../entities/spell_summary.dart';
@@ -24,6 +25,9 @@ abstract interface class ICompendiumRepository {
     required int offset,
     required int limit,
   });
+
+  /// Retorna os detalhes completos do monstro identificado por [index].
+  Future<MonsterDetail> getMonsterDetail(String index);
 
   /// Retorna a lista de classes jogáveis disponíveis na API.
   Future<List<ApiReference>> getClasses();

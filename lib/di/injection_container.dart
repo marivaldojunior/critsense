@@ -25,6 +25,7 @@ import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_
 import 'package:crit_sense/features/compendium/domain/usecases/get_classes_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipment_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipments_usecase.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_monster_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monsters_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_races_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
@@ -33,6 +34,7 @@ import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc
 import 'package:crit_sense/features/compendium/presentation/bloc/equipment_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/equipment_detail_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/monster_bloc.dart';
+import 'package:crit_sense/features/compendium/presentation/bloc/monster_detail_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
 import 'package:dio/dio.dart';
 
@@ -144,6 +146,9 @@ Future<void> init() async {
     () => EquipmentDetailBloc(sl<GetEquipmentDetailUseCase>()),
   );
   sl.registerFactory<MonsterBloc>(() => MonsterBloc(sl<GetMonstersUseCase>()));
+  sl.registerFactory<MonsterDetailBloc>(
+    () => MonsterDetailBloc(sl<GetMonsterDetailUseCase>()),
+  );
   sl.registerLazySingleton<GetSpellsUseCase>(
     () => GetSpellsUseCase(sl<ICompendiumRepository>()),
   );
@@ -158,6 +163,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetMonstersUseCase>(
     () => GetMonstersUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetMonsterDetailUseCase>(
+    () => GetMonsterDetailUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<GetClassesUseCase>(
     () => GetClassesUseCase(sl<ICompendiumRepository>()),

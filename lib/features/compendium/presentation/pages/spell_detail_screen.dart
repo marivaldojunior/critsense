@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/spell_detail.dart';
 import '../bloc/spell_detail_bloc.dart';
@@ -88,27 +90,27 @@ class _SpellDetailBody extends StatelessWidget {
             runSpacing: 8,
             children: [
               _InfoChip(
-                icon: Icons.bar_chart,
+                iconAsset: 'assets/icons/game/spell.svg',
                 label: 'Nível ${spell.level == 0 ? "Truque" : spell.level}',
                 color: colorScheme.primary,
               ),
               _InfoChip(
-                icon: Icons.timer_outlined,
+                iconAsset: 'assets/icons/entity/time.svg',
                 label: spell.castingTime,
                 color: colorScheme.secondary,
               ),
               _InfoChip(
-                icon: Icons.social_distance,
+                iconAsset: 'assets/icons/attribute/range.svg',
                 label: spell.range,
                 color: colorScheme.tertiary,
               ),
               _InfoChip(
-                icon: Icons.hourglass_bottom_outlined,
+                iconAsset: 'assets/icons/combat/round.svg',
                 label: spell.duration,
                 color: colorScheme.secondary,
               ),
               _InfoChip(
-                icon: Icons.category_outlined,
+                iconAsset: 'assets/icons/entity/wand.svg',
                 label: spell.components.join(', '),
                 color: colorScheme.primary,
               ),
@@ -148,12 +150,12 @@ class _SpellDetailBody extends StatelessWidget {
 
 /// Chip compacto para exibir um atributo com ícone e cor personalizados.
 class _InfoChip extends StatelessWidget {
-  final IconData icon;
+  final String iconAsset;
   final String label;
   final Color color;
 
   const _InfoChip({
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     required this.color,
   });
@@ -161,7 +163,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      avatar: Icon(icon, size: 16, color: color),
+      avatar: DnDIcon(assetPath: iconAsset, size: 16, color: color),
       label: Text(label),
       side: BorderSide(color: color.withValues(alpha: 0.4)),
       visualDensity: VisualDensity.compact,

@@ -5,6 +5,7 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
 import '../bloc/monster_bloc.dart';
+import 'monster_detail_screen.dart';
 
 /// Tela do Bestiário com scroll infinito paginado.
 ///
@@ -118,6 +119,13 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
                         color: Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            MonsterDetailScreen(monsterIndex: monster.index),
                       ),
                     ),
                   );

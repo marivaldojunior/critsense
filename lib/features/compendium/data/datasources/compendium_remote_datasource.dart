@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../models/api_reference_model.dart';
 import '../models/equipment_detail_model.dart';
 import '../models/equipment_summary_model.dart';
+import '../models/monster_detail_model.dart';
 import '../models/monster_summary_model.dart';
 import '../models/spell_detail_model.dart';
 import '../models/spell_summary_model.dart';
@@ -23,6 +24,9 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
   Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit);
+
+  /// Busca os detalhes completos do monstro identificado por [index].
+  Future<MonsterDetailModel> getMonsterDetail(String index);
 
   /// Busca a lista de classes jogáveis na API remota.
   Future<List<ApiReferenceModel>> getClasses();
@@ -125,6 +129,15 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
           .toList();
     }
     return _cachedMonsters!.skip(offset).take(limit).toList();
+  }
+
+  /// Busca os detalhes do monstro pelo [index]; o payload raiz já é o objeto.
+  @override
+  Future<MonsterDetailModel> getMonsterDetail(String index) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$_monstersEndpoint/$index',
+    );
+    return MonsterDetailModel.fromJson(response.data!);
   }
 
   /// Busca todas as classes e mapeia a lista `"results"` do payload para modelos.

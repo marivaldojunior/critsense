@@ -4,6 +4,7 @@ import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/api_reference.dart';
 import '../../domain/entities/equipment_detail.dart';
 import '../../domain/entities/equipment_summary.dart';
+import '../../domain/entities/monster_detail.dart';
 import '../../domain/entities/monster_summary.dart';
 import '../../domain/entities/spell_detail.dart';
 import '../../domain/entities/spell_summary.dart';
@@ -81,6 +82,18 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   }) async {
     try {
       return await _remoteDataSource.getMonsters(offset, limit);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Erro de rede desconhecido.');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Busca os detalhes do monstro e converte erros de rede em [ServerException].
+  @override
+  Future<MonsterDetail> getMonsterDetail(String index) async {
+    try {
+      return await _remoteDataSource.getMonsterDetail(index);
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {
