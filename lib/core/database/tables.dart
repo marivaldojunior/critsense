@@ -138,9 +138,9 @@ class Attributes extends Table {
 /// Relação 1:N com [Characters]: um personagem possui zero ou mais itens.
 ///
 /// No Entity Framework Core (.NET), essa relação seria configurada via Fluent
-/// API: `modelBuilder.Entity<Character>().HasMany(c => c.InventoryItems)
-/// .WithOne(i => i.Character).HasForeignKey(i => i.CharacterId)
-/// .OnDelete(DeleteBehavior.Cascade)`. O EF gerencia a FK e o cascade
+/// API:
+/// `modelBuilder.Entity<Character>().HasMany(c => c.InventoryItems).WithOne(i => i.Character).HasForeignKey(i => i.CharacterId).OnDelete(DeleteBehavior.Cascade)`.
+/// O EF gerencia a FK e o cascade
 /// automaticamente na migração. No Drift, declaramos a FK explicitamente
 /// com `.references(Characters, #id, onDelete: KeyAction.cascade)`, e o
 /// próprio Drift gera o DDL correspondente em `app_database.g.dart`.
@@ -173,9 +173,7 @@ class InventoryItems extends Table {
 /// Tabela de notas de sessão de RPG, vinculada 1:N a [Characters].
 ///
 /// No EF Core, esta relação seria configurada assim:
-/// `modelBuilder.Entity<Character>().HasMany(c => c.SessionNotes)
-/// .WithOne(n => n.Character).HasForeignKey(n => n.CharacterId)
-/// .OnDelete(DeleteBehavior.Cascade)`.
+/// `modelBuilder.Entity<Character>().HasMany(c => c.SessionNotes).WithOne(n => n.Character).HasForeignKey(n => n.CharacterId).OnDelete(DeleteBehavior.Cascade)`.
 /// O EF gerencia a FK e o DDL automaticamente via migração.
 /// No Drift, declaramos a FK explicitamente com `.references(...)` e
 /// executamos `dart run build_runner build` para sincronizar o esquema.

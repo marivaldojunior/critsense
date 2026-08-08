@@ -109,6 +109,6 @@ class HardwareBridge {
   static Stream<void> get onShakeDetected {
     return _eventChannel.receiveBroadcastStream()
     // Descarta o payload (o nativo só precisa sinalizar o evento, sem dados).
-    .map<void>((_) => null);
+    .map<void>((_) {});
   }
 }
