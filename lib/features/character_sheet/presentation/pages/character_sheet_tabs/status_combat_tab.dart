@@ -8,6 +8,7 @@ import '../../../domain/entities/character.dart';
 import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
 import '../../bloc/character_bloc.dart';
+import '../../widgets/animated_hp_bar.dart';
 
 /// Aba "Status & Combate" da ficha: os blocos centrais da primeira página
 /// da ficha oficial — CA/Iniciativa/Deslocamento, PV e as duas listas de
@@ -156,7 +157,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// Bloco central de Pontos de Vida: máximo, atual e temporário.
+/// Bloco central de Pontos de Vida: barra animada com máximo, atual e temporário.
 class _HpCard extends StatelessWidget {
   const _HpCard({required this.character});
 
@@ -164,39 +165,13 @@ class _HpCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const DnDIcon(assetPath: 'assets/icons/hp/full.svg', size: 36),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Pontos de Vida', style: theme.textTheme.labelMedium),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${character.currentHitPoints} / ${character.maxHitPoints}',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (character.temporaryHitPoints > 0) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      '+${character.temporaryHitPoints} temporário',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+        child: AnimatedHpBar(
+          currentHitPoints: character.currentHitPoints,
+          maxHitPoints: character.maxHitPoints,
+          temporaryHitPoints: character.temporaryHitPoints,
         ),
       ),
     );
