@@ -1,4 +1,5 @@
 import '../entities/api_reference.dart';
+import '../entities/equipment_detail.dart';
 import '../entities/equipment_summary.dart';
 import '../entities/monster_summary.dart';
 import '../entities/spell_detail.dart';
@@ -14,6 +15,9 @@ abstract interface class ICompendiumRepository {
 
   /// Retorna a lista resumida de todos os equipamentos disponíveis na API.
   Future<List<EquipmentSummary>> getEquipments();
+
+  /// Retorna os detalhes completos do equipamento identificado por [index].
+  Future<EquipmentDetail> getEquipmentDetail(String index);
 
   /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
   Future<List<MonsterSummary>> getMonsters({

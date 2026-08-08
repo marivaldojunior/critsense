@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../models/api_reference_model.dart';
+import '../models/equipment_detail_model.dart';
 import '../models/equipment_summary_model.dart';
 import '../models/monster_summary_model.dart';
 import '../models/spell_detail_model.dart';
@@ -16,6 +17,9 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Busca a lista de equipamentos na API remota.
   Future<List<EquipmentSummaryModel>> getEquipments();
+
+  /// Busca os detalhes completos do equipamento identificado por [index].
+  Future<EquipmentDetailModel> getEquipmentDetail(String index);
 
   /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
   Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit);
@@ -43,6 +47,7 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   static const _monstersEndpoint = 'https://www.dnd5eapi.co/api/monsters';
   static const _classesEndpoint = 'https://www.dnd5eapi.co/api/classes';
   static const _racesEndpoint = 'https://www.dnd5eapi.co/api/races';
+  static const _equipmentEndpoint = 'https://www.dnd5eapi.co/api/equipment';
 
   /// Cache em memória de todos os monstros carregados na primeira requisição.
   ///
@@ -82,14 +87,21 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   /// Busca todos os equipamentos e mapeia a lista `"results"` para modelos.
   @override
   Future<List<EquipmentSummaryModel>> getEquipments() async {
-    final response = await _dio.get<Map<String, dynamic>>(
-      'https://www.dnd5eapi.co/api/equipment',
-    );
+    final response = await _dio.get<Map<String, dynamic>>(_equipmentEndpoint);
     final results = response.data!['results'] as List<dynamic>;
     return results
         .cast<Map<String, dynamic>>()
         .map(EquipmentSummaryModel.fromJson)
         .toList();
+  }
+
+  /// Busca os detalhes do equipamento pelo [index]; o payload raiz já é o objeto.
+  @override
+  Future<EquipmentDetailModel> getEquipmentDetail(String index) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$_equipmentEndpoint/$index',
+    );
+    return EquipmentDetailModel.fromJson(response.data!);
   }
 
   /// Retorna uma página de monstros, buscando da API apenas na primeira chamada.

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/api_reference.dart';
+import '../../domain/entities/equipment_detail.dart';
 import '../../domain/entities/equipment_summary.dart';
 import '../../domain/entities/monster_summary.dart';
 import '../../domain/entities/spell_detail.dart';
@@ -53,6 +54,18 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   Future<List<EquipmentSummary>> getEquipments() async {
     try {
       return await _remoteDataSource.getEquipments();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Erro de rede desconhecido.');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Busca os detalhes do equipamento e converte erros de rede em [ServerException].
+  @override
+  Future<EquipmentDetail> getEquipmentDetail(String index) async {
+    try {
+      return await _remoteDataSource.getEquipmentDetail(index);
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {

@@ -9,6 +9,7 @@ import '../../../character_sheet/domain/entities/inventory_item.dart';
 import '../../../character_sheet/presentation/bloc/character_bloc.dart';
 import '../../domain/entities/equipment_summary.dart';
 import '../bloc/equipment_bloc.dart';
+import 'equipment_detail_screen.dart';
 
 /// Tela de listagem de equipamentos do compêndio.
 ///
@@ -93,8 +94,17 @@ class _EquipmentTile extends StatelessWidget {
         equipment.index,
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      trailing: const Icon(Icons.add_circle_outline),
-      onTap: () => _showCharacterPicker(context),
+      trailing: IconButton(
+        icon: const Icon(Icons.add_circle_outline),
+        tooltip: 'Adicionar a um personagem',
+        onPressed: () => _showCharacterPicker(context),
+      ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EquipmentDetailScreen(equipmentIndex: equipment.index),
+        ),
+      ),
     );
   }
 
