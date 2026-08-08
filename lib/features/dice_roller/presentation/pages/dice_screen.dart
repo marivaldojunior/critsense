@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,9 +40,16 @@ class _DiceView extends StatefulWidget {
 class _DiceViewState extends State<_DiceView> {
   StreamSubscription<void>? _shakeSub;
 
+  /// Alimenta o [ConfettiWidget] sobreposto à tela; disparado pelo listener
+  /// do BLoC sempre que a rolagem concluída contém um d20 crítico (natural 20).
+  late final ConfettiController _confettiController;
+
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
     _shakeSub = HardwareBridge.onShakeDetected.listen((_) {
       if (!mounted) return;
       context.read<DiceBloc>().add(const DiceShakeDetected());
@@ -51,6 +59,7 @@ class _DiceViewState extends State<_DiceView> {
   @override
   void dispose() {
     _shakeSub?.cancel();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -58,92 +67,125 @@ class _DiceViewState extends State<_DiceView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Rolador de Dados')),
-      body: BlocConsumer<DiceBloc, DiceState>(
-        // Só dispara quando uma rolagem termina (rolling -> idle com
-        // resultado novo) — evita reabrir o popup em mudanças de pool,
-        // modificador ou modo do d20.
-        listenWhen: (previous, current) =>
-            previous.status == DiceRollStatus.rolling &&
-            current.status == DiceRollStatus.idle &&
-            current.lastResult != null,
-        listener: (context, state) =>
-            _showResultDialog(context, state.lastResult!),
-        builder: (context, state) {
-          final bloc = context.read<DiceBloc>();
-          final isRolling = state.status == DiceRollStatus.rolling;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    for (final type in DiceType.values)
-                      DiceTypeButton(
-                        type: type,
-                        count: state.pool[type] ?? 0,
-                        onAdd: () => bloc.add(DiceTypeAdded(type)),
-                        onRemove: () => bloc.add(DiceTypeRemoved(type)),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Modo do d20',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                D20ModeSelector(
-                  mode: state.d20Mode,
-                  onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
-                ),
-                const SizedBox(height: 20),
-                ModifierControl(
-                  modifier: state.modifier,
-                  onIncrement: () => bloc.add(const ModifierIncremented()),
-                  onDecrement: () => bloc.add(const ModifierDecremented()),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: state.totalDiceCount == 0 || isRolling
-                        ? null
-                        : () => bloc.add(const DiceRollRequested()),
-                    icon: const DnDIcon(
-                      assetPath: 'assets/icons/dice/roll.svg',
-                      size: 24,
-                    ),
-                    label: Text(isRolling ? 'Rolando...' : 'Rolar Dados'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed:
-                      state.pool.isEmpty &&
-                          state.modifier == 0 &&
-                          state.d20Mode == D20RollMode.normal
-                      ? null
-                      : () => bloc.add(const PoolCleared()),
-                  icon: const DnDIcon(
-                    assetPath: 'assets/icons/util/cross.svg',
-                    size: 20,
-                  ),
-                  label: const Text('Limpar Pool'),
-                ),
-                const SizedBox(height: 20),
-                _buildResultSection(context, state, isRolling),
-              ],
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          _buildDiceConsumer(context),
+          // `IgnorePointer` garante que o burst de confete, centralizado na
+          // tela, nunca intercepte toques destinados aos controles abaixo dele.
+          IgnorePointer(
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              numberOfParticles: 30,
+              maxBlastForce: 20,
+              minBlastForce: 8,
+              gravity: 0.3,
+              shouldLoop: false,
+              colors: const [Colors.green, Color(0xFFFFD700)],
             ),
-          );
-        },
+          ),
+        ],
       ),
+    );
+  }
+
+  /// `BlocConsumer` já *é* um `BlocListener` + `BlocBuilder` combinados —
+  /// reaproveitado aqui em vez de um `BlocListener` redundante ao lado, o
+  /// que duplicaria a assinatura no mesmo estado do [DiceBloc].
+  Widget _buildDiceConsumer(BuildContext context) {
+    return BlocConsumer<DiceBloc, DiceState>(
+      // Só dispara quando uma rolagem termina (rolling -> idle com
+      // resultado novo) — evita reabrir o popup em mudanças de pool,
+      // modificador ou modo do d20.
+      listenWhen: (previous, current) =>
+          previous.status == DiceRollStatus.rolling &&
+          current.status == DiceRollStatus.idle &&
+          current.lastResult != null,
+      listener: (context, state) {
+        final result = state.lastResult!;
+        // Reaproveita `hasCriticalSuccess` do domínio: já considera o valor
+        // *mantido* de cada d20 (pós vantagem/desvantagem), não o descartado.
+        if (result.hasCriticalSuccess) {
+          _confettiController.play();
+        }
+        _showResultDialog(context, result);
+      },
+      builder: (context, state) {
+        final bloc = context.read<DiceBloc>();
+        final isRolling = state.status == DiceRollStatus.rolling;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final type in DiceType.values)
+                    DiceTypeButton(
+                      type: type,
+                      count: state.pool[type] ?? 0,
+                      onAdd: () => bloc.add(DiceTypeAdded(type)),
+                      onRemove: () => bloc.add(DiceTypeRemoved(type)),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Modo do d20',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              D20ModeSelector(
+                mode: state.d20Mode,
+                onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
+              ),
+              const SizedBox(height: 20),
+              ModifierControl(
+                modifier: state.modifier,
+                onIncrement: () => bloc.add(const ModifierIncremented()),
+                onDecrement: () => bloc.add(const ModifierDecremented()),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: state.totalDiceCount == 0 || isRolling
+                      ? null
+                      : () => bloc.add(const DiceRollRequested()),
+                  icon: const DnDIcon(
+                    assetPath: 'assets/icons/dice/roll.svg',
+                    size: 24,
+                  ),
+                  label: Text(isRolling ? 'Rolando...' : 'Rolar Dados'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed:
+                    state.pool.isEmpty &&
+                        state.modifier == 0 &&
+                        state.d20Mode == D20RollMode.normal
+                    ? null
+                    : () => bloc.add(const PoolCleared()),
+                icon: const DnDIcon(
+                  assetPath: 'assets/icons/util/cross.svg',
+                  size: 20,
+                ),
+                label: const Text('Limpar Pool'),
+              ),
+              const SizedBox(height: 20),
+              _buildResultSection(context, state, isRolling),
+            ],
+          ),
+        );
+      },
     );
   }
 
