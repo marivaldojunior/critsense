@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
-import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_shape_icon.dart';
+
+/// Caminho do ícone SVG temático correspondente a cada [DiceType].
+///
+/// O d100 (percentual) não possui ícone dedicado no pacote e é rolado com um
+/// d10 na mesa, por isso reutiliza o mesmo asset.
+String _diceIconAsset(DiceType type) => switch (type) {
+  DiceType.d4 => 'assets/icons/dice/d4.svg',
+  DiceType.d6 => 'assets/icons/dice/d6.svg',
+  DiceType.d8 => 'assets/icons/dice/d8.svg',
+  DiceType.d10 => 'assets/icons/dice/d10.svg',
+  DiceType.d12 => 'assets/icons/dice/d12.svg',
+  DiceType.d20 => 'assets/icons/dice/d20.svg',
+  DiceType.d100 => 'assets/icons/dice/d10.svg',
+};
 
 /// Botão de um tipo de dado no painel de montagem do pool: exibe o rótulo
 /// (`d6`, `d20`...) e controles de +/- para a quantidade selecionada.
@@ -45,12 +59,10 @@ class DiceTypeButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DiceShapeIcon(
-                type: type,
+              DnDIcon(
+                assetPath: _diceIconAsset(type),
+                size: 40,
                 color: selected ? colorScheme.primary : colorScheme.outline,
-                fillColor: selected
-                    ? colorScheme.primary.withValues(alpha: 0.15)
-                    : null,
               ),
               const SizedBox(height: 4),
               Text(

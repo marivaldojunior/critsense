@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/compendium/domain/entities/api_reference.dart';
 
@@ -239,6 +240,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             label: 'Classe',
             items: options.classes,
             onChanged: (value) => _selectedClass = value,
+            leadingIconBuilder: _classIconAsset,
           ),
           _buildTextField(
             controller: _levelCtrl,
@@ -295,10 +297,14 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   }
 
   /// Constrói um [DropdownButtonFormField] a partir de uma lista de [ApiReference].
+  ///
+  /// [leadingIconBuilder], quando informado, retorna o caminho do asset SVG
+  /// exibido antes do nome de cada item (usado pelo dropdown de Classe).
   Widget _buildDropdown({
     required String label,
     required List<ApiReference> items,
     required ValueChanged<String?> onChanged,
+    String? Function(ApiReference)? leadingIconBuilder,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -312,7 +318,16 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             .map(
               (ref) => DropdownMenuItem<String>(
                 value: ref.name,
-                child: Text(ref.name),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (leadingIconBuilder?.call(ref) case final iconPath?) ...[
+                      DnDIcon(assetPath: iconPath, size: 22),
+                      const SizedBox(width: 10),
+                    ],
+                    Text(ref.name),
+                  ],
+                ),
               ),
             )
             .toList(),
@@ -321,6 +336,33 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             (v == null || v.isEmpty) ? 'Selecione uma opção.' : null,
       ),
     );
+  }
+
+  /// Caminho do ícone de classe (`assets/icons/class/`) correspondente ao
+  /// nome retornado pela API do compêndio (ex: "Wizard" -> `wizard.svg`).
+  ///
+  /// Retorna `null` para classes sem ícone dedicado no pacote, caso em que
+  /// o dropdown exibe apenas o nome, sem ícone.
+  static const _knownClassIcons = {
+    'artificer',
+    'barbarian',
+    'bard',
+    'cleric',
+    'druid',
+    'fighter',
+    'monk',
+    'paladin',
+    'ranger',
+    'rogue',
+    'sorcerer',
+    'warlock',
+    'wizard',
+  };
+
+  String? _classIconAsset(ApiReference ref) {
+    final key = ref.name.toLowerCase();
+    if (!_knownClassIcons.contains(key)) return null;
+    return 'assets/icons/class/$key.svg';
   }
 
   /// Dropdown de tendência (alinhamento) a partir das nove opções fixas do

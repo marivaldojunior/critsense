@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
@@ -112,7 +113,10 @@ class _DiceViewState extends State<_DiceView> {
                     onPressed: state.totalDiceCount == 0 || isRolling
                         ? null
                         : () => bloc.add(const DiceRollRequested()),
-                    icon: const Icon(Icons.casino_outlined),
+                    icon: const DnDIcon(
+                      assetPath: 'assets/icons/dice/roll.svg',
+                      size: 24,
+                    ),
                     label: Text(isRolling ? 'Rolando...' : 'Rolar Dados'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),

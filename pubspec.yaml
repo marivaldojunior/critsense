@@ -45,6 +45,7 @@ dependencies:
   dio: ^5.11.0
   image_picker: ^1.2.3
   intl: ^0.20.3
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -75,8 +76,35 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   
+  # O Flutter só inclui arquivos diretamente dentro de cada diretório listado
+  # (não recursivamente) — cada subpasta de assets/icons/ precisa de uma
+  # entrada própria, senão os SVGs dela não são empacotados no app.
   assets:
     - assets/icons/
+    - assets/icons/ability/
+    - assets/icons/attribute/
+    - assets/icons/campaign/
+    - assets/icons/class/
+    - assets/icons/combat/
+    - assets/icons/condition/
+    - assets/icons/d20test/
+    - assets/icons/damage/
+    - assets/icons/dice/
+    - assets/icons/entity/
+    - assets/icons/game/
+    - assets/icons/hp/
+    - assets/icons/location/
+    - assets/icons/logo/
+    - assets/icons/monster/
+    - assets/icons/movement/
+    - assets/icons/proficiency/
+    - assets/icons/roll20/
+    - assets/icons/skill/
+    - assets/icons/slot/
+    - assets/icons/spell/
+    - assets/icons/target/
+    - assets/icons/util/
+    - assets/icons/weapon/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
