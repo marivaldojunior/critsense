@@ -6,10 +6,24 @@ import 'dice_type.dart';
 /// acerto/falha crítica, então os getters checam explicitamente o [type].
 class SingleDieResult {
   final DiceType type;
+
+  /// Valor mantido para a soma. Em rolagens com vantagem/desvantagem, é o
+  /// maior ou o menor entre os dois d20 rolados — nunca a média nem a soma.
   final int value;
 
-  const SingleDieResult({required this.type, required this.value});
+  /// O outro valor rolado quando vantagem/desvantagem se aplicou a este
+  /// dado, mantido apenas para exibição transparente na UI. `null` em
+  /// rolagens normais.
+  final int? discardedValue;
 
+  const SingleDieResult({
+    required this.type,
+    required this.value,
+    this.discardedValue,
+  });
+
+  /// Crítico é avaliado sobre o valor mantido — a regra de d20 natural não
+  /// muda com vantagem/desvantagem, só qual dos dois rolls é considerado.
   bool get isCriticalSuccess => type == DiceType.d20 && value == 20;
   bool get isCriticalFailure => type == DiceType.d20 && value == 1;
 

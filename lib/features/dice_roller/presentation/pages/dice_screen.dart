@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
 import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/d20_mode_selector.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_type_button.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/modifier_control.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_result_panel.dart';
@@ -78,6 +80,16 @@ class _DiceViewState extends State<_DiceView> {
                   ],
                 ),
                 const SizedBox(height: 20),
+                Text(
+                  'Modo do d20',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                D20ModeSelector(
+                  mode: state.d20Mode,
+                  onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
+                ),
+                const SizedBox(height: 20),
                 ModifierControl(
                   modifier: state.modifier,
                   onIncrement: () => bloc.add(const ModifierIncremented()),
@@ -99,7 +111,10 @@ class _DiceViewState extends State<_DiceView> {
                 ),
                 const SizedBox(height: 8),
                 TextButton.icon(
-                  onPressed: state.pool.isEmpty && state.modifier == 0
+                  onPressed:
+                      state.pool.isEmpty &&
+                          state.modifier == 0 &&
+                          state.d20Mode == D20RollMode.normal
                       ? null
                       : () => bloc.add(const PoolCleared()),
                   icon: const Icon(Icons.clear_all),

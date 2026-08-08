@@ -101,6 +101,21 @@ class RollResultPanel extends StatelessWidget {
             ),
           ),
         );
+        // Dado descartado por vantagem/desvantagem: exibido pequeno e
+        // riscado, só para transparência de como o valor mantido foi decidido.
+        if (roll.discardedValue != null) {
+          spans.add(
+            TextSpan(
+              text: ' (${roll.discardedValue})',
+              style: baseStyle?.copyWith(
+                fontSize: (baseStyle.fontSize ?? 24) * 0.6,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                decoration: TextDecoration.lineThrough,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          );
+        }
       }
       spans.add(TextSpan(text: ']', style: baseStyle));
     }

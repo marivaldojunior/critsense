@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
@@ -17,6 +18,7 @@ class DiceBloc extends Bloc<DiceEvent, DiceState> {
     on<ModifierIncremented>(_onModifierIncremented);
     on<ModifierDecremented>(_onModifierDecremented);
     on<PoolCleared>(_onPoolCleared);
+    on<D20ModeChanged>(_onD20ModeChanged);
     on<DiceRollRequested>(_onDiceRollRequested);
     on<DiceShakeDetected>(_onDiceShakeDetected);
   }
@@ -58,6 +60,10 @@ class DiceBloc extends Bloc<DiceEvent, DiceState> {
     emit(const DiceState());
   }
 
+  void _onD20ModeChanged(D20ModeChanged event, Emitter<DiceState> emit) {
+    emit(state.copyWith(d20Mode: event.mode));
+  }
+
   /// Rola o pool atual, mantendo pool e modificador intactos após o
   /// resultado — o usuário pode repetir a mesma rolagem sem remontá-la.
   Future<void> _onDiceRollRequested(
@@ -72,7 +78,11 @@ class DiceBloc extends Bloc<DiceEvent, DiceState> {
     // resultado ser revelado.
     await Future<void>.delayed(const Duration(milliseconds: 600));
 
-    final result = _rollDiceUseCase(pool: state.pool, modifier: state.modifier);
+    final result = _rollDiceUseCase(
+      pool: state.pool,
+      modifier: state.modifier,
+      d20Mode: state.d20Mode,
+    );
     emit(state.copyWith(status: DiceRollStatus.idle, lastResult: result));
   }
 

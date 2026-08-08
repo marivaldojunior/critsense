@@ -29,6 +29,12 @@ final class PoolCleared extends DiceEvent {
   const PoolCleared();
 }
 
+/// Altera o modo de rolagem aplicado aos d20 do pool (normal/vantagem/desvantagem).
+final class D20ModeChanged extends DiceEvent {
+  final D20RollMode mode;
+  const D20ModeChanged(this.mode);
+}
+
 /// Solicita a rolagem do pool atual.
 final class DiceRollRequested extends DiceEvent {
   const DiceRollRequested();
