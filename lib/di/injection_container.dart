@@ -12,6 +12,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/get_session_
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/point_buy_cubit.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
@@ -75,6 +76,10 @@ Future<void> init() async {
       sl<AddInventoryItemUseCase>(),
     ),
   );
+
+  // Factory: nova instância por tela, assim os pontos alocados de uma
+  // criação de personagem não vazam para a próxima.
+  sl.registerFactory<PointBuyCubit>(() => PointBuyCubit());
 
   // Factory: nova instância por tela, assim o estado de carregamento é limpo
   // a cada abertura do formulário.

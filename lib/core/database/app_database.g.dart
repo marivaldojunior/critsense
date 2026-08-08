@@ -87,6 +87,28 @@ class $CharactersTable extends Characters
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _alignmentMeta = const VerificationMeta(
+    'alignment',
+  );
+  @override
+  late final GeneratedColumn<String> alignment = GeneratedColumn<String>(
+    'alignment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backgroundMeta = const VerificationMeta(
+    'background',
+  );
+  @override
+  late final GeneratedColumn<String> background = GeneratedColumn<String>(
+    'background',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -97,6 +119,8 @@ class $CharactersTable extends Characters
     hpMaximo,
     hpAtual,
     avatarPath,
+    alignment,
+    background,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -169,6 +193,18 @@ class $CharactersTable extends Characters
         avatarPath.isAcceptableOrUnknown(data['avatar_path']!, _avatarPathMeta),
       );
     }
+    if (data.containsKey('alignment')) {
+      context.handle(
+        _alignmentMeta,
+        alignment.isAcceptableOrUnknown(data['alignment']!, _alignmentMeta),
+      );
+    }
+    if (data.containsKey('background')) {
+      context.handle(
+        _backgroundMeta,
+        background.isAcceptableOrUnknown(data['background']!, _backgroundMeta),
+      );
+    }
     return context;
   }
 
@@ -210,6 +246,14 @@ class $CharactersTable extends Characters
         DriftSqlType.string,
         data['${effectivePrefix}avatar_path'],
       ),
+      alignment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alignment'],
+      ),
+      background: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}background'],
+      ),
     );
   }
 
@@ -243,6 +287,14 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
 
   /// Caminho local para a imagem de avatar do personagem; pode ser nulo.
   final String? avatarPath;
+
+  /// Tendência (alinhamento), ex: "Leal e Bom". Nullable para não quebrar
+  /// personagens já persistidos antes desta coluna existir.
+  final String? alignment;
+
+  /// Antecedente (background) do personagem. Mesma justificativa de
+  /// nullability de [alignment].
+  final String? background;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -252,6 +304,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.hpMaximo,
     required this.hpAtual,
     this.avatarPath,
+    this.alignment,
+    this.background,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -265,6 +319,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     map['hp_atual'] = Variable<int>(hpAtual);
     if (!nullToAbsent || avatarPath != null) {
       map['avatar_path'] = Variable<String>(avatarPath);
+    }
+    if (!nullToAbsent || alignment != null) {
+      map['alignment'] = Variable<String>(alignment);
+    }
+    if (!nullToAbsent || background != null) {
+      map['background'] = Variable<String>(background);
     }
     return map;
   }
@@ -281,6 +341,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       avatarPath: avatarPath == null && nullToAbsent
           ? const Value.absent()
           : Value(avatarPath),
+      alignment: alignment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(alignment),
+      background: background == null && nullToAbsent
+          ? const Value.absent()
+          : Value(background),
     );
   }
 
@@ -298,6 +364,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       hpMaximo: serializer.fromJson<int>(json['hpMaximo']),
       hpAtual: serializer.fromJson<int>(json['hpAtual']),
       avatarPath: serializer.fromJson<String?>(json['avatarPath']),
+      alignment: serializer.fromJson<String?>(json['alignment']),
+      background: serializer.fromJson<String?>(json['background']),
     );
   }
   @override
@@ -312,6 +380,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'hpMaximo': serializer.toJson<int>(hpMaximo),
       'hpAtual': serializer.toJson<int>(hpAtual),
       'avatarPath': serializer.toJson<String?>(avatarPath),
+      'alignment': serializer.toJson<String?>(alignment),
+      'background': serializer.toJson<String?>(background),
     };
   }
 
@@ -324,6 +394,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     int? hpMaximo,
     int? hpAtual,
     Value<String?> avatarPath = const Value.absent(),
+    Value<String?> alignment = const Value.absent(),
+    Value<String?> background = const Value.absent(),
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -333,6 +405,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     hpMaximo: hpMaximo ?? this.hpMaximo,
     hpAtual: hpAtual ?? this.hpAtual,
     avatarPath: avatarPath.present ? avatarPath.value : this.avatarPath,
+    alignment: alignment.present ? alignment.value : this.alignment,
+    background: background.present ? background.value : this.background,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -346,6 +420,10 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       avatarPath: data.avatarPath.present
           ? data.avatarPath.value
           : this.avatarPath,
+      alignment: data.alignment.present ? data.alignment.value : this.alignment,
+      background: data.background.present
+          ? data.background.value
+          : this.background,
     );
   }
 
@@ -359,14 +437,26 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('nivel: $nivel, ')
           ..write('hpMaximo: $hpMaximo, ')
           ..write('hpAtual: $hpAtual, ')
-          ..write('avatarPath: $avatarPath')
+          ..write('avatarPath: $avatarPath, ')
+          ..write('alignment: $alignment, ')
+          ..write('background: $background')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nome, raca, classe, nivel, hpMaximo, hpAtual, avatarPath);
+  int get hashCode => Object.hash(
+    id,
+    nome,
+    raca,
+    classe,
+    nivel,
+    hpMaximo,
+    hpAtual,
+    avatarPath,
+    alignment,
+    background,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -378,7 +468,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.nivel == this.nivel &&
           other.hpMaximo == this.hpMaximo &&
           other.hpAtual == this.hpAtual &&
-          other.avatarPath == this.avatarPath);
+          other.avatarPath == this.avatarPath &&
+          other.alignment == this.alignment &&
+          other.background == this.background);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -390,6 +482,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<int> hpMaximo;
   final Value<int> hpAtual;
   final Value<String?> avatarPath;
+  final Value<String?> alignment;
+  final Value<String?> background;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -400,6 +494,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.hpMaximo = const Value.absent(),
     this.hpAtual = const Value.absent(),
     this.avatarPath = const Value.absent(),
+    this.alignment = const Value.absent(),
+    this.background = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -411,6 +507,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     required int hpMaximo,
     required int hpAtual,
     this.avatarPath = const Value.absent(),
+    this.alignment = const Value.absent(),
+    this.background = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -428,6 +526,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<int>? hpMaximo,
     Expression<int>? hpAtual,
     Expression<String>? avatarPath,
+    Expression<String>? alignment,
+    Expression<String>? background,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -439,6 +539,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (hpMaximo != null) 'hp_maximo': hpMaximo,
       if (hpAtual != null) 'hp_atual': hpAtual,
       if (avatarPath != null) 'avatar_path': avatarPath,
+      if (alignment != null) 'alignment': alignment,
+      if (background != null) 'background': background,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -452,6 +554,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<int>? hpMaximo,
     Value<int>? hpAtual,
     Value<String?>? avatarPath,
+    Value<String?>? alignment,
+    Value<String?>? background,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -463,6 +567,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       hpMaximo: hpMaximo ?? this.hpMaximo,
       hpAtual: hpAtual ?? this.hpAtual,
       avatarPath: avatarPath ?? this.avatarPath,
+      alignment: alignment ?? this.alignment,
+      background: background ?? this.background,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -494,6 +600,12 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (avatarPath.present) {
       map['avatar_path'] = Variable<String>(avatarPath.value);
     }
+    if (alignment.present) {
+      map['alignment'] = Variable<String>(alignment.value);
+    }
+    if (background.present) {
+      map['background'] = Variable<String>(background.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -511,6 +623,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('hpMaximo: $hpMaximo, ')
           ..write('hpAtual: $hpAtual, ')
           ..write('avatarPath: $avatarPath, ')
+          ..write('alignment: $alignment, ')
+          ..write('background: $background, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -544,7 +658,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   static const VerificationMeta _destrezaMeta = const VerificationMeta(
     'destreza',
@@ -555,7 +670,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   static const VerificationMeta _constituicaoMeta = const VerificationMeta(
     'constituicao',
@@ -566,7 +682,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   static const VerificationMeta _inteligenciaMeta = const VerificationMeta(
     'inteligencia',
@@ -577,7 +694,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   static const VerificationMeta _sabedoriaMeta = const VerificationMeta(
     'sabedoria',
@@ -588,7 +706,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   static const VerificationMeta _carismaMeta = const VerificationMeta(
     'carisma',
@@ -599,7 +718,8 @@ class $AttributesTable extends Attributes
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -639,16 +759,12 @@ class $AttributesTable extends Attributes
         _forcaMeta,
         forca.isAcceptableOrUnknown(data['forca']!, _forcaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_forcaMeta);
     }
     if (data.containsKey('destreza')) {
       context.handle(
         _destrezaMeta,
         destreza.isAcceptableOrUnknown(data['destreza']!, _destrezaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_destrezaMeta);
     }
     if (data.containsKey('constituicao')) {
       context.handle(
@@ -658,8 +774,6 @@ class $AttributesTable extends Attributes
           _constituicaoMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_constituicaoMeta);
     }
     if (data.containsKey('inteligencia')) {
       context.handle(
@@ -669,24 +783,18 @@ class $AttributesTable extends Attributes
           _inteligenciaMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_inteligenciaMeta);
     }
     if (data.containsKey('sabedoria')) {
       context.handle(
         _sabedoriaMeta,
         sabedoria.isAcceptableOrUnknown(data['sabedoria']!, _sabedoriaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_sabedoriaMeta);
     }
     if (data.containsKey('carisma')) {
       context.handle(
         _carismaMeta,
         carisma.isAcceptableOrUnknown(data['carisma']!, _carismaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_carismaMeta);
     }
     return context;
   }
@@ -911,20 +1019,14 @@ class AttributesCompanion extends UpdateCompanion<AttributeData> {
   });
   AttributesCompanion.insert({
     required String characterId,
-    required int forca,
-    required int destreza,
-    required int constituicao,
-    required int inteligencia,
-    required int sabedoria,
-    required int carisma,
+    this.forca = const Value.absent(),
+    this.destreza = const Value.absent(),
+    this.constituicao = const Value.absent(),
+    this.inteligencia = const Value.absent(),
+    this.sabedoria = const Value.absent(),
+    this.carisma = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : characterId = Value(characterId),
-       forca = Value(forca),
-       destreza = Value(destreza),
-       constituicao = Value(constituicao),
-       inteligencia = Value(inteligencia),
-       sabedoria = Value(sabedoria),
-       carisma = Value(carisma);
+  }) : characterId = Value(characterId);
   static Insertable<AttributeData> custom({
     Expression<String>? characterId,
     Expression<int>? forca,
@@ -1830,6 +1932,8 @@ typedef $$CharactersTableCreateCompanionBuilder =
       required int hpMaximo,
       required int hpAtual,
       Value<String?> avatarPath,
+      Value<String?> alignment,
+      Value<String?> background,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -1842,6 +1946,8 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<int> hpMaximo,
       Value<int> hpAtual,
       Value<String?> avatarPath,
+      Value<String?> alignment,
+      Value<String?> background,
       Value<int> rowid,
     });
 
@@ -1950,6 +2056,16 @@ class $$CharactersTableFilterComposer
 
   ColumnFilters<String> get avatarPath => $composableBuilder(
     column: $table.avatarPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get alignment => $composableBuilder(
+    column: $table.alignment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get background => $composableBuilder(
+    column: $table.background,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2077,6 +2193,16 @@ class $$CharactersTableOrderingComposer
     column: $table.avatarPath,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get alignment => $composableBuilder(
+    column: $table.alignment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get background => $composableBuilder(
+    column: $table.background,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -2111,6 +2237,14 @@ class $$CharactersTableAnnotationComposer
 
   GeneratedColumn<String> get avatarPath => $composableBuilder(
     column: $table.avatarPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get alignment =>
+      $composableBuilder(column: $table.alignment, builder: (column) => column);
+
+  GeneratedColumn<String> get background => $composableBuilder(
+    column: $table.background,
     builder: (column) => column,
   );
 
@@ -2230,6 +2364,8 @@ class $$CharactersTableTableManager
                 Value<int> hpMaximo = const Value.absent(),
                 Value<int> hpAtual = const Value.absent(),
                 Value<String?> avatarPath = const Value.absent(),
+                Value<String?> alignment = const Value.absent(),
+                Value<String?> background = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -2240,6 +2376,8 @@ class $$CharactersTableTableManager
                 hpMaximo: hpMaximo,
                 hpAtual: hpAtual,
                 avatarPath: avatarPath,
+                alignment: alignment,
+                background: background,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2252,6 +2390,8 @@ class $$CharactersTableTableManager
                 required int hpMaximo,
                 required int hpAtual,
                 Value<String?> avatarPath = const Value.absent(),
+                Value<String?> alignment = const Value.absent(),
+                Value<String?> background = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -2262,6 +2402,8 @@ class $$CharactersTableTableManager
                 hpMaximo: hpMaximo,
                 hpAtual: hpAtual,
                 avatarPath: avatarPath,
+                alignment: alignment,
+                background: background,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2380,12 +2522,12 @@ typedef $$CharactersTableProcessedTableManager =
 typedef $$AttributesTableCreateCompanionBuilder =
     AttributesCompanion Function({
       required String characterId,
-      required int forca,
-      required int destreza,
-      required int constituicao,
-      required int inteligencia,
-      required int sabedoria,
-      required int carisma,
+      Value<int> forca,
+      Value<int> destreza,
+      Value<int> constituicao,
+      Value<int> inteligencia,
+      Value<int> sabedoria,
+      Value<int> carisma,
       Value<int> rowid,
     });
 typedef $$AttributesTableUpdateCompanionBuilder =
@@ -2652,12 +2794,12 @@ class $$AttributesTableTableManager
           createCompanionCallback:
               ({
                 required String characterId,
-                required int forca,
-                required int destreza,
-                required int constituicao,
-                required int inteligencia,
-                required int sabedoria,
-                required int carisma,
+                Value<int> forca = const Value.absent(),
+                Value<int> destreza = const Value.absent(),
+                Value<int> constituicao = const Value.absent(),
+                Value<int> inteligencia = const Value.absent(),
+                Value<int> sabedoria = const Value.absent(),
+                Value<int> carisma = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AttributesCompanion.insert(
                 characterId: characterId,

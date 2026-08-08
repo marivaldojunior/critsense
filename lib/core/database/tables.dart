@@ -30,6 +30,14 @@ class Characters extends Table {
   /// Caminho local para a imagem de avatar do personagem; pode ser nulo.
   TextColumn get avatarPath => text().nullable()();
 
+  /// Tendência (alinhamento), ex: "Leal e Bom". Nullable para não quebrar
+  /// personagens já persistidos antes desta coluna existir.
+  TextColumn get alignment => text().nullable()();
+
+  /// Antecedente (background) do personagem. Mesma justificativa de
+  /// nullability de [alignment].
+  TextColumn get background => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -45,23 +53,28 @@ class Attributes extends Table {
   TextColumn get characterId =>
       text().references(Characters, #id, onDelete: KeyAction.cascade)();
 
+  // Default 8: ponto de partida do sistema de Compra de Pontos (Point Buy)
+  // do D&D 5e — a aplicação sempre envia os 6 valores explicitamente ao
+  // salvar, então este default só importa para inserções feitas fora do
+  // fluxo do formulário (ex: scripts, testes manuais no banco).
+
   /// Força: capacidade física bruta.
-  IntColumn get forca => integer()();
+  IntColumn get forca => integer().withDefault(const Constant(8))();
 
   /// Destreza: agilidade e coordenação.
-  IntColumn get destreza => integer()();
+  IntColumn get destreza => integer().withDefault(const Constant(8))();
 
   /// Constituição: resistência física.
-  IntColumn get constituicao => integer()();
+  IntColumn get constituicao => integer().withDefault(const Constant(8))();
 
   /// Inteligência: raciocínio e memória.
-  IntColumn get inteligencia => integer()();
+  IntColumn get inteligencia => integer().withDefault(const Constant(8))();
 
   /// Sabedoria: percepção e intuição.
-  IntColumn get sabedoria => integer()();
+  IntColumn get sabedoria => integer().withDefault(const Constant(8))();
 
   /// Carisma: força de personalidade.
-  IntColumn get carisma => integer()();
+  IntColumn get carisma => integer().withDefault(const Constant(8))();
 
   @override
   Set<Column> get primaryKey => {characterId};

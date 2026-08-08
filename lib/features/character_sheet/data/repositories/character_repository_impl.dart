@@ -128,6 +128,11 @@ class CharacterRepositoryImpl implements ICharacterRepository {
 
 extension _CharacterDataMapper on CharacterData {
   /// Converte a linha gerada pelo Drift para a entidade pura de domínio [Character].
+  ///
+  /// [alignment]/[background] são nullable no banco (colunas adicionadas em
+  /// uma migração posterior); personagens salvos antes dela viram string
+  /// vazia aqui — o domínio permanece non-null, a infraestrutura absorve a
+  /// lacuna de dados legados.
   Character _toDomain(AttributeData attrData) {
     return Character(
       id: id,
@@ -138,6 +143,8 @@ extension _CharacterDataMapper on CharacterData {
       maxHp: hpMaximo,
       currentHp: hpAtual,
       attributes: attrData._toDomain(),
+      alignment: alignment ?? '',
+      background: background ?? '',
       avatarPath: avatarPath,
     );
   }
@@ -168,6 +175,8 @@ extension _CharacterToCompanion on Character {
       nivel: Value(level),
       hpMaximo: Value(maxHp),
       hpAtual: Value(currentHp),
+      alignment: Value(alignment),
+      background: Value(background),
       avatarPath: Value(avatarPath),
     );
   }

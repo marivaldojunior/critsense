@@ -11,10 +11,12 @@ import 'package:uuid/uuid.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/compendium/domain/entities/api_reference.dart';
 
-import '../../domain/entities/attribute.dart';
+import '../../domain/entities/alignment.dart' as dnd;
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/form_options_bloc.dart';
+import '../bloc/point_buy_cubit.dart';
+import '../widgets/point_buy_section.dart';
 
 /// Tela de criação de um novo personagem via formulário.
 ///
@@ -44,18 +46,16 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   // removido da árvore — causando memory leaks e callbacks em objetos mortos.
   late final TextEditingController _nameCtrl;
   late final TextEditingController _levelCtrl;
-  late final TextEditingController _strengthCtrl;
-  late final TextEditingController _dexterityCtrl;
-  late final TextEditingController _constitutionCtrl;
-  late final TextEditingController _intelligenceCtrl;
-  late final TextEditingController _wisdomCtrl;
-  late final TextEditingController _charismaCtrl;
+  late final TextEditingController _backgroundCtrl;
 
   /// Valor selecionado no dropdown de raça; corresponde a [ApiReference.name].
   String? _selectedRace;
 
   /// Valor selecionado no dropdown de classe; corresponde a [ApiReference.name].
   String? _selectedClass;
+
+  /// Valor selecionado no dropdown de tendência; corresponde a [Alignment.label].
+  String? _selectedAlignment;
 
   /// Arquivo de avatar escolhido pelo usuário; nulo enquanto nenhum for selecionado.
   File? _avatarImage;
@@ -65,12 +65,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     super.initState();
     _nameCtrl = TextEditingController();
     _levelCtrl = TextEditingController();
-    _strengthCtrl = TextEditingController();
-    _dexterityCtrl = TextEditingController();
-    _constitutionCtrl = TextEditingController();
-    _intelligenceCtrl = TextEditingController();
-    _wisdomCtrl = TextEditingController();
-    _charismaCtrl = TextEditingController();
+    _backgroundCtrl = TextEditingController();
   }
 
   @override
@@ -78,12 +73,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     // Libera os recursos nativos de cada controller na ordem inversa de criação.
     _nameCtrl.dispose();
     _levelCtrl.dispose();
-    _strengthCtrl.dispose();
-    _dexterityCtrl.dispose();
-    _constitutionCtrl.dispose();
-    _intelligenceCtrl.dispose();
-    _wisdomCtrl.dispose();
-    _charismaCtrl.dispose();
+    _backgroundCtrl.dispose();
     super.dispose();
   }
 
@@ -108,13 +98,20 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     setState(() => _avatarImage = saved);
   }
 
-  void _submit() {
+  /// Recebe [context] explicitamente em vez de usar `this.context`: o
+  /// `context` do próprio [State] é ancestral do [MultiBlocProvider] criado
+  /// em [build] (é o `context` recebido por `build`, pai da árvore que ele
+  /// retorna), então `context.read<PointBuyCubit>()` com `this.context`
+  /// nunca o encontra — `PointBuyCubit` é provido *dentro* dessa árvore,
+  /// não acima dela. O `context` do `BlocBuilder` abaixo já é descendente
+  /// dos providers, por isso é repassado até aqui.
+  void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
 
     final level = int.parse(_levelCtrl.text);
+    final attributes = context.read<PointBuyCubit>().state.attributes;
     // HP máximo calculado pela fórmula base: 10 + (Constituição × Nível).
-    final constitution = int.parse(_constitutionCtrl.text);
-    final maxHp = 10 + constitution * level;
+    final maxHp = 10 + attributes.constitution * level;
 
     final character = Character(
       id: const Uuid().v4(),
@@ -124,14 +121,9 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       level: level,
       maxHp: maxHp,
       currentHp: maxHp,
-      attributes: Attribute(
-        strength: int.parse(_strengthCtrl.text),
-        dexterity: int.parse(_dexterityCtrl.text),
-        constitution: constitution,
-        intelligence: int.parse(_intelligenceCtrl.text),
-        wisdom: int.parse(_wisdomCtrl.text),
-        charisma: int.parse(_charismaCtrl.text),
-      ),
+      attributes: attributes,
+      alignment: _selectedAlignment!,
+      background: _backgroundCtrl.text.trim(),
       avatarPath: _avatarImage?.path,
     );
 
@@ -142,8 +134,13 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<FormOptionsBloc>(
-      create: (_) => sl<FormOptionsBloc>()..add(LoadFormOptionsEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FormOptionsBloc>(
+          create: (_) => sl<FormOptionsBloc>()..add(LoadFormOptionsEvent()),
+        ),
+        BlocProvider<PointBuyCubit>(create: (_) => sl<PointBuyCubit>()),
+      ],
       child: Scaffold(
         appBar: AppBar(title: const Text('Novo Personagem')),
         body: BlocBuilder<FormOptionsBloc, FormOptionsState>(
@@ -162,7 +159,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             }
 
             final options = state as FormOptionsLoaded;
-            return _buildForm(options);
+            return _buildForm(context, options);
           },
         ),
       ),
@@ -214,7 +211,11 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   }
 
   /// Renderiza o formulário completo com os dropdowns populados por [options].
-  Widget _buildForm(FormOptionsLoaded options) {
+  ///
+  /// Recebe [context] do [BlocBuilder] ancestral (descendente dos providers
+  /// deste formulário) apenas para repassá-lo a [_submit] — ver o comentário
+  /// nesse método para o porquê de não bastar `this.context`.
+  Widget _buildForm(BuildContext context, FormOptionsLoaded options) {
     return Form(
       key: _formKey,
       child: ListView(
@@ -245,48 +246,19 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
             numeric: true,
             validator: _positiveIntValidator,
           ),
+          _buildAlignmentDropdown(),
+          _buildTextField(
+            controller: _backgroundCtrl,
+            label: 'Antecedente',
+            validator: _requiredValidator,
+          ),
           const SizedBox(height: 24),
           _SectionHeader(title: 'Atributos'),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _strengthCtrl,
-            label: 'Força',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
-          _buildTextField(
-            controller: _dexterityCtrl,
-            label: 'Destreza',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
-          _buildTextField(
-            controller: _constitutionCtrl,
-            label: 'Constituição',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
-          _buildTextField(
-            controller: _intelligenceCtrl,
-            label: 'Inteligência',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
-          _buildTextField(
-            controller: _wisdomCtrl,
-            label: 'Sabedoria',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
-          _buildTextField(
-            controller: _charismaCtrl,
-            label: 'Carisma',
-            numeric: true,
-            validator: _attributeValidator,
-          ),
+          const SizedBox(height: 4),
+          const PointBuySection(),
           const SizedBox(height: 32),
           FilledButton.icon(
-            onPressed: _submit,
+            onPressed: () => _submit(context),
             icon: const Icon(Icons.save_outlined),
             label: const Text('Salvar Personagem'),
             style: FilledButton.styleFrom(
@@ -351,6 +323,32 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     );
   }
 
+  /// Dropdown de tendência (alinhamento) a partir das nove opções fixas do
+  /// D&D 5e — diferente de [_buildDropdown], não depende da API do compêndio.
+  Widget _buildAlignmentDropdown() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DropdownButtonFormField<String>(
+        initialValue: null,
+        decoration: const InputDecoration(
+          labelText: 'Tendência',
+          border: OutlineInputBorder(),
+        ),
+        items: dnd.Alignment.values
+            .map(
+              (alignment) => DropdownMenuItem<String>(
+                value: alignment.label,
+                child: Text(alignment.label),
+              ),
+            )
+            .toList(),
+        onChanged: (value) => _selectedAlignment = value,
+        validator: (v) =>
+            (v == null || v.isEmpty) ? 'Selecione uma opção.' : null,
+      ),
+    );
+  }
+
   String? _requiredValidator(String? value) {
     if (value == null || value.trim().isEmpty) return 'Campo obrigatório.';
     return null;
@@ -359,13 +357,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   String? _positiveIntValidator(String? value) {
     final n = int.tryParse(value ?? '');
     if (n == null || n < 1) return 'Informe um número maior que zero.';
-    return null;
-  }
-
-  /// Valida atributos entre 1 e 20 (limite padrão D&D 5e).
-  String? _attributeValidator(String? value) {
-    final n = int.tryParse(value ?? '');
-    if (n == null || n < 1 || n > 20) return 'Informe um valor entre 1 e 20.';
     return null;
   }
 }

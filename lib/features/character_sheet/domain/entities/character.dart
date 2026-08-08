@@ -26,6 +26,12 @@ class Character {
   /// Conjunto de atributos base do personagem.
   final Attribute attributes;
 
+  /// Tendência (alinhamento), ex: "Leal e Bom".
+  final String alignment;
+
+  /// Antecedente (background) do personagem.
+  final String background;
+
   /// Caminho local para a imagem de avatar; nulo quando nenhum avatar foi definido.
   final String? avatarPath;
 
@@ -39,6 +45,8 @@ class Character {
     required this.maxHp,
     required this.currentHp,
     required this.attributes,
+    required this.alignment,
+    required this.background,
     this.avatarPath,
   });
 }
