@@ -11,9 +11,12 @@ import 'package:crit_sense/features/home/presentation/pages/home_screen.dart';
 /// `ValueNotifier`. Ao autenticar, repassa esse mesmo callback adiante para
 /// que a alternância de tema continue funcionando dentro da Home.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.onToggleTheme});
+  const LoginScreen({super.key, this.onToggleTheme});
 
-  final VoidCallback onToggleTheme;
+  /// Opcional: quando a tela é recriada pelo [AppDrawer] após logout, não há
+  /// um `ThemeMode` de origem para repassar, então o botão de tema fica
+  /// inerte (`IconButton.onPressed` nulo já trata isso sem erro).
+  final VoidCallback? onToggleTheme;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -45,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomeScreen(onToggleTheme: widget.onToggleTheme),
+          builder: (_) => HomeScreen(onToggleTheme: widget.onToggleTheme ?? () {}),
         ),
       );
     }

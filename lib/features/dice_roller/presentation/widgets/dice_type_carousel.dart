@@ -52,7 +52,7 @@ class _DieCard extends StatelessWidget {
       children: [
         DnDIcon(
           assetPath: type.iconAsset,
-          size: 48,
+          size: 52,
           color: colorScheme.primary,
         ),
         const SizedBox(height: 6),
@@ -60,7 +60,7 @@ class _DieCard extends StatelessWidget {
           type.label,
           style: Theme.of(
             context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/features/character_sheet/presentation/pages/character_list_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/bestiary_screen.dart';
@@ -60,6 +61,7 @@ class HomeScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('CritSense'),
         actions: [

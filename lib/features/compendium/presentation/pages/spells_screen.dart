@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
@@ -56,6 +57,7 @@ class _SpellsScreenState extends State<SpellsScreen> {
       create: (_) => sl<CompendiumBloc>()..add(const LoadSpellsEvent()),
       child: Scaffold(
         appBar: AppBar(title: const Text('Compêndio de Magias')),
+        drawer: const AppDrawer(),
         body: BlocBuilder<CompendiumBloc, CompendiumState>(
           builder: (context, state) {
             final bloc = context.read<CompendiumBloc>();

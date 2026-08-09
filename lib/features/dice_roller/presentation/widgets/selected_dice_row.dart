@@ -26,7 +26,7 @@ class SelectedDiceRow extends StatefulWidget {
 
   /// Altura de um ícone individual: 32 (tamanho do `DnDIcon`) + 4 de padding
   /// em cada lado — ver [_SelectedDieIcon].
-  static const _lineHeight = 40.0;
+  static const _lineHeight = 50.0;
 
   /// Altura de 2 linhas + o espaçamento vertical entre elas (`runSpacing`).
   static const _maxHeight = _lineHeight * 2 + 8;
@@ -109,7 +109,7 @@ class _SelectedDieIcon extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final icon = DnDIcon(
       assetPath: type.iconAsset,
-      size: 32,
+      size: 36,
       color: colorScheme.primary,
     );
 

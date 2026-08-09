@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
@@ -60,6 +61,7 @@ class _EquipmentsScreenState extends State<EquipmentsScreen> {
       create: (_) => sl<EquipmentBloc>()..add(const LoadEquipmentsEvent()),
       child: Scaffold(
         appBar: AppBar(title: const Text('Equipamentos')),
+        drawer: const AppDrawer(),
         body: BlocBuilder<EquipmentBloc, EquipmentState>(
           builder: (context, state) {
             final bloc = context.read<EquipmentBloc>();

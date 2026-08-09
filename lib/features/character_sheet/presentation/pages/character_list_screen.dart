@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 
 import '../../domain/entities/character.dart';
@@ -65,6 +66,7 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Personagens')),
+      drawer: const AppDrawer(),
       // BlocBuilder observa o stream do CharacterBloc e reconstrói apenas
       // o subwidget que envolve — análogo ao React: em vez de re-renderizar
       // o componente pai inteiro, apenas o filho "conectado" ao store é

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
@@ -115,7 +116,22 @@ class _DiceViewState extends State<_DiceView> {
         final isRolling = state.status == DiceRollStatus.rolling;
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Rolador de Dados')),
+          drawer: const AppDrawer(),
+          appBar: AppBar(
+            // A DiceScreen é empurrada por cima da Home via `Navigator.push`,
+            // então o Scaffold infere uma seta de voltar por padrão em vez do
+            // ícone de menu. Um `leading` explícito com `Builder` (necessário
+            // para obter um `context` descendente do próprio `Scaffold` e
+            // poder chamar `Scaffold.of(context)`) força o ícone do Drawer
+            // aqui mesmo com uma rota anterior na pilha.
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+            title: const Text('Rolador de Dados'),
+          ),
           body: Stack(
             alignment: Alignment.center,
             children: [

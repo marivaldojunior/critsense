@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
@@ -91,6 +92,7 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
       value: _bloc,
       child: Scaffold(
         appBar: AppBar(title: const Text('Bestiário')),
+        drawer: const AppDrawer(),
         body: BlocBuilder<MonsterBloc, MonsterState>(
           builder: (context, state) {
             return Column(
