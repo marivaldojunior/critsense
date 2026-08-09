@@ -39,6 +39,8 @@ class RollFlowDialog extends StatelessWidget {
               (false, final result?) => RollResultPanel(
                 key: const ValueKey('result'),
                 result: result,
+                onRollAgain: () =>
+                    context.read<DiceBloc>().add(const DiceRollRequested()),
               ),
               (false, null) => const SizedBox.shrink(key: ValueKey('empty')),
             },

@@ -14,9 +14,19 @@ import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart
 /// Não traz superfície própria (sem [Card]): é exibido dentro de um
 /// [AlertDialog] pelo chamador, que já fornece o fundo/elevação.
 class RollResultPanel extends StatelessWidget {
-  const RollResultPanel({super.key, required this.result});
+  const RollResultPanel({
+    super.key,
+    required this.result,
+    required this.onRollAgain,
+  });
 
   final DiceRollResult result;
+
+  /// Repete a rolagem do pool atual sem fechar o dialog — quem fornece este
+  /// callback (o [RollFlowDialog]) é responsável por disparar
+  /// `DiceRollRequested` no [DiceBloc], que já reaproveita `state.pool` e
+  /// `state.modifier` correntes.
+  final VoidCallback onRollAgain;
 
   static final Color _criticalSuccessColor = Colors.green.shade600;
 
@@ -81,6 +91,12 @@ class RollResultPanel extends StatelessWidget {
                 children: _buildDieChips(theme),
               ),
             ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.tonalIcon(
+            onPressed: onRollAgain,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Rolar Novamente'),
           ),
         ],
       ),
