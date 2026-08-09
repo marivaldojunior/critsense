@@ -24,11 +24,18 @@ class RollFlowDialog extends StatelessWidget {
           content: AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: switch ((isRolling, state.lastResult)) {
-              (true, _) => Padding(
+              // Tabuleiro físico em área quadrada fixa (300x300, folga em
+              // torno dos 250x250 usados na simulação): o dado precisa de um
+              // espaço estável para quicar independente do que vem depois.
+              (true, _) => SizedBox(
                 key: const ValueKey('rolling'),
-                padding: const EdgeInsets.all(24),
-                child: AnimatedRollingDice(pool: state.pool),
+                width: 300,
+                height: 300,
+                child: Center(child: AnimatedRollingDice(pool: state.pool)),
               ),
+              // Sem tamanho fixo aqui: o RollResultPanel se dimensiona pelo
+              // próprio conteúdo (poucos dados = modal compacto) e só limita
+              // a própria altura internamente para pools grandes.
               (false, final result?) => RollResultPanel(
                 key: const ValueKey('result'),
                 result: result,
