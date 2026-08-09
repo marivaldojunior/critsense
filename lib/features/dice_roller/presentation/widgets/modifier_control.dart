@@ -37,7 +37,10 @@ class ModifierControl extends StatelessWidget {
             ),
           ),
         ),
-        IconButton.filledTonal(onPressed: onIncrement, icon: const Icon(Icons.add)),
+        IconButton.filledTonal(
+          onPressed: onIncrement,
+          icon: const Icon(Icons.add),
+        ),
       ],
     );
   }

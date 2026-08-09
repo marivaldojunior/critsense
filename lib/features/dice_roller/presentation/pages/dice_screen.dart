@@ -12,9 +12,10 @@ import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/d20_mode_selector.dart';
-import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_type_button.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_type_carousel.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/modifier_control.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_result_panel.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/selected_dice_row.dart';
 
 /// Tela do rolador de dados: monta um pool de múltiplos tipos/quantidades,
 /// aplica um modificador global e exibe o detalhamento da soma.
@@ -43,6 +44,10 @@ class _DiceViewState extends State<_DiceView> {
   /// Alimenta o [ConfettiWidget] sobreposto à tela; disparado pelo listener
   /// do BLoC sempre que a rolagem concluída contém um d20 crítico (natural 20).
   late final ConfettiController _confettiController;
+
+  /// Tipo de dado atualmente centralizado no [DiceTypeCarousel] — é ele que
+  /// o botão "Adicionar ao Pool" envia ao [DiceBloc].
+  DiceType _focusedDiceType = DiceType.values.first;
 
   @override
   void initState() {
@@ -119,21 +124,28 @@ class _DiceViewState extends State<_DiceView> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                  for (final type in DiceType.values)
-                    DiceTypeButton(
-                      type: type,
-                      count: state.pool[type] ?? 0,
-                      onAdd: () => bloc.add(DiceTypeAdded(type)),
-                      onRemove: () => bloc.add(DiceTypeRemoved(type)),
-                    ),
-                ],
+              DiceTypeCarousel(
+                onFocusChanged: (type) =>
+                    setState(() => _focusedDiceType = type),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => bloc.add(DiceTypeAdded(_focusedDiceType)),
+                icon: const Icon(Icons.add),
+                label: Text('Adicionar ${_focusedDiceType.label} ao Pool'),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Dados selecionados',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              SelectedDiceRow(
+                pool: state.pool,
+                d20Mode: state.d20Mode,
+                onRemove: (type) => bloc.add(DiceTypeRemoved(type)),
+              ),
+              const SizedBox(height: 16),
               Text(
                 'Modo do d20',
                 style: Theme.of(context).textTheme.titleSmall,
@@ -143,13 +155,13 @@ class _DiceViewState extends State<_DiceView> {
                 mode: state.d20Mode,
                 onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               ModifierControl(
                 modifier: state.modifier,
                 onIncrement: () => bloc.add(const ModifierIncremented()),
                 onDecrement: () => bloc.add(const ModifierDecremented()),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
@@ -180,7 +192,7 @@ class _DiceViewState extends State<_DiceView> {
                 ),
                 label: const Text('Limpar Pool'),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildResultSection(context, state, isRolling),
             ],
           ),
