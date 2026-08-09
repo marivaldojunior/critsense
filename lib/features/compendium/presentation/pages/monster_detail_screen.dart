@@ -61,6 +61,8 @@ class MonsterDetailScreen extends StatelessWidget {
             appBar: AppBar(
               title: Text(
                 state is MonsterDetailLoaded ? state.monster.name : 'Detalhes',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             body: AnimatedSwitcher(

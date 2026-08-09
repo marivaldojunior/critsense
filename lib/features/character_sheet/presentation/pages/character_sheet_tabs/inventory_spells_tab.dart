@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
 
 import '../../../domain/entities/inventory_item.dart';
@@ -46,25 +47,9 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
         FutureBuilder<List<InventoryItem>>(
           future: _inventoryFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            final items = snapshot.data ?? const [];
-            if (items.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('Nenhum item no inventário.'),
-              );
-            }
-
-            return Column(
-              children: [
-                for (final item in items) _InventoryItemTile(item: item),
-              ],
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _buildInventoryBody(snapshot),
             );
           },
         ),
@@ -94,6 +79,63 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
       ],
     );
   }
+
+  /// Resolve o corpo da seção de Inventário a partir do [snapshot] do
+  /// [FutureBuilder] — usado como `child` do [AnimatedSwitcher] em [build],
+  /// daí cada branch carregar uma [ValueKey] distinta para o Flutter
+  /// detectar a troca e disparar o fade de 300ms.
+  Widget _buildInventoryBody(AsyncSnapshot<List<InventoryItem>> snapshot) {
+    if (snapshot.connectionState != ConnectionState.done) {
+      return const _InventorySkeleton(key: ValueKey('loading'));
+    }
+
+    final items = snapshot.data ?? const [];
+    if (items.isEmpty) {
+      return const Padding(
+        key: ValueKey('empty'),
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Text('Nenhum item no inventário.'),
+      );
+    }
+
+    return Column(
+      key: const ValueKey('loaded'),
+      children: [
+        for (final item in items) _InventoryItemTile(item: item),
+      ],
+    );
+  }
+}
+
+/// Esqueleto de carregamento que imita a silhueta de [_InventoryItemTile]:
+/// mesmo [Card]/[ListTile] real, só trocando o conteúdo por [SkeletonBones].
+class _InventorySkeleton extends StatelessWidget {
+  const _InventorySkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonShimmer(
+      child: Column(
+        children: List.generate(
+          3,
+          (_) => Card(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            child: ListTile(
+              leading: const SkeletonBones.circle(size: 24),
+              title: const Align(
+                alignment: Alignment.centerLeft,
+                child: SkeletonBones.rect(width: 140, height: 13),
+              ),
+              subtitle: const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: SkeletonBones.rect(width: 80, height: 10),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _InventoryItemTile extends StatelessWidget {
@@ -115,7 +157,11 @@ class _InventoryItemTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: DnDIcon(assetPath: _iconAsset, size: 24),
-        title: Text(item.name),
+        title: Text(
+          item.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text(item.equipmentCategory),
       ),
     );

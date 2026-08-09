@@ -34,7 +34,11 @@ class CharacterSheetScreen extends StatelessWidget {
               CharacterAvatar(character: character, radius: 18),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(character.name, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  character.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

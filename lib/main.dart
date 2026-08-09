@@ -66,84 +66,77 @@ class CritSenseApp extends StatelessWidget {
     );
   }
 
-  /// Constrói o tema claro com paleta neutra de ficha de RPG: fundo em tom
-  /// de pergaminho e acentos em marrom-acinzentado/sépia pastel.
+  /// Semente única de matiz sépia/marrom-acinzentado a partir da qual o
+  /// Material 3 deriva *todos* os roles tonais do [ColorScheme] — inclusive
+  /// os que antes ficavam sem definição explícita (`surfaceContainerHighest`,
+  /// `outline`, `outlineVariant` etc.) e por isso vazavam o roxo/cinza
+  /// padrão do Material em vez de herdar o tom quente do app.
   ///
-  /// A paleta é deliberadamente restrita a branco, preto, cinzas e tons
-  /// pastel — vermelho e verde ficam reservados para sinalizar sucesso e
-  /// falha (crítico/falha crítica no d20, exclusão de itens, erros),
-  /// nunca como cor decorativa de marca.
+  /// Vermelho e verde continuam fora da semente — seguem reservados para
+  /// sinalizar sucesso e falha (crítico/falha crítica no d20, exclusão de
+  /// itens, erros), nunca como cor decorativa de marca.
+  static const _rpgSeed = Color(0xFF6B5F4F);
+
+  /// Constrói o tema claro: [ColorScheme.fromSeed] com `brightness: light`
+  /// gera automaticamente uma paleta tonal inteira (fundo em tom de
+  /// pergaminho, superfícies e acentos em sépia) coerente com a semente.
   ThemeData _buildLightTheme() {
-    const rpgParchment = Color(0xFFFBF5E9);
-    const rpgSurfaceLight = Color(0xFFF0E6D2);
-    const rpgAccentPrimary = Color(0xFF6B5F4F);
-    const rpgAccentSecondary = Color(0xFFC9B896);
-    const rpgAccentTertiary = Color(0xFFA8998A);
     const rpgError = Color(0xFFB71C1C);
 
-    return ThemeData(
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: _rpgSeed,
       brightness: Brightness.light,
-      scaffoldBackgroundColor: rpgParchment,
-      colorScheme: const ColorScheme.light(
-        primary: rpgAccentPrimary,
-        secondary: rpgAccentSecondary,
-        tertiary: rpgAccentTertiary,
-        surface: rpgSurfaceLight,
-        error: rpgError,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: rpgAccentPrimary,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 0,
-      ),
-      tabBarTheme: const TabBarThemeData(
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white70,
-        indicatorColor: Colors.white,
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: rpgAccentPrimary,
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
-
-  /// Constrói o tema escuro com a mesma paleta neutra, invertida em
-  /// luminância: fundo cinza quase-preto (sem matiz de cor) e acentos em
-  /// bege/sépia pastel claro para manter contraste legível.
-  ThemeData _buildDarkTheme() {
-    const rpgBackground = Color(0xFF121212);
-    const rpgSurface = Color(0xFF1E1E1E);
-    const rpgAccentPrimary = Color(0xFFD8CFC0);
-    const rpgAccentSecondary = Color(0xFF9C8F76);
-    const rpgAccentTertiary = Color(0xFFB0A99E);
-    const rpgError = Color(0xFFEF5350);
+    ).copyWith(error: rpgError);
 
     return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: rpgBackground,
-      colorScheme: const ColorScheme.dark(
-        primary: rpgAccentPrimary,
-        secondary: rpgAccentSecondary,
-        tertiary: rpgAccentTertiary,
-        surface: rpgSurface,
-        error: rpgError,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: rpgSurface,
-        foregroundColor: rpgAccentPrimary,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         centerTitle: true,
         elevation: 0,
       ),
       tabBarTheme: TabBarThemeData(
-        labelColor: rpgAccentPrimary,
-        unselectedLabelColor: rpgAccentPrimary.withValues(alpha: 0.7),
-        indicatorColor: rpgAccentPrimary,
+        labelColor: colorScheme.onPrimary,
+        unselectedLabelColor: colorScheme.onPrimary.withValues(alpha: 0.7),
+        indicatorColor: colorScheme.onPrimary,
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: rpgAccentPrimary,
-        foregroundColor: rpgSurface,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
+    );
+  }
+
+  /// Constrói o tema escuro a partir da mesma semente sépia, apenas com
+  /// `brightness: dark` — o Material 3 já inverte a luminância mantendo o
+  /// mesmo matiz, sem precisar de uma segunda paleta mantida à mão.
+  ThemeData _buildDarkTheme() {
+    const rpgError = Color(0xFFEF5350);
+
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: _rpgSeed,
+      brightness: Brightness.dark,
+    ).copyWith(error: rpgError);
+
+    return ThemeData(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.primary,
+        centerTitle: true,
+        elevation: 0,
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: colorScheme.primary,
+        unselectedLabelColor: colorScheme.primary.withValues(alpha: 0.7),
+        indicatorColor: colorScheme.primary,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
     );
   }

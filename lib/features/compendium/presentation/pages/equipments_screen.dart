@@ -84,7 +84,11 @@ class _EquipmentTile extends StatelessWidget {
         assetPath: 'assets/icons/entity/weapon.svg',
         size: 26,
       ),
-      title: Text(equipment.name),
+      title: Text(
+        equipment.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text(
         equipment.index,
         style: Theme.of(context).textTheme.bodySmall,
@@ -146,7 +150,11 @@ class _EquipmentTile extends StatelessWidget {
                           assetPath: 'assets/icons/game/character.svg',
                           size: 26,
                         ),
-                        title: Text(character.name),
+                        title: Text(
+                          character.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         subtitle: Text(
                           '${character.characterClass} • Nível ${character.level}',
                         ),

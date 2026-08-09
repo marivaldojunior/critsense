@@ -109,7 +109,11 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
                           size: 26,
                         ),
                       ),
-                      title: Text(monster.name),
+                      title: Text(
+                        monster.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(
                         monster.index,
                         style: TextStyle(

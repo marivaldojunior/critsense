@@ -34,6 +34,8 @@ class SpellDetailScreen extends StatelessWidget {
               // Exibe o nome da magia assim que o estado Loaded for emitido.
               title: Text(
                 state is SpellDetailLoaded ? state.spell.name : 'Detalhes',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             body: AnimatedSwitcher(

@@ -49,7 +49,11 @@ class SpellsScreen extends StatelessWidget {
                         assetPath: 'assets/icons/game/spell.svg',
                         size: 26,
                       ),
-                      title: Text(spell.name),
+                      title: Text(
+                        spell.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(
                         spell.index,
                         style: Theme.of(context).textTheme.bodySmall,

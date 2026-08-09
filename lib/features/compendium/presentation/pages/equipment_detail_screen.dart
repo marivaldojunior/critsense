@@ -33,6 +33,8 @@ class EquipmentDetailScreen extends StatelessWidget {
                 state is EquipmentDetailLoaded
                     ? state.equipment.name
                     : 'Detalhes',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             body: AnimatedSwitcher(

@@ -70,35 +70,10 @@ class _DiceViewState extends State<_DiceView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Rolador de Dados')),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          _buildDiceConsumer(context),
-          // `IgnorePointer` garante que o burst de confete, centralizado na
-          // tela, nunca intercepte toques destinados aos controles abaixo dele.
-          IgnorePointer(
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              numberOfParticles: 30,
-              maxBlastForce: 20,
-              minBlastForce: 8,
-              gravity: 0.3,
-              shouldLoop: false,
-              colors: const [Colors.green, Color(0xFFFFD700)],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// `BlocConsumer` já *é* um `BlocListener` + `BlocBuilder` combinados —
-  /// reaproveitado aqui em vez de um `BlocListener` redundante ao lado, o
-  /// que duplicaria a assinatura no mesmo estado do [DiceBloc].
-  Widget _buildDiceConsumer(BuildContext context) {
+    // `BlocConsumer` já *é* um `BlocListener` + `BlocBuilder` combinados —
+    // reaproveitado no nível do Scaffold (em vez de um `BlocListener`
+    // redundante ao lado) porque tanto o corpo rolável quanto o CTA fixo em
+    // `bottomNavigationBar` precisam do mesmo `state`/`bloc` do [DiceBloc].
     return BlocConsumer<DiceBloc, DiceState>(
       // Só dispara quando uma rolagem termina (rolling -> idle com
       // resultado novo) — evita reabrir o popup em mudanças de pool,
@@ -120,49 +95,36 @@ class _DiceViewState extends State<_DiceView> {
         final bloc = context.read<DiceBloc>();
         final isRolling = state.status == DiceRollStatus.rolling;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+        return Scaffold(
+          appBar: AppBar(title: const Text('Rolador de Dados')),
+          body: Stack(
+            alignment: Alignment.center,
             children: [
-              DiceTypeCarousel(
-                onFocusChanged: (type) =>
-                    setState(() => _focusedDiceType = type),
+              _buildScrollableContent(context, state, bloc, isRolling),
+              // `IgnorePointer` garante que o burst de confete, centralizado
+              // na tela, nunca intercepte toques destinados aos controles
+              // abaixo dele.
+              IgnorePointer(
+                child: ConfettiWidget(
+                  confettiController: _confettiController,
+                  blastDirectionality: BlastDirectionality.explosive,
+                  numberOfParticles: 30,
+                  maxBlastForce: 20,
+                  minBlastForce: 8,
+                  gravity: 0.3,
+                  shouldLoop: false,
+                  colors: const [Colors.green, Color(0xFFFFD700)],
+                ),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => bloc.add(DiceTypeAdded(_focusedDiceType)),
-                icon: const Icon(Icons.add),
-                label: Text('Adicionar ${_focusedDiceType.label} ao Pool'),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Dados selecionados',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              SelectedDiceRow(
-                pool: state.pool,
-                d20Mode: state.d20Mode,
-                onRemove: (type) => bloc.add(DiceTypeRemoved(type)),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Modo do d20',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              D20ModeSelector(
-                mode: state.d20Mode,
-                onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
-              ),
-              const SizedBox(height: 16),
-              ModifierControl(
-                modifier: state.modifier,
-                onIncrement: () => bloc.add(const ModifierIncremented()),
-                onDecrement: () => bloc.add(const ModifierDecremented()),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
+            ],
+          ),
+          // CTA principal fixo na base da tela — fora da área rolável, para
+          // que "Rolar Dados" fique sempre alcançável na thumb zone,
+          // independente de quantos dados o usuário já adicionou ao pool.
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: state.totalDiceCount == 0 || isRolling
@@ -178,26 +140,80 @@ class _DiceViewState extends State<_DiceView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed:
-                    state.pool.isEmpty &&
-                        state.modifier == 0 &&
-                        state.d20Mode == D20RollMode.normal
-                    ? null
-                    : () => bloc.add(const PoolCleared()),
-                icon: const DnDIcon(
-                  assetPath: 'assets/icons/util/cross.svg',
-                  size: 20,
-                ),
-                label: const Text('Limpar Pool'),
-              ),
-              const SizedBox(height: 16),
-              _buildResultSection(context, state, isRolling),
-            ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  /// Conteúdo rolável da tela: tudo além do CTA "Rolar Dados", que agora
+  /// vive fixo em `bottomNavigationBar`.
+  Widget _buildScrollableContent(
+    BuildContext context,
+    DiceState state,
+    DiceBloc bloc,
+    bool isRolling,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          DiceTypeCarousel(
+            onFocusChanged: (type) =>
+                setState(() => _focusedDiceType = type),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => bloc.add(DiceTypeAdded(_focusedDiceType)),
+            icon: const Icon(Icons.add),
+            label: Text('Adicionar ${_focusedDiceType.label} ao Pool'),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Dados selecionados',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          SelectedDiceRow(
+            pool: state.pool,
+            d20Mode: state.d20Mode,
+            onRemove: (type) => bloc.add(DiceTypeRemoved(type)),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Modo do d20',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          D20ModeSelector(
+            mode: state.d20Mode,
+            onChanged: (mode) => bloc.add(D20ModeChanged(mode)),
+          ),
+          const SizedBox(height: 16),
+          ModifierControl(
+            modifier: state.modifier,
+            onIncrement: () => bloc.add(const ModifierIncremented()),
+            onDecrement: () => bloc.add(const ModifierDecremented()),
+          ),
+          const SizedBox(height: 16),
+          TextButton.icon(
+            onPressed:
+                state.pool.isEmpty &&
+                    state.modifier == 0 &&
+                    state.d20Mode == D20RollMode.normal
+                ? null
+                : () => bloc.add(const PoolCleared()),
+            icon: const DnDIcon(
+              assetPath: 'assets/icons/util/cross.svg',
+              size: 20,
+            ),
+            label: const Text('Limpar Pool'),
+          ),
+          const SizedBox(height: 16),
+          _buildResultSection(context, state, isRolling),
+        ],
+      ),
     );
   }
 
