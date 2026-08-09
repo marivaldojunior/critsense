@@ -8,13 +8,12 @@ import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
-import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/d20_mode_selector.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_type_carousel.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/modifier_control.dart';
-import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_result_panel.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_flow_dialog.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/selected_dice_row.dart';
 
 /// Tela do rolador de dados: monta um pool de múltiplos tipos/quantidades,
@@ -49,6 +48,11 @@ class _DiceViewState extends State<_DiceView> {
   /// o botão "Adicionar ao Pool" envia ao [DiceBloc].
   DiceType _focusedDiceType = DiceType.values.first;
 
+  /// Status da última emissão, usado no `listener` para detectar a transição
+  /// exata `idle -> rolling` (abrir o dialog) sem depender do parâmetro
+  /// `previous`, que `BlocConsumer.listener` não expõe.
+  DiceRollStatus? _previousStatus;
+
   @override
   void initState() {
     super.initState();
@@ -75,21 +79,36 @@ class _DiceViewState extends State<_DiceView> {
     // redundante ao lado) porque tanto o corpo rolável quanto o CTA fixo em
     // `bottomNavigationBar` precisam do mesmo `state`/`bloc` do [DiceBloc].
     return BlocConsumer<DiceBloc, DiceState>(
-      // Só dispara quando uma rolagem termina (rolling -> idle com
-      // resultado novo) — evita reabrir o popup em mudanças de pool,
-      // modificador ou modo do d20.
-      listenWhen: (previous, current) =>
-          previous.status == DiceRollStatus.rolling &&
-          current.status == DiceRollStatus.idle &&
-          current.lastResult != null,
+      // Só dispara em mudanças de status — evita reagir a alterações de
+      // pool, modificador ou modo do d20.
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
-        final result = state.lastResult!;
+        final previousStatus = _previousStatus;
+        _previousStatus = state.status;
+
+        // idle -> rolling: abre o dialog único que acompanha toda a rolagem.
+        if (previousStatus != DiceRollStatus.rolling &&
+            state.status == DiceRollStatus.rolling) {
+          showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => BlocProvider.value(
+              value: context.read<DiceBloc>(),
+              child: const RollFlowDialog(),
+            ),
+          );
+          return;
+        }
+
+        // rolling -> idle: rolagem concluída, dispara o confete se crítico.
         // Reaproveita `hasCriticalSuccess` do domínio: já considera o valor
         // *mantido* de cada d20 (pós vantagem/desvantagem), não o descartado.
-        if (result.hasCriticalSuccess) {
+        if (previousStatus == DiceRollStatus.rolling &&
+            state.status == DiceRollStatus.idle &&
+            state.lastResult != null &&
+            state.lastResult!.hasCriticalSuccess) {
           _confettiController.play();
         }
-        _showResultDialog(context, result);
       },
       builder: (context, state) {
         final bloc = context.read<DiceBloc>();
@@ -160,8 +179,7 @@ class _DiceViewState extends State<_DiceView> {
       child: Column(
         children: [
           DiceTypeCarousel(
-            onFocusChanged: (type) =>
-                setState(() => _focusedDiceType = type),
+            onFocusChanged: (type) => setState(() => _focusedDiceType = type),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
@@ -181,10 +199,7 @@ class _DiceViewState extends State<_DiceView> {
             onRemove: (type) => bloc.add(DiceTypeRemoved(type)),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Modo do d20',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text('Modo do d20', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           D20ModeSelector(
             mode: state.d20Mode,
@@ -211,24 +226,13 @@ class _DiceViewState extends State<_DiceView> {
             label: const Text('Limpar Pool'),
           ),
           const SizedBox(height: 16),
-          _buildResultSection(context, state, isRolling),
+          _buildResultSection(context, state),
         ],
       ),
     );
   }
 
-  Widget _buildResultSection(
-    BuildContext context,
-    DiceState state,
-    bool isRolling,
-  ) {
-    if (isRolling) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
-        child: CircularProgressIndicator(),
-      );
-    }
-
+  Widget _buildResultSection(BuildContext context, DiceState state) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Text(
@@ -237,25 +241,6 @@ class _DiceViewState extends State<_DiceView> {
             : 'Monte seu pool de dados e toque em "Rolar Dados".',
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    );
-  }
-
-  /// Exibe o resultado da rolagem em um popup: fecha tocando fora
-  /// ([barrierDismissible]) ou no botão "Ok".
-  void _showResultDialog(BuildContext context, DiceRollResult result) {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => AlertDialog(
-        content: RollResultPanel(result: result),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Ok'),
-          ),
-        ],
       ),
     );
   }

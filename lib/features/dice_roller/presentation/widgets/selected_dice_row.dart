@@ -63,18 +63,25 @@ class _SelectedDiceRowState extends State<SelectedDiceRow> {
 
     return SizedBox(
       height: SelectedDiceRow._height,
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        child: ListView.separated(
+      // `Center` + `shrinkWrap: true`: a ListView passa a ocupar só a
+      // largura real do conteúdo (centralizada) enquanto ele couber na
+      // tela, e some a se comportar como uma lista normal — ocupando toda
+      // a largura disponível e rolando — assim que o pool excede o espaço.
+      child: Center(
+        child: Scrollbar(
           controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          itemCount: dice.length,
-          separatorBuilder: (context, index) => const SizedBox(width: 8),
-          itemBuilder: (context, index) => _SelectedDieIcon(
-            type: dice[index],
-            d20Mode: widget.d20Mode,
-            onRemove: widget.onRemove,
+          thumbVisibility: true,
+          child: ListView.separated(
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            itemCount: dice.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) => _SelectedDieIcon(
+              type: dice[index],
+              d20Mode: widget.d20Mode,
+              onRemove: widget.onRemove,
+            ),
           ),
         ),
       ),
