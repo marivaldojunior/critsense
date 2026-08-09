@@ -1,43 +1,62 @@
-# 🐉 D&D 5e Mobile Companion
+# ⚔️ CritSense
 
-Um aplicativo mobile robusto para gerenciamento de fichas de RPG e consulta ao compêndio do Dungeons & Dragons 5e. Construído com **Flutter**, este projeto aplica conceitos de engenharia de software corporativa, focado em performance, previsibilidade de estado e persistência de dados *Offline-First*.
+**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio oficial (magias, equipamentos e bestiário) e rolador de dados físico, tudo em um único app **offline-first**, construído com padrões de arquitetura de nível corporativo.
 
-## 📱 Funcionalidades
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Drift-003B57?logo=sqlite&logoColor=white)
+![BLoC](https://img.shields.io/badge/State%20Management-BLoC-5C2D91)
+![Material 3](https://img.shields.io/badge/Design-Material%203-757575?logo=materialdesign&logoColor=white)
 
-*   **Home:** Hub central com acesso rápido a todas as features e alternância entre tema claro/escuro.
-*   **Ficha de Personagem (CRUD Local):** Criação e gerenciamento de personagens salvos no banco de dados local do dispositivo, com atributos definidos via Point Buy.
-*   **Formulários Dinâmicos Paralelos:** Consumo simultâneo (`Future.wait`) das APIs de Raças e Classes para alimentar os formulários de criação, otimizando o tempo de resposta.
-*   **Compêndio D&D 5e:** Consulta a Magias, Equipamentos e Bestiário direto da [D&D 5e API](https://www.dnd5eapi.co/), cada um com tela de detalhes dedicada:
-    *   *Magias* — nível, tempo de conjuração, alcance, duração, componentes e descrição.
-    *   *Equipamentos* — custo, peso, dano/alcance (armas) ou Classe de Armadura (armaduras).
-    *   *Bestiário* — Stat Block completo (tamanho, tipo, tendência, CA, PV, deslocamento e ações de combate).
-*   **Inventário Híbrido (Cross-Feature):** Consulta de equipamentos na API oficial e persistência dos itens escolhidos no banco SQLite (relacionamento *One-to-Many* com o personagem).
-*   **Bestiário com Infinite Scroll:** Consumo da API de monstros com paginação em memória, utilizando `ScrollController` para renderização sob demanda de listas gigantes sem perda de frames.
-*   **Rolador de Dados:** Montagem de um pool com múltiplos tipos de dado (d4 a d20, incluindo d100), modificador global, modos de vantagem/desvantagem no d20 e disparo de rolagem por *shake* do dispositivo (sensor nativo).
-*   **Acesso a Hardware Nativo (Avatar):** Integração com a câmera e galeria do dispositivo para personalização do avatar do personagem, salvando a imagem de forma otimizada no diretório de documentos do app.
-*   **Diário de Campanha:** Sistema de anotações por sessão atrelado a cada personagem.
-*   **Identidade Visual Temática:** Ícones SVG próprios de D&D (widget `DnDIcon`) substituindo os ícones genéricos do Material Design nas telas principais, AppBars, listas e cards — catálogo completo documentado em [`assets/icons/README.md`](assets/icons/README.md).
+---
 
-## 🏗️ Arquitetura e Tecnologias
+## 🏗️ Visão Geral e Arquitetura
 
-O projeto foi desenhado sob os princípios da **Clean Architecture**, dividindo cada feature em camadas de *Domain*, *Data* e *Presentation*, garantindo baixo acoplamento e alta testabilidade (conceitos familiares a ecossistemas como .NET e Java).
+O projeto é estruturado sob os princípios de **Clean Architecture**, com cada feature isolada em três camadas — `domain`, `data` e `presentation` — garantindo baixo acoplamento, alta testabilidade e regras de negócio livres de dependências de framework ou infraestrutura.
 
-*   **[Flutter & Dart]**: Framework principal e linguagem (SDK ^3.12.1).
-*   **[BLoC (Business Logic Component)]**: Gerenciamento de estado baseado em Eventos e Estados (padrão arquitetural semelhante ao CQRS).
-*   **[Drift (SQLite)]**: ORM para persistência local de dados com segurança de tipagem e relacionamentos relacionais nativos.
-*   **[Dio]**: Cliente HTTP para consumo da [D&D 5e API](https://www.dnd5eapi.co/).
-*   **[GetIt]**: Service Locator para Injeção de Dependência (DI).
-*   **[flutter_svg]**: Renderização dos ícones SVG temáticos via o widget `DnDIcon`.
-*   **[Image Picker & Path Provider]**: Acesso nativo aos recursos de hardware e sistema de arquivos.
-*   **[mocktail & bloc_test]**: Mocks e utilitários de teste para os BLoCs.
+* **Injeção de Dependência (`get_it`):** todo o grafo de dependências (DataSources → Repositories → Use Cases → BLoCs) é registrado centralmente em [lib/di/injection_container.dart](lib/di/injection_container.dart), com `LazySingleton` para recursos compartilhados (conexão SQLite, cliente HTTP) e `Factory` para estado de UI isolado por tela.
+* **Gerenciamento de estado previsível (`flutter_bloc`):** cada feature expõe seu estado através de eventos e states imutáveis (`Equatable`), eliminando mutação implícita e tornando toda transição de estado rastreável e testável — coberto com testes de BLoC usando `bloc_test` e `mocktail`.
+* **Persistência local com Drift/SQLite:** camada de dados com migrações versionadas (`MigrationStrategy`), transações atômicas, UPSERTs e cascade delete via foreign keys — sem depender de conectividade para uso contínuo do app (*Offline-First*).
+* **Integração cruzada entre features:** o módulo `compendium` dispara eventos diretamente nos BLoCs de `character_sheet` (ex: `AddInventoryItemEvent`, `AddSpellToCharacterEvent`, `AddBossToCharacterEvent`), mantendo baixo acoplamento sem um mediador central — cada feature conhece apenas o contrato do evento que dispara.
 
-## 🚀 Como Executar o Projeto
+---
 
-**Pré-requisitos:**
-*   Flutter SDK instalado (versão 3.x+, compatível com Dart ^3.12.1).
-*   Emulador Android/iOS configurado ou dispositivo físico conectado.
+## ✨ Principais Funcionalidades
 
-**Passos:**
+### 📜 Ficha de Personagem
+* **Criação via Point Buy:** alocação dos 27 pontos entre os seis atributos, com regras de custo/limite aplicadas em tempo real (`PointBuyCubit`).
+* **Status de Combate completo:** Classe de Armadura, iniciativa, deslocamento, pontos de vida (atuais/máximos/temporários), experiência e bônus de proficiência.
+* **Diário de Campanha:** notas de sessão por personagem com criação via formulário validado e **exclusão com sistema de Undo** — a nota some da lista imediatamente e só é removida do banco se o usuário não tocar em "Desfazer" dentro da janela do `SnackBar`.
+* **Persistência local offline-first:** todos os dados (atributos, inventário, magias, notas, chefes derrotados) sobrevivem sem conexão, com schema versionado e migrações incrementais no Drift.
+
+### 📚 Compêndio D&D 5e
+* Integração com a **API 5e-bits** via `Dio`, cobrindo **Magias**, **Equipamentos** e **Bestiário**, cada um com tela de listagem e detalhe dedicadas (stat blocks completos para monstros, componentes/duração para magias, dano/CA para equipamentos).
+* Busca por nome e filtros rápidos (nível, categoria, Classe de Desafio) combinados em um único fluxo reativo por feature.
+
+### 🔗 Integração Cruzada (Compêndio → Personagem)
+* Adição direta de **magias** e **itens de equipamento** ao inventário de um personagem a partir das telas de detalhe do compêndio.
+* Registro de **chefes/monstros derrotados** vinculados ao personagem, direto da tela de detalhe do Bestiário.
+* Toda a persistência dessas ações é gravada no banco **Drift/SQLite** do personagem, sem acoplamento direto entre os módulos de `compendium` e `character_sheet`.
+
+### 🎲 Rolador de Dados
+* Pool com múltiplos tipos e quantidades de dados (d4 a d100).
+* Modificador global configurável e modos de **vantagem/desvantagem** aplicados especificamente ao d20.
+* **Suporte a hardware:** disparo de rolagem via sensor de movimento do dispositivo (shake), além do CTA manual fixo na tela.
+
+---
+
+## 🎨 Destaques de UI/UX e Performance
+
+* **Design System em Material Design 3:** paleta inteira derivada de uma única semente via `ColorScheme.fromSeed`, com temas claro/escuro consistentes e cores semânticas reservadas (verde/vermelho) para sucesso e falha crítica.
+* **Busca reativa com `RxDart`:** transformador de eventos customizado aplica `debounceTime` + `switchMap` nos BLoCs de busca do compêndio, cancelando requisições obsoletas e evitando chamadas excessivas à API a cada tecla digitada.
+* **Skeleton Loading com `shimmer`:** transições suaves entre estados de carregamento e conteúdo real, com esqueletos que imitam o layout final (listagens e telas de detalhe).
+* **Paginação infinita:** Bestiário consumido sob demanda via `ScrollController`, disparando novas páginas ao atingir 90% do scroll, sem travar a renderização de listas extensas.
+
+---
+
+## 🚀 Como Rodar o Projeto
+
+**Pré-requisitos:** Flutter SDK (compatível com Dart `^3.12.1`) e um emulador/dispositivo configurado.
 
 ```bash
 # 1. Clone o repositório
@@ -50,18 +69,13 @@ flutter pub get
 # 3. Gere o código do Drift (tabelas/queries do banco local)
 dart run build_runner build --delete-conflicting-outputs
 
-# 4. Rode o app em um emulador/dispositivo conectado
+# 4. Rode o app
 flutter run
 ```
 
-**Testes:**
+**Testes e análise estática:**
 
 ```bash
 flutter test
-```
-
-**Análise estática:**
-
-```bash
 flutter analyze
 ```
