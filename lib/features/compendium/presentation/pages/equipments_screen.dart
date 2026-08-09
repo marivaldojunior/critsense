@@ -9,6 +9,8 @@ import '../../../character_sheet/domain/entities/inventory_item.dart';
 import '../../../character_sheet/presentation/bloc/character_bloc.dart';
 import '../../domain/entities/equipment_summary.dart';
 import '../bloc/equipment_bloc.dart';
+import '../widgets/compendium_feedback_state.dart';
+import '../widgets/compendium_list_skeleton.dart';
 import 'equipment_detail_screen.dart';
 
 /// Tela de listagem de equipamentos do compêndio.
@@ -34,41 +36,34 @@ class EquipmentsScreen extends StatelessWidget {
         appBar: AppBar(title: const Text('Equipamentos')),
         body: BlocBuilder<EquipmentBloc, EquipmentState>(
           builder: (context, state) {
-            return switch (state) {
-              EquipmentInitial() => const SizedBox.shrink(),
-              EquipmentLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              EquipmentLoaded(:final equipments) when equipments.isEmpty =>
-                const Center(child: Text('Nenhum equipamento encontrado.')),
-              EquipmentLoaded(:final equipments) => ListView.builder(
-                itemCount: equipments.length,
-                itemBuilder: (context, index) {
-                  final equipment = equipments[index];
-                  return _EquipmentTile(equipment: equipment);
-                },
-              ),
-              EquipmentError(:final message) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: switch (state) {
+                EquipmentInitial() =>
+                  const SizedBox.shrink(key: ValueKey('initial')),
+                EquipmentLoading() => const CompendiumListSkeleton(
+                  key: ValueKey('loading'),
+                  hasTrailing: true,
                 ),
-              ),
-            };
+                EquipmentLoaded(:final equipments) when equipments.isEmpty =>
+                  const CompendiumFeedbackState.empty(
+                    key: ValueKey('empty'),
+                    message: 'Nenhum equipamento encontrado.',
+                  ),
+                EquipmentLoaded(:final equipments) => ListView.builder(
+                  key: const ValueKey('loaded'),
+                  itemCount: equipments.length,
+                  itemBuilder: (context, index) {
+                    final equipment = equipments[index];
+                    return _EquipmentTile(equipment: equipment);
+                  },
+                ),
+                EquipmentError(:final message) => CompendiumFeedbackState.error(
+                  key: const ValueKey('error'),
+                  message: message,
+                ),
+              },
+            );
           },
         ),
       ),

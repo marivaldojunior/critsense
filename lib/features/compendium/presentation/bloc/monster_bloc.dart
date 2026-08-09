@@ -43,8 +43,13 @@ class MonsterBloc extends Bloc<MonsterEvent, MonsterState> {
       );
 
       if (newMonsters.isEmpty) {
-        // Nenhum item retornado: sinaliza que todas as páginas foram consumidas.
-        emit(state.copyWith(hasReachedMax: true));
+        // Nenhum item retornado: sinaliza que todas as páginas foram
+        // consumidas. Também marca status como success mesmo quando a
+        // lista continua vazia (primeira página sem resultados), senão a
+        // tela ficaria presa no esqueleto de carregamento indefinidamente.
+        emit(
+          state.copyWith(status: MonsterStatus.success, hasReachedMax: true),
+        );
       } else {
         emit(
           state.copyWith(

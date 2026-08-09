@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/monster_detail.dart';
 import '../bloc/monster_detail_bloc.dart';
+import '../widgets/compendium_feedback_state.dart';
 
 /// Traduz o campo `type` da API (ex: "dragon", "fey") para o nome do
 /// arquivo correspondente em `assets/icons/monster/`.
@@ -61,35 +63,24 @@ class MonsterDetailScreen extends StatelessWidget {
                 state is MonsterDetailLoaded ? state.monster.name : 'Detalhes',
               ),
             ),
-            body: switch (state) {
-              MonsterDetailInitial() => const SizedBox.shrink(),
-              MonsterDetailLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              MonsterDetailLoaded(:final monster) => _MonsterDetailBody(
-                monster: monster,
-              ),
-              MonsterDetailError(:final message) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: switch (state) {
+                MonsterDetailInitial() =>
+                  const SizedBox.shrink(key: ValueKey('initial')),
+                MonsterDetailLoading() =>
+                  const _MonsterDetailSkeleton(key: ValueKey('loading')),
+                MonsterDetailLoaded(:final monster) => _MonsterDetailBody(
+                  key: const ValueKey('loaded'),
+                  monster: monster,
                 ),
-              ),
-            },
+                MonsterDetailError(:final message) =>
+                  CompendiumFeedbackState.error(
+                    key: const ValueKey('error'),
+                    message: message,
+                  ),
+              },
+            ),
           );
         },
       ),
@@ -101,7 +92,7 @@ class MonsterDetailScreen extends StatelessWidget {
 class _MonsterDetailBody extends StatelessWidget {
   final MonsterDetail monster;
 
-  const _MonsterDetailBody({required this.monster});
+  const _MonsterDetailBody({super.key, required this.monster});
 
   @override
   Widget build(BuildContext context) {
@@ -205,6 +196,76 @@ class _MonsterDetailBody extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Esqueleto de carregamento que imita o layout do Stat Block: bloco de
+/// título, blocos menores de status (CA/PV) e linhas de ações.
+class _MonsterDetailSkeleton extends StatelessWidget {
+  const _MonsterDetailSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonShimmer(
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Cabeçalho: tamanho, tipo e tendência ───────────────────
+            Row(
+              children: const [
+                SkeletonBones.circle(size: 28),
+                SizedBox(width: 8),
+                SkeletonBones.rect(width: 140, height: 18),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const SkeletonBones.rect(width: 100, height: 12),
+            const SizedBox(height: 16),
+
+            // ── CA e PV ──────────────────────────────────────────────
+            Row(
+              children: const [
+                SkeletonBones.rect(width: 96, height: 52, borderRadius: 12),
+                SizedBox(width: 12),
+                SkeletonBones.rect(width: 96, height: 52, borderRadius: 12),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // ── Deslocamento ─────────────────────────────────────────
+            const SkeletonBones.rect(width: 130, height: 16),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                SkeletonBones.rect(width: 64, height: 26, borderRadius: 14),
+                SkeletonBones.rect(width: 64, height: 26, borderRadius: 14),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // ── Ações ────────────────────────────────────────────────
+            const SkeletonBones.rect(width: 70, height: 16),
+            const SizedBox(height: 12),
+            ...List.generate(
+              3,
+              (_) => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: SkeletonBones.rect(
+                  width: double.infinity,
+                  height: 60,
+                  borderRadius: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

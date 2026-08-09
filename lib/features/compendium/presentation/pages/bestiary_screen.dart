@@ -5,6 +5,8 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
 import '../bloc/monster_bloc.dart';
+import '../widgets/compendium_feedback_state.dart';
+import '../widgets/compendium_list_skeleton.dart';
 import 'monster_detail_screen.dart';
 
 /// Tela do Bestiário com scroll infinito paginado.
@@ -73,68 +75,62 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
         appBar: AppBar(title: const Text('Bestiário')),
         body: BlocBuilder<MonsterBloc, MonsterState>(
           builder: (context, state) {
-            return switch (state.status) {
-              MonsterStatus.initial => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              MonsterStatus.failure => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Erro ao carregar o Bestiário.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: switch (state.status) {
+                MonsterStatus.initial => const CompendiumListSkeleton(
+                  key: ValueKey('loading'),
                 ),
-              ),
-              MonsterStatus.success => ListView.builder(
-                controller: _scrollController,
-                // +1 reserva espaço para o BottomLoader enquanto há mais páginas.
-                itemCount:
-                    state.monsters.length + (state.hasReachedMax ? 0 : 1),
-                itemBuilder: (context, index) {
-                  if (index >= state.monsters.length) {
-                    return const _BottomLoader();
-                  }
-                  final monster = state.monsters[index];
-                  return ListTile(
-                    leading: Hero(
-                      tag: 'monster-icon-${monster.index}',
-                      child: const DnDIcon(
-                        assetPath: 'assets/icons/game/monster.svg',
-                        size: 26,
+                MonsterStatus.failure => const CompendiumFeedbackState.error(
+                  key: ValueKey('error'),
+                  message: 'Erro ao carregar o Bestiário.',
+                ),
+                MonsterStatus.success when state.monsters.isEmpty =>
+                  const CompendiumFeedbackState.empty(
+                    key: ValueKey('empty'),
+                    message: 'Nenhum monstro encontrado.',
+                  ),
+                MonsterStatus.success => ListView.builder(
+                  key: const ValueKey('loaded'),
+                  controller: _scrollController,
+                  // +1 reserva espaço para o BottomLoader enquanto há mais páginas.
+                  itemCount:
+                      state.monsters.length + (state.hasReachedMax ? 0 : 1),
+                  itemBuilder: (context, index) {
+                    if (index >= state.monsters.length) {
+                      return const _BottomLoader();
+                    }
+                    final monster = state.monsters[index];
+                    return ListTile(
+                      leading: Hero(
+                        tag: 'monster-icon-${monster.index}',
+                        child: const DnDIcon(
+                          assetPath: 'assets/icons/game/monster.svg',
+                          size: 26,
+                        ),
                       ),
-                    ),
-                    title: Text(monster.name),
-                    subtitle: Text(
-                      monster.index,
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      title: Text(monster.name),
+                      subtitle: Text(
+                        monster.index,
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
-                    ),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            MonsterDetailScreen(monsterIndex: monster.index),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MonsterDetailScreen(
+                            monsterIndex: monster.index,
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            };
+                    );
+                  },
+                ),
+              },
+            );
           },
         ),
       ),

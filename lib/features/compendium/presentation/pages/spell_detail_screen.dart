@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/spell_detail.dart';
 import '../bloc/spell_detail_bloc.dart';
+import '../widgets/compendium_feedback_state.dart';
 
 /// Tela de detalhes de uma magia do compêndio.
 ///
@@ -34,33 +36,24 @@ class SpellDetailScreen extends StatelessWidget {
                 state is SpellDetailLoaded ? state.spell.name : 'Detalhes',
               ),
             ),
-            body: switch (state) {
-              SpellDetailInitial() => const SizedBox.shrink(),
-              SpellDetailLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              SpellDetailLoaded(:final spell) => _SpellDetailBody(spell: spell),
-              SpellDetailError(:final message) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: switch (state) {
+                SpellDetailInitial() =>
+                  const SizedBox.shrink(key: ValueKey('initial')),
+                SpellDetailLoading() =>
+                  const _SpellDetailSkeleton(key: ValueKey('loading')),
+                SpellDetailLoaded(:final spell) => _SpellDetailBody(
+                  key: const ValueKey('loaded'),
+                  spell: spell,
                 ),
-              ),
-            },
+                SpellDetailError(:final message) =>
+                  CompendiumFeedbackState.error(
+                    key: const ValueKey('error'),
+                    message: message,
+                  ),
+              },
+            ),
           );
         },
       ),
@@ -72,7 +65,7 @@ class SpellDetailScreen extends StatelessWidget {
 class _SpellDetailBody extends StatelessWidget {
   final SpellDetail spell;
 
-  const _SpellDetailBody({required this.spell});
+  const _SpellDetailBody({super.key, required this.spell});
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +136,51 @@ class _SpellDetailBody extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Esqueleto de carregamento que imita o layout de detalhes da magia: chips
+/// de atributos rápidos seguidos de linhas de texto da descrição.
+class _SpellDetailSkeleton extends StatelessWidget {
+  const _SpellDetailSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonShimmer(
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                SkeletonBones.rect(width: 90, height: 28, borderRadius: 16),
+                SkeletonBones.rect(width: 110, height: 28, borderRadius: 16),
+                SkeletonBones.rect(width: 80, height: 28, borderRadius: 16),
+                SkeletonBones.rect(width: 100, height: 28, borderRadius: 16),
+                SkeletonBones.rect(width: 70, height: 28, borderRadius: 16),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const SkeletonBones.rect(width: 100, height: 16),
+            const SizedBox(height: 12),
+            ...List.generate(
+              5,
+              (index) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SkeletonBones.rect(
+                  width: index == 4 ? 180 : double.infinity,
+                  height: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

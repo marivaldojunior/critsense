@@ -5,6 +5,8 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
 import '../bloc/compendium_bloc.dart';
+import '../widgets/compendium_feedback_state.dart';
+import '../widgets/compendium_list_skeleton.dart';
 import 'spell_detail_screen.dart';
 
 /// Tela de listagem de magias do compêndio do D&D 5e.
@@ -23,59 +25,52 @@ class SpellsScreen extends StatelessWidget {
         appBar: AppBar(title: const Text('Compêndio de Magias')),
         body: BlocBuilder<CompendiumBloc, CompendiumState>(
           builder: (context, state) {
-            return switch (state) {
-              CompendiumInitial() => const SizedBox.shrink(),
-              CompendiumLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              CompendiumLoaded(:final spells) when spells.isEmpty =>
-                const Center(child: Text('Nenhuma magia encontrada.')),
-              CompendiumLoaded(:final spells) => ListView.builder(
-                itemCount: spells.length,
-                itemBuilder: (context, index) {
-                  final spell = spells[index];
-                  return ListTile(
-                    leading: const DnDIcon(
-                      assetPath: 'assets/icons/game/spell.svg',
-                      size: 26,
-                    ),
-                    title: Text(spell.name),
-                    subtitle: Text(
-                      spell.index,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            SpellDetailScreen(spellIndex: spell.index),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              CompendiumError(:final message) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: switch (state) {
+                CompendiumInitial() =>
+                  const SizedBox.shrink(key: ValueKey('initial')),
+                CompendiumLoading() => const CompendiumListSkeleton(
+                  key: ValueKey('loading'),
+                  hasTrailing: true,
                 ),
-              ),
-            };
+                CompendiumLoaded(:final spells) when spells.isEmpty =>
+                  const CompendiumFeedbackState.empty(
+                    key: ValueKey('empty'),
+                    message: 'Nenhuma magia encontrada.',
+                  ),
+                CompendiumLoaded(:final spells) => ListView.builder(
+                  key: const ValueKey('loaded'),
+                  itemCount: spells.length,
+                  itemBuilder: (context, index) {
+                    final spell = spells[index];
+                    return ListTile(
+                      leading: const DnDIcon(
+                        assetPath: 'assets/icons/game/spell.svg',
+                        size: 26,
+                      ),
+                      title: Text(spell.name),
+                      subtitle: Text(
+                        spell.index,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SpellDetailScreen(spellIndex: spell.index),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                CompendiumError(:final message) => CompendiumFeedbackState.error(
+                  key: const ValueKey('error'),
+                  message: message,
+                ),
+              },
+            );
           },
         ),
       ),
