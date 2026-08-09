@@ -8,8 +8,10 @@ import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 /// individual — `{d20: 2, d4: 1}` renderiza dois ícones de d20 e um de d4
 /// lado a lado, na ordem em que os tipos foram adicionados ao pool.
 ///
-/// Tocar em um ícone dispara [onRemove] para aquele dado específico.
-class SelectedDiceRow extends StatelessWidget {
+/// Tocar em um ícone dispara [onRemove] para aquele dado específico. Rola
+/// horizontalmente com uma thumb sempre visível quando o pool excede a
+/// largura disponível.
+class SelectedDiceRow extends StatefulWidget {
   const SelectedDiceRow({
     super.key,
     required this.pool,
@@ -23,10 +25,23 @@ class SelectedDiceRow extends StatelessWidget {
 
   static const _height = 56.0;
 
+  @override
+  State<SelectedDiceRow> createState() => _SelectedDiceRowState();
+}
+
+class _SelectedDiceRowState extends State<SelectedDiceRow> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   /// Desdobra o mapa `tipo -> quantidade` em uma lista plana, um item por
   /// unidade de dado.
   List<DiceType> _flatten() => [
-    for (final entry in pool.entries)
+    for (final entry in widget.pool.entries)
       for (var i = 0; i < entry.value; i++) entry.key,
   ];
 
@@ -36,7 +51,7 @@ class SelectedDiceRow extends StatelessWidget {
 
     if (dice.isEmpty) {
       return SizedBox(
-        height: _height,
+        height: SelectedDiceRow._height,
         child: Center(
           child: Text(
             'Nenhum dado no pool ainda.',
@@ -47,15 +62,20 @@ class SelectedDiceRow extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _height,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: dice.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) => _SelectedDieIcon(
-          type: dice[index],
-          d20Mode: d20Mode,
-          onRemove: onRemove,
+      height: SelectedDiceRow._height,
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        child: ListView.separated(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          itemCount: dice.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 8),
+          itemBuilder: (context, index) => _SelectedDieIcon(
+            type: dice[index],
+            d20Mode: widget.d20Mode,
+            onRemove: widget.onRemove,
+          ),
         ),
       ),
     );
