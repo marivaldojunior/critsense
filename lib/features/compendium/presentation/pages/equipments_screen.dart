@@ -11,7 +11,19 @@ import '../../domain/entities/equipment_summary.dart';
 import '../bloc/equipment_bloc.dart';
 import '../widgets/compendium_feedback_state.dart';
 import '../widgets/compendium_list_skeleton.dart';
+import '../widgets/compendium_search_bar.dart';
+import '../widgets/filter_chip_row.dart';
 import 'equipment_detail_screen.dart';
+
+/// Opções do filtro rápido de categoria — slugs reais de
+/// `/api/equipment-categories` da API do D&D 5e.
+const _categoryOptions = [
+  FilterChipOption(label: 'Arma', value: 'weapon'),
+  FilterChipOption(label: 'Armadura', value: 'armor'),
+  FilterChipOption(label: 'Equip. de Aventureiro', value: 'adventuring-gear'),
+  FilterChipOption(label: 'Ferramentas', value: 'tools'),
+  FilterChipOption(label: 'Poções', value: 'potion'),
+];
 
 /// Tela de listagem de equipamentos do compêndio.
 ///
@@ -25,8 +37,21 @@ import 'equipment_detail_screen.dart';
 /// conheça a implementação — o mesmo princípio se aplica aqui: a tela de
 /// equipamentos não sabe *como* o item é salvo, apenas envia o evento ao
 /// BLoC responsável pelo estado de personagens.
-class EquipmentsScreen extends StatelessWidget {
+class EquipmentsScreen extends StatefulWidget {
   const EquipmentsScreen({super.key});
+
+  @override
+  State<EquipmentsScreen> createState() => _EquipmentsScreenState();
+}
+
+class _EquipmentsScreenState extends State<EquipmentsScreen> {
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,33 +61,64 @@ class EquipmentsScreen extends StatelessWidget {
         appBar: AppBar(title: const Text('Equipamentos')),
         body: BlocBuilder<EquipmentBloc, EquipmentState>(
           builder: (context, state) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: switch (state) {
-                EquipmentInitial() =>
-                  const SizedBox.shrink(key: ValueKey('initial')),
-                EquipmentLoading() => const CompendiumListSkeleton(
-                  key: ValueKey('loading'),
-                  hasTrailing: true,
-                ),
-                EquipmentLoaded(:final equipments) when equipments.isEmpty =>
-                  const CompendiumFeedbackState.empty(
-                    key: ValueKey('empty'),
-                    message: 'Nenhum equipamento encontrado.',
+            final bloc = context.read<EquipmentBloc>();
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: CompendiumSearchBar(
+                    controller: _searchController,
+                    hintText: 'Buscar equipamentos...',
+                    onChanged: (query) =>
+                        bloc.add(SearchQueryChanged(query)),
                   ),
-                EquipmentLoaded(:final equipments) => ListView.builder(
-                  key: const ValueKey('loaded'),
-                  itemCount: equipments.length,
-                  itemBuilder: (context, index) {
-                    final equipment = equipments[index];
-                    return _EquipmentTile(equipment: equipment);
-                  },
                 ),
-                EquipmentError(:final message) => CompendiumFeedbackState.error(
-                  key: const ValueKey('error'),
-                  message: message,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: FilterChipRow(
+                    filterType: 'equipmentCategory',
+                    options: _categoryOptions,
+                    activeFilters: state.activeFilters,
+                    onToggle: (type, value) =>
+                        bloc.add(FilterToggled(type, value)),
+                  ),
                 ),
-              },
+                const SizedBox(height: 8),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: switch (state.status) {
+                      EquipmentStatus.initial ||
+                      EquipmentStatus.loading => const CompendiumListSkeleton(
+                        key: ValueKey('loading'),
+                        hasTrailing: true,
+                      ),
+                      EquipmentStatus.success when state.equipments.isEmpty =>
+                        const CompendiumFeedbackState.empty(
+                          key: ValueKey('empty'),
+                          message: 'Nenhum equipamento encontrado.',
+                        ),
+                      EquipmentStatus.success => ListView.builder(
+                        key: const ValueKey('loaded'),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        itemCount: state.equipments.length,
+                        itemBuilder: (context, index) {
+                          final equipment = state.equipments[index];
+                          return _EquipmentTile(equipment: equipment);
+                        },
+                      ),
+                      EquipmentStatus.failure => CompendiumFeedbackState.error(
+                        key: const ValueKey('error'),
+                        message:
+                            state.errorMessage ??
+                            'Erro ao carregar equipamentos.',
+                      ),
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),

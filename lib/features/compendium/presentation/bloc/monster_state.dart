@@ -5,6 +5,12 @@ enum MonsterStatus {
   /// Estado inicial antes de qualquer requisição.
   initial,
 
+  /// Busca/filtro em andamento, com a paginação recém-zerada — diferente
+  /// de uma busca de página seguinte via scroll infinito, que mantém
+  /// [MonsterState.status] em [success] (o `_BottomLoader` da lista já
+  /// sinaliza esse carregamento parcial, sem precisar do esqueleto cheio).
+  loading,
+
   /// Última operação concluída com sucesso.
   success,
 
@@ -35,10 +41,18 @@ class MonsterState {
   /// Indica que todas as páginas disponíveis já foram carregadas.
   final bool hasReachedMax;
 
+  /// Texto de busca atualmente aplicado (vazio = sem busca).
+  final String searchQuery;
+
+  /// Filtros rápidos ativos, chaveados por tipo (ex: `{'challengeRating': 5}`).
+  final Map<String, dynamic> activeFilters;
+
   const MonsterState({
     this.status = MonsterStatus.initial,
     this.monsters = const [],
     this.hasReachedMax = false,
+    this.searchQuery = '',
+    this.activeFilters = const {},
   });
 
   /// Retorna uma cópia deste estado substituindo apenas os campos fornecidos.
@@ -46,11 +60,15 @@ class MonsterState {
     MonsterStatus? status,
     List<MonsterSummary>? monsters,
     bool? hasReachedMax,
+    String? searchQuery,
+    Map<String, dynamic>? activeFilters,
   }) {
     return MonsterState(
       status: status ?? this.status,
       monsters: monsters ?? this.monsters,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      searchQuery: searchQuery ?? this.searchQuery,
+      activeFilters: activeFilters ?? this.activeFilters,
     );
   }
 }

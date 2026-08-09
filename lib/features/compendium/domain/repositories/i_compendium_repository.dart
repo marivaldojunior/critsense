@@ -8,22 +8,31 @@ import '../entities/spell_summary.dart';
 
 /// Contrato para acesso ao compêndio de recursos do D&D 5e.
 abstract interface class ICompendiumRepository {
-  /// Retorna a lista resumida de todas as magias disponíveis na API.
-  Future<List<SpellSummary>> getSpells();
+  /// Retorna a lista resumida das magias que casam com [name]/[level]/
+  /// [school] (todos opcionais — quando nulos, retorna a lista completa).
+  Future<List<SpellSummary>> getSpells({String? name, int? level, String? school});
 
   /// Retorna os detalhes completos da magia identificada por [index].
   Future<SpellDetail> getSpellDetail(String index);
 
-  /// Retorna a lista resumida de todos os equipamentos disponíveis na API.
-  Future<List<EquipmentSummary>> getEquipments();
+  /// Retorna a lista resumida dos equipamentos que casam com [name]/
+  /// [equipmentCategory] (ambos opcionais).
+  Future<List<EquipmentSummary>> getEquipments({
+    String? name,
+    String? equipmentCategory,
+  });
 
   /// Retorna os detalhes completos do equipamento identificado por [index].
   Future<EquipmentDetail> getEquipmentDetail(String index);
 
-  /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
+  /// Retorna uma página de monstros a partir de [offset] com até [limit]
+  /// itens, dentre os que casam com [name]/[challengeRating] quando
+  /// informados.
   Future<List<MonsterSummary>> getMonsters({
     required int offset,
     required int limit,
+    String? name,
+    num? challengeRating,
   });
 
   /// Retorna os detalhes completos do monstro identificado por [index].

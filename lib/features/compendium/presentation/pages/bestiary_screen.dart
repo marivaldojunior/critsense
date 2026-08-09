@@ -7,7 +7,23 @@ import '../../../../di/injection_container.dart';
 import '../bloc/monster_bloc.dart';
 import '../widgets/compendium_feedback_state.dart';
 import '../widgets/compendium_list_skeleton.dart';
+import '../widgets/compendium_search_bar.dart';
+import '../widgets/filter_chip_row.dart';
 import 'monster_detail_screen.dart';
+
+/// Opções do filtro rápido de CR (Classe de Desafio) — valores comuns,
+/// aceitos pela API como `double` direto (sem precisar formatar como fração).
+const _challengeRatingOptions = [
+  FilterChipOption(label: 'CR 1/8', value: 0.125),
+  FilterChipOption(label: 'CR 1/4', value: 0.25),
+  FilterChipOption(label: 'CR 1/2', value: 0.5),
+  FilterChipOption(label: 'CR 1', value: 1),
+  FilterChipOption(label: 'CR 2', value: 2),
+  FilterChipOption(label: 'CR 5', value: 5),
+  FilterChipOption(label: 'CR 10', value: 10),
+  FilterChipOption(label: 'CR 15', value: 15),
+  FilterChipOption(label: 'CR 20', value: 20),
+];
 
 /// Tela do Bestiário com scroll infinito paginado.
 ///
@@ -26,6 +42,7 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
   late final MonsterBloc _bloc;
 
   final ScrollController _scrollController = ScrollController();
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -63,6 +80,7 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     _bloc.close();
     super.dispose();
   }
@@ -75,65 +93,93 @@ class _BestiaryScreenState extends State<BestiaryScreen> {
         appBar: AppBar(title: const Text('Bestiário')),
         body: BlocBuilder<MonsterBloc, MonsterState>(
           builder: (context, state) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: switch (state.status) {
-                MonsterStatus.initial => const CompendiumListSkeleton(
-                  key: ValueKey('loading'),
-                ),
-                MonsterStatus.failure => const CompendiumFeedbackState.error(
-                  key: ValueKey('error'),
-                  message: 'Erro ao carregar o Bestiário.',
-                ),
-                MonsterStatus.success when state.monsters.isEmpty =>
-                  const CompendiumFeedbackState.empty(
-                    key: ValueKey('empty'),
-                    message: 'Nenhum monstro encontrado.',
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: CompendiumSearchBar(
+                    controller: _searchController,
+                    hintText: 'Buscar monstros...',
+                    onChanged: (query) => _bloc.add(SearchQueryChanged(query)),
                   ),
-                MonsterStatus.success => ListView.builder(
-                  key: const ValueKey('loaded'),
-                  controller: _scrollController,
-                  // +1 reserva espaço para o BottomLoader enquanto há mais páginas.
-                  itemCount:
-                      state.monsters.length + (state.hasReachedMax ? 0 : 1),
-                  itemBuilder: (context, index) {
-                    if (index >= state.monsters.length) {
-                      return const _BottomLoader();
-                    }
-                    final monster = state.monsters[index];
-                    return ListTile(
-                      leading: Hero(
-                        tag: 'monster-icon-${monster.index}',
-                        child: const DnDIcon(
-                          assetPath: 'assets/icons/game/monster.svg',
-                          size: 26,
-                        ),
-                      ),
-                      title: Text(
-                        monster.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        monster.index,
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MonsterDetailScreen(
-                            monsterIndex: monster.index,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
                 ),
-              },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: FilterChipRow(
+                    filterType: 'challengeRating',
+                    options: _challengeRatingOptions,
+                    activeFilters: state.activeFilters,
+                    onToggle: (type, value) =>
+                        _bloc.add(FilterToggled(type, value)),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: switch (state.status) {
+                      MonsterStatus.initial || MonsterStatus.loading =>
+                        const CompendiumListSkeleton(key: ValueKey('loading')),
+                      MonsterStatus.failure =>
+                        const CompendiumFeedbackState.error(
+                          key: ValueKey('error'),
+                          message: 'Erro ao carregar o Bestiário.',
+                        ),
+                      MonsterStatus.success when state.monsters.isEmpty =>
+                        const CompendiumFeedbackState.empty(
+                          key: ValueKey('empty'),
+                          message: 'Nenhum monstro encontrado.',
+                        ),
+                      MonsterStatus.success => ListView.builder(
+                        key: const ValueKey('loaded'),
+                        controller: _scrollController,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        // +1 reserva espaço para o BottomLoader enquanto há mais páginas.
+                        itemCount:
+                            state.monsters.length +
+                            (state.hasReachedMax ? 0 : 1),
+                        itemBuilder: (context, index) {
+                          if (index >= state.monsters.length) {
+                            return const _BottomLoader();
+                          }
+                          final monster = state.monsters[index];
+                          return ListTile(
+                            leading: Hero(
+                              tag: 'monster-icon-${monster.index}',
+                              child: const DnDIcon(
+                                assetPath: 'assets/icons/game/monster.svg',
+                                size: 26,
+                              ),
+                            ),
+                            title: Text(
+                              monster.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              monster.index,
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MonsterDetailScreen(
+                                  monsterIndex: monster.index,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),

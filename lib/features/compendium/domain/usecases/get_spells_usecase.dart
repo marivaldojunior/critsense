@@ -8,8 +8,9 @@ class GetSpellsUseCase {
   const GetSpellsUseCase(ICompendiumRepository repository)
     : _repository = repository;
 
-  /// Retorna a lista de [SpellSummary] ou lança exceção em caso de falha.
-  Future<List<SpellSummary>> call() {
-    return _repository.getSpells();
+  /// Retorna a lista de [SpellSummary] que casam com [name]/[level]/
+  /// [school], ou lança exceção em caso de falha.
+  Future<List<SpellSummary>> call({String? name, int? level, String? school}) {
+    return _repository.getSpells(name: name, level: level, school: school);
   }
 }

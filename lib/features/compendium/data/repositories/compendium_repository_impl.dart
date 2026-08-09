@@ -28,9 +28,17 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   /// dependência. O Use Case recebe apenas [SpellSummary]s ou uma exceção
   /// agnóstica de infraestrutura.
   @override
-  Future<List<SpellSummary>> getSpells() async {
+  Future<List<SpellSummary>> getSpells({
+    String? name,
+    int? level,
+    String? school,
+  }) async {
     try {
-      return await _remoteDataSource.getSpells();
+      return await _remoteDataSource.getSpells(
+        name: name,
+        level: level,
+        school: school,
+      );
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {
@@ -52,9 +60,15 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
 
   /// Busca os equipamentos e converte erros de rede em [ServerException].
   @override
-  Future<List<EquipmentSummary>> getEquipments() async {
+  Future<List<EquipmentSummary>> getEquipments({
+    String? name,
+    String? equipmentCategory,
+  }) async {
     try {
-      return await _remoteDataSource.getEquipments();
+      return await _remoteDataSource.getEquipments(
+        name: name,
+        equipmentCategory: equipmentCategory,
+      );
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {
@@ -79,9 +93,16 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   Future<List<MonsterSummary>> getMonsters({
     required int offset,
     required int limit,
+    String? name,
+    num? challengeRating,
   }) async {
     try {
-      return await _remoteDataSource.getMonsters(offset, limit);
+      return await _remoteDataSource.getMonsters(
+        offset,
+        limit,
+        name: name,
+        challengeRating: challengeRating,
+      );
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {

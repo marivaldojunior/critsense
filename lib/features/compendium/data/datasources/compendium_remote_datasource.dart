@@ -11,19 +11,41 @@ import '../models/spell_summary_model.dart';
 /// Contrato para o acesso remoto ao compêndio do D&D 5e.
 abstract interface class ICompendiumRemoteDataSource {
   /// Busca a lista de magias na API remota.
-  Future<List<SpellSummaryModel>> getSpells();
+  ///
+  /// [name], [level] e [school] são repassados como query parameters
+  /// (`?name=`, `?level=`, `?school=`) para filtragem no próprio servidor;
+  /// quando nulos, são omitidos da requisição e a API retorna a lista
+  /// completa (comportamento idêntico ao anterior a essa busca/filtro).
+  Future<List<SpellSummaryModel>> getSpells({
+    String? name,
+    int? level,
+    String? school,
+  });
 
   /// Busca os detalhes completos da magia identificada por [index].
   Future<SpellDetailModel> getSpellDetail(String index);
 
   /// Busca a lista de equipamentos na API remota.
-  Future<List<EquipmentSummaryModel>> getEquipments();
+  ///
+  /// [name] e [equipmentCategory] são repassados como query parameters
+  /// (`?name=`, `?equipment_category=`) para filtragem no servidor.
+  Future<List<EquipmentSummaryModel>> getEquipments({
+    String? name,
+    String? equipmentCategory,
+  });
 
   /// Busca os detalhes completos do equipamento identificado por [index].
   Future<EquipmentDetailModel> getEquipmentDetail(String index);
 
-  /// Retorna uma página de monstros a partir de [offset] com até [limit] itens.
-  Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit);
+  /// Retorna uma página de monstros a partir de [offset] com até [limit]
+  /// itens, dentre os que casam com [name]/[challengeRating] (`?name=`,
+  /// `?challenge_rating=`) quando informados.
+  Future<List<MonsterSummaryModel>> getMonsters(
+    int offset,
+    int limit, {
+    String? name,
+    num? challengeRating,
+  });
 
   /// Busca os detalhes completos do monstro identificado por [index].
   Future<MonsterDetailModel> getMonsterDetail(String index);
@@ -53,24 +75,46 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   static const _racesEndpoint = 'https://www.dnd5eapi.co/api/races';
   static const _equipmentEndpoint = 'https://www.dnd5eapi.co/api/equipment';
 
-  /// Cache em memória de todos os monstros carregados na primeira requisição.
+  /// Cache em memória dos monstros da última página de filtros consultada.
   ///
-  /// Esta estratégia é equivalente a um `IMemoryCache` do .NET populado na
-  /// primeira chamada e reutilizado nas seguintes — o padrão "cache-aside".
-  /// A paginação subsequente via `.skip(offset).take(limit)` em Dart é análoga
-  /// ao `IQueryable<T>.Skip(offset).Take(limit)` do LINQ sobre Entity Framework,
-  /// com a diferença fundamental de que aqui operamos sobre uma lista já
-  /// materializada em RAM, enquanto o EF traduz `Skip/Take` para
-  /// `OFFSET/FETCH NEXT` no SQL, adiando a materialização para o banco de dados.
+  /// A API de monstros não pagina no servidor — todo GET retorna a lista
+  /// inteira. Esta estratégia é equivalente a um `IMemoryCache` do .NET
+  /// populado na primeira chamada e reutilizado nas seguintes — o padrão
+  /// "cache-aside". A paginação em si via `.skip(offset).take(limit)` em
+  /// Dart é análoga ao `IQueryable<T>.Skip(offset).Take(limit)` do LINQ
+  /// sobre Entity Framework, com a diferença fundamental de que aqui
+  /// operamos sobre uma lista já materializada em RAM.
+  ///
+  /// [_cachedMonstersSignature] identifica sob quais filtros o cache foi
+  /// populado (`name`/`challengeRating`, concatenados numa chave simples).
+  /// Um slot único (não um `Map` por combinação de filtros) é suficiente:
+  /// cada nova busca/filtro já força um novo GET de qualquer forma (o
+  /// servidor não pagina), então cachear por combinação anterior não
+  /// evitaria requisições futuras — só serve para as páginas seguintes
+  /// *dentro* do mesmo filtro, que um slot único já cobre, sem risco de
+  /// crescer indefinidamente numa sessão longa com muitas buscas distintas.
   List<MonsterSummaryModel>? _cachedMonsters;
+  String? _cachedMonstersSignature;
 
   /// Recebe o [Dio] pré-configurado via construtor para facilitar testes com mocks.
   CompendiumRemoteDataSourceImpl(Dio dio) : _dio = dio;
 
-  /// Busca todas as magias e mapeia a lista `"results"` do payload para modelos.
+  /// Busca as magias que casam com [name]/[level]/[school] e mapeia a lista
+  /// `"results"` do payload para modelos.
   @override
-  Future<List<SpellSummaryModel>> getSpells() async {
-    final response = await _dio.get<Map<String, dynamic>>(_spellsEndpoint);
+  Future<List<SpellSummaryModel>> getSpells({
+    String? name,
+    int? level,
+    String? school,
+  }) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      _spellsEndpoint,
+      queryParameters: {
+        if (name != null && name.isNotEmpty) 'name': name,
+        'level': ?level,
+        'school': ?school,
+      },
+    );
 
     final results = response.data!['results'] as List<dynamic>;
     return results
@@ -88,10 +132,20 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
     return SpellDetailModel.fromJson(response.data!);
   }
 
-  /// Busca todos os equipamentos e mapeia a lista `"results"` para modelos.
+  /// Busca os equipamentos que casam com [name]/[equipmentCategory] e
+  /// mapeia a lista `"results"` para modelos.
   @override
-  Future<List<EquipmentSummaryModel>> getEquipments() async {
-    final response = await _dio.get<Map<String, dynamic>>(_equipmentEndpoint);
+  Future<List<EquipmentSummaryModel>> getEquipments({
+    String? name,
+    String? equipmentCategory,
+  }) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      _equipmentEndpoint,
+      queryParameters: {
+        if (name != null && name.isNotEmpty) 'name': name,
+        'equipment_category': ?equipmentCategory,
+      },
+    );
     final results = response.data!['results'] as List<dynamic>;
     return results
         .cast<Map<String, dynamic>>()
@@ -108,25 +162,36 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
     return EquipmentDetailModel.fromJson(response.data!);
   }
 
-  /// Retorna uma página de monstros, buscando da API apenas na primeira chamada.
-  ///
-  /// Se [_cachedMonsters] ainda não foi populado, faz um único GET à API e
-  /// armazena o resultado completo. As chamadas seguintes pulam a rede e
-  /// fatiam diretamente a lista em memória com `.skip(offset).take(limit)`.
+  /// Retorna uma página de monstros que casam com [name]/[challengeRating],
+  /// buscando da API apenas quando os filtros mudam em relação à última
+  /// chamada (ver doc de [_cachedMonstersSignature]).
   ///
   /// Em C# com Entity Framework, a paginação equivalente seria:
-  /// `dbContext.Monsters.OrderBy(m => m.Name).Skip(offset).Take(limit).ToListAsync()`
+  /// `dbContext.Monsters.Where(...).OrderBy(m => m.Name).Skip(offset).Take(limit).ToListAsync()`
   /// Aqui, contudo, a coleção já está em RAM, então `skip/take` são operações
   /// O(n) sobre `Iterable`, sem custo de I/O ou geração de SQL.
   @override
-  Future<List<MonsterSummaryModel>> getMonsters(int offset, int limit) async {
-    if (_cachedMonsters == null) {
-      final response = await _dio.get<Map<String, dynamic>>(_monstersEndpoint);
+  Future<List<MonsterSummaryModel>> getMonsters(
+    int offset,
+    int limit, {
+    String? name,
+    num? challengeRating,
+  }) async {
+    final signature = '${name ?? ''}|${challengeRating ?? ''}';
+    if (_cachedMonsters == null || _cachedMonstersSignature != signature) {
+      final response = await _dio.get<Map<String, dynamic>>(
+        _monstersEndpoint,
+        queryParameters: {
+          if (name != null && name.isNotEmpty) 'name': name,
+          'challenge_rating': ?challengeRating,
+        },
+      );
       final results = response.data!['results'] as List<dynamic>;
       _cachedMonsters = results
           .cast<Map<String, dynamic>>()
           .map(MonsterSummaryModel.fromJson)
           .toList();
+      _cachedMonstersSignature = signature;
     }
     return _cachedMonsters!.skip(offset).take(limit).toList();
   }

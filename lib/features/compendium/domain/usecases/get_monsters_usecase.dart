@@ -11,11 +11,23 @@ class GetMonstersUseCase {
   const GetMonstersUseCase(ICompendiumRepository repository)
     : _repository = repository;
 
-  /// Retorna a fatia de [MonsterSummary] correspondente à página solicitada.
+  /// Retorna a fatia de [MonsterSummary] correspondente à página solicitada,
+  /// dentre os monstros que casam com [name]/[challengeRating] quando
+  /// informados.
   ///
   /// [offset] — índice do primeiro item desejado.
   /// [limit]  — quantidade máxima de itens a retornar.
-  Future<List<MonsterSummary>> call({required int offset, required int limit}) {
-    return _repository.getMonsters(offset: offset, limit: limit);
+  Future<List<MonsterSummary>> call({
+    required int offset,
+    required int limit,
+    String? name,
+    num? challengeRating,
+  }) {
+    return _repository.getMonsters(
+      offset: offset,
+      limit: limit,
+      name: name,
+      challengeRating: challengeRating,
+    );
   }
 }

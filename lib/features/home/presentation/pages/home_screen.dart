@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
     _FeatureItem(
       title: 'Magias',
       subtitle: 'Explore o compêndio de magias',
-      iconAsset: 'assets/icons/game/spell.svg',
+      iconAsset: 'assets/icons/entity/spellbook.svg',
       builder: (_) => const SpellsScreen(),
     ),
   ];
