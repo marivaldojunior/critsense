@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/di/injection_container.dart' as di;
+import 'package:crit_sense/features/auth/presentation/screens/login_screen.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
-import 'package:crit_sense/features/home/presentation/pages/home_screen.dart';
 
 /// Ponto de entrada assíncrono: aguarda o `get_it` registrar todas as
 /// dependências antes de renderizar qualquer widget.
@@ -56,10 +56,18 @@ class CritSenseApp extends StatelessWidget {
           // para baixo, deixando um espaço em branco acima da AppBar.
           builder: (context, child) =>
               SafeArea(top: false, child: child ?? const SizedBox.shrink()),
-          home: HomeScreen(
-            onToggleTheme: () => _themeMode.value = mode == ThemeMode.dark
-                ? ThemeMode.light
-                : ThemeMode.dark,
+          home: LoginScreen(
+            // Lê `_themeMode.value` no momento do toque, não o `mode`
+            // capturado nesta closure: telas empurradas via Navigator (como
+            // a HomeScreen, alcançada por pushReplacement a partir daqui)
+            // não são reconstruídas quando o ValueListenableBuilder acima
+            // reage a uma troca de tema, então ficariam com este callback
+            // "congelado" no `mode` de quando foram criadas — sempre
+            // alternando a partir do mesmo valor antigo em vez do atual.
+            onToggleTheme: () => _themeMode.value =
+                _themeMode.value == ThemeMode.dark
+                    ? ThemeMode.light
+                    : ThemeMode.dark,
           ),
         ),
       ),
