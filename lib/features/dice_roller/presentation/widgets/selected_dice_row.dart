@@ -4,13 +4,14 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 
-/// Lista horizontal com a composição exata do pool: um ícone por dado
-/// individual — `{d20: 2, d4: 1}` renderiza dois ícones de d20 e um de d4
-/// lado a lado, na ordem em que os tipos foram adicionados ao pool.
+/// Grade com a composição exata do pool: um ícone por dado individual —
+/// `{d20: 2, d4: 1}` renderiza dois ícones de d20 e um de d4, centralizados
+/// em cada linha e quebrando para a linha seguinte conforme a largura
+/// disponível.
 ///
-/// Tocar em um ícone dispara [onRemove] para aquele dado específico. Rola
-/// horizontalmente com uma thumb sempre visível quando o pool excede a
-/// largura disponível.
+/// Tocar em um ícone dispara [onRemove] para aquele dado específico. Mostra
+/// no máximo 2 linhas; a partir da terceira, rola verticalmente com uma
+/// thumb sempre visível.
 class SelectedDiceRow extends StatefulWidget {
   const SelectedDiceRow({
     super.key,
@@ -23,7 +24,12 @@ class SelectedDiceRow extends StatefulWidget {
   final D20RollMode d20Mode;
   final ValueChanged<DiceType> onRemove;
 
-  static const _height = 56.0;
+  /// Altura de um ícone individual: 32 (tamanho do `DnDIcon`) + 4 de padding
+  /// em cada lado — ver [_SelectedDieIcon].
+  static const _lineHeight = 40.0;
+
+  /// Altura de 2 linhas + o espaçamento vertical entre elas (`runSpacing`).
+  static const _maxHeight = _lineHeight * 2 + 8;
 
   @override
   State<SelectedDiceRow> createState() => _SelectedDiceRowState();
@@ -51,7 +57,7 @@ class _SelectedDiceRowState extends State<SelectedDiceRow> {
 
     if (dice.isEmpty) {
       return SizedBox(
-        height: SelectedDiceRow._height,
+        height: SelectedDiceRow._lineHeight,
         child: Center(
           child: Text(
             'Nenhum dado no pool ainda.',
@@ -61,27 +67,25 @@ class _SelectedDiceRowState extends State<SelectedDiceRow> {
       );
     }
 
-    return SizedBox(
-      height: SelectedDiceRow._height,
-      // `Center` + `shrinkWrap: true`: a ListView passa a ocupar só a
-      // largura real do conteúdo (centralizada) enquanto ele couber na
-      // tela, e some a se comportar como uma lista normal — ocupando toda
-      // a largura disponível e rolando — assim que o pool excede o espaço.
-      child: Center(
-        child: Scrollbar(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: SelectedDiceRow._maxHeight),
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
           controller: _scrollController,
-          thumbVisibility: true,
-          child: ListView.separated(
-            controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            itemCount: dice.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
-            itemBuilder: (context, index) => _SelectedDieIcon(
-              type: dice[index],
-              d20Mode: widget.d20Mode,
-              onRemove: widget.onRemove,
-            ),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final type in dice)
+                _SelectedDieIcon(
+                  type: type,
+                  d20Mode: widget.d20Mode,
+                  onRemove: widget.onRemove,
+                ),
+            ],
           ),
         ),
       ),
