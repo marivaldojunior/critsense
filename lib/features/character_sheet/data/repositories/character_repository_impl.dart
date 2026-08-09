@@ -92,6 +92,15 @@ class CharacterRepositoryImpl implements ICharacterRepository {
     return rows.map((row) => row._toDomain()).toList();
   }
 
+  /// Remove o item identificado por [itemId]; sem CASCADE a considerar aqui,
+  /// pois itens de inventário não possuem filhos.
+  @override
+  Future<void> deleteInventoryItem(String itemId) async {
+    await (_db.delete(
+      _db.inventoryItems,
+    )..where((t) => t.id.equals(itemId))).go();
+  }
+
   /// Retorna as notas de sessão do personagem, ordenadas da mais recente para a mais antiga.
   @override
   Future<List<SessionNote>> getSessionNotes(String characterId) async {
@@ -156,6 +165,8 @@ extension _CharacterDataMapper on CharacterData {
       experiencePoints: experiencePoints,
       proficiencyBonus: proficiencyBonus,
       avatarPath: avatarPath,
+      spells: spells,
+      defeatedBosses: defeatedBosses,
     );
   }
 }
@@ -198,6 +209,8 @@ extension _CharacterToCompanion on Character {
       experiencePoints: Value(experiencePoints),
       proficiencyBonus: Value(proficiencyBonus),
       avatarPath: Value(avatarPath),
+      spells: Value(spells),
+      defeatedBosses: Value(defeatedBosses),
     );
   }
 }

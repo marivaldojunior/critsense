@@ -1,4 +1,28 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
+
+/// Converte `List<String>` (domínio) em `TEXT` (SQLite) via JSON, para
+/// colunas que guardam listas simples de identificadores sem precisar de
+/// uma tabela relacionada dedicada — diferente de [InventoryItems], que é
+/// uma tabela própria por ter atributos além do identificador (ex:
+/// [InventoryItems.equipmentCategory]).
+///
+/// Usado com `.map(const StringListConverter())` numa [TextColumn]: o
+/// Drift passa a expor o campo já como `List<String>` no código gerado,
+/// aplicando [fromSql]/[toSql] automaticamente em cada leitura/escrita —
+/// nenhum `jsonEncode`/`jsonDecode` manual é necessário fora deste arquivo.
+class StringListConverter extends TypeConverter<List<String>, String> {
+  const StringListConverter();
+
+  @override
+  List<String> fromSql(String fromDb) {
+    return (jsonDecode(fromDb) as List<dynamic>).cast<String>();
+  }
+
+  @override
+  String toSql(List<String> value) => jsonEncode(value);
+}
 
 /// Tabela de personagens persistidos no banco de dados local.
 ///
@@ -90,6 +114,24 @@ class Characters extends Table {
   /// Default 2: valor do SRD do D&D 5e para personagens de nível 1 a 4.
   IntColumn get proficiencyBonus =>
       integer().withDefault(const Constant(2))();
+
+  // ── Magias e Monstros Derrotados ────────────────────────────────────────
+  // Listas simples de identificadores vinculadas ao personagem — ver
+  // [StringListConverter] para o porquê de serem colunas de texto JSON em
+  // vez de tabelas relacionadas.
+
+  /// Magias conhecidas/vinculadas ao personagem, como JSON de `List<String>`.
+  /// Default `'[]'`: nenhum personagem existente antes desta coluna tinha
+  /// magias registradas.
+  TextColumn get spells => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
+
+  /// Monstros/chefes derrotados pelo personagem, como JSON de `List<String>`.
+  /// Mesma justificativa de default de [spells].
+  TextColumn get defeatedBosses => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

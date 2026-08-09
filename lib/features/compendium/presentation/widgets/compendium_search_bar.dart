@@ -28,9 +28,9 @@ class CompendiumSearchBar extends StatelessWidget {
         return SearchBar(
           controller: controller,
           hintText: hintText,
-          leading: const DnDIcon(
-            assetPath: 'assets/icons/util/search.svg',
-            size: 20,
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: DnDIcon(assetPath: 'assets/icons/util/search.svg', size: 20),
           ),
           trailing: controller.text.isEmpty
               ? null

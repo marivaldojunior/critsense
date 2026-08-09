@@ -88,6 +88,22 @@ class Character {
   /// Caminho local para a imagem de avatar; nulo quando nenhum avatar foi definido.
   final String? avatarPath;
 
+  /// Magias conhecidas/vinculadas ao personagem (índice ou nome da magia no
+  /// compêndio). Vazia por padrão: nenhum personagem existente antes deste
+  /// campo tinha magias registradas.
+  ///
+  /// Diferente do inventário (ver [InventoryItem], persistido em sua própria
+  /// tabela relacional `InventoryItems` por ter atributos próprios como
+  /// categoria), uma magia registrada aqui não carrega dado adicional além
+  /// do identificador — uma lista simples já é suficiente, sem precisar de
+  /// uma tabela dedicada.
+  final List<String> spells;
+
+  /// Monstros/chefes derrotados pelo personagem (índice ou nome no
+  /// compêndio). Mesma justificativa de [spells] para ser uma lista simples
+  /// em vez de uma tabela relacional.
+  final List<String> defeatedBosses;
+
   /// Cria um [Character] com todos os campos obrigatórios.
   const Character({
     required this.id,
@@ -112,6 +128,8 @@ class Character {
     required this.proficiencyBonus,
     this.proficiencies = const [],
     this.avatarPath,
+    this.spells = const [],
+    this.defeatedBosses = const [],
   });
 
   /// Retorna uma cópia com os campos informados substituídos.
@@ -141,6 +159,8 @@ class Character {
     int? proficiencyBonus,
     List<Proficiency>? proficiencies,
     String? avatarPath,
+    List<String>? spells,
+    List<String>? defeatedBosses,
   }) {
     return Character(
       id: id,
@@ -165,6 +185,8 @@ class Character {
       proficiencyBonus: proficiencyBonus ?? this.proficiencyBonus,
       proficiencies: proficiencies ?? this.proficiencies,
       avatarPath: avatarPath ?? this.avatarPath,
+      spells: spells ?? this.spells,
+      defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }
 }

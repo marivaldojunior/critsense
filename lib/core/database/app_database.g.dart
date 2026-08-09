@@ -218,6 +218,26 @@ class $CharactersTable extends Characters
     defaultValue: const Constant(2),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> spells =
+      GeneratedColumn<String>(
+        'spells',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>($CharactersTable.$converterspells);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+  defeatedBosses = GeneratedColumn<String>(
+    'defeated_bosses',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  ).withConverter<List<String>>($CharactersTable.$converterdefeatedBosses);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     nome,
@@ -239,6 +259,8 @@ class $CharactersTable extends Characters
     flaws,
     experiencePoints,
     proficiencyBonus,
+    spells,
+    defeatedBosses,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -490,6 +512,18 @@ class $CharactersTable extends Characters
         DriftSqlType.int,
         data['${effectivePrefix}proficiency_bonus'],
       )!,
+      spells: $CharactersTable.$converterspells.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}spells'],
+        )!,
+      ),
+      defeatedBosses: $CharactersTable.$converterdefeatedBosses.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}defeated_bosses'],
+        )!,
+      ),
     );
   }
 
@@ -497,6 +531,11 @@ class $CharactersTable extends Characters
   $CharactersTable createAlias(String alias) {
     return $CharactersTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterspells =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterdefeatedBosses =
+      const StringListConverter();
 }
 
 class CharacterData extends DataClass implements Insertable<CharacterData> {
@@ -567,6 +606,15 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   /// Bônus de proficiência aplicado a testes, ataques e resistências.
   /// Default 2: valor do SRD do D&D 5e para personagens de nível 1 a 4.
   final int proficiencyBonus;
+
+  /// Magias conhecidas/vinculadas ao personagem, como JSON de `List<String>`.
+  /// Default `'[]'`: nenhum personagem existente antes desta coluna tinha
+  /// magias registradas.
+  final List<String> spells;
+
+  /// Monstros/chefes derrotados pelo personagem, como JSON de `List<String>`.
+  /// Mesma justificativa de default de [spells].
+  final List<String> defeatedBosses;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -588,6 +636,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     this.flaws,
     required this.experiencePoints,
     required this.proficiencyBonus,
+    required this.spells,
+    required this.defeatedBosses,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -626,6 +676,16 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     }
     map['experience_points'] = Variable<int>(experiencePoints);
     map['proficiency_bonus'] = Variable<int>(proficiencyBonus);
+    {
+      map['spells'] = Variable<String>(
+        $CharactersTable.$converterspells.toSql(spells),
+      );
+    }
+    {
+      map['defeated_bosses'] = Variable<String>(
+        $CharactersTable.$converterdefeatedBosses.toSql(defeatedBosses),
+      );
+    }
     return map;
   }
 
@@ -665,6 +725,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           : Value(flaws),
       experiencePoints: Value(experiencePoints),
       proficiencyBonus: Value(proficiencyBonus),
+      spells: Value(spells),
+      defeatedBosses: Value(defeatedBosses),
     );
   }
 
@@ -696,6 +758,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       flaws: serializer.fromJson<String?>(json['flaws']),
       experiencePoints: serializer.fromJson<int>(json['experiencePoints']),
       proficiencyBonus: serializer.fromJson<int>(json['proficiencyBonus']),
+      spells: serializer.fromJson<List<String>>(json['spells']),
+      defeatedBosses: serializer.fromJson<List<String>>(json['defeatedBosses']),
     );
   }
   @override
@@ -722,6 +786,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'flaws': serializer.toJson<String?>(flaws),
       'experiencePoints': serializer.toJson<int>(experiencePoints),
       'proficiencyBonus': serializer.toJson<int>(proficiencyBonus),
+      'spells': serializer.toJson<List<String>>(spells),
+      'defeatedBosses': serializer.toJson<List<String>>(defeatedBosses),
     };
   }
 
@@ -746,6 +812,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     Value<String?> flaws = const Value.absent(),
     int? experiencePoints,
     int? proficiencyBonus,
+    List<String>? spells,
+    List<String>? defeatedBosses,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -769,6 +837,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     flaws: flaws.present ? flaws.value : this.flaws,
     experiencePoints: experiencePoints ?? this.experiencePoints,
     proficiencyBonus: proficiencyBonus ?? this.proficiencyBonus,
+    spells: spells ?? this.spells,
+    defeatedBosses: defeatedBosses ?? this.defeatedBosses,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -812,6 +882,10 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       proficiencyBonus: data.proficiencyBonus.present
           ? data.proficiencyBonus.value
           : this.proficiencyBonus,
+      spells: data.spells.present ? data.spells.value : this.spells,
+      defeatedBosses: data.defeatedBosses.present
+          ? data.defeatedBosses.value
+          : this.defeatedBosses,
     );
   }
 
@@ -837,13 +911,15 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('bonds: $bonds, ')
           ..write('flaws: $flaws, ')
           ..write('experiencePoints: $experiencePoints, ')
-          ..write('proficiencyBonus: $proficiencyBonus')
+          ..write('proficiencyBonus: $proficiencyBonus, ')
+          ..write('spells: $spells, ')
+          ..write('defeatedBosses: $defeatedBosses')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     nome,
     raca,
@@ -864,7 +940,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     flaws,
     experiencePoints,
     proficiencyBonus,
-  );
+    spells,
+    defeatedBosses,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -888,7 +966,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.bonds == this.bonds &&
           other.flaws == this.flaws &&
           other.experiencePoints == this.experiencePoints &&
-          other.proficiencyBonus == this.proficiencyBonus);
+          other.proficiencyBonus == this.proficiencyBonus &&
+          other.spells == this.spells &&
+          other.defeatedBosses == this.defeatedBosses);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -912,6 +992,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<String?> flaws;
   final Value<int> experiencePoints;
   final Value<int> proficiencyBonus;
+  final Value<List<String>> spells;
+  final Value<List<String>> defeatedBosses;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -934,6 +1016,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.flaws = const Value.absent(),
     this.experiencePoints = const Value.absent(),
     this.proficiencyBonus = const Value.absent(),
+    this.spells = const Value.absent(),
+    this.defeatedBosses = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -957,6 +1041,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.flaws = const Value.absent(),
     this.experiencePoints = const Value.absent(),
     this.proficiencyBonus = const Value.absent(),
+    this.spells = const Value.absent(),
+    this.defeatedBosses = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -986,6 +1072,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<String>? flaws,
     Expression<int>? experiencePoints,
     Expression<int>? proficiencyBonus,
+    Expression<String>? spells,
+    Expression<String>? defeatedBosses,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1010,6 +1098,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (flaws != null) 'flaws': flaws,
       if (experiencePoints != null) 'experience_points': experiencePoints,
       if (proficiencyBonus != null) 'proficiency_bonus': proficiencyBonus,
+      if (spells != null) 'spells': spells,
+      if (defeatedBosses != null) 'defeated_bosses': defeatedBosses,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1035,6 +1125,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<String?>? flaws,
     Value<int>? experiencePoints,
     Value<int>? proficiencyBonus,
+    Value<List<String>>? spells,
+    Value<List<String>>? defeatedBosses,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1058,6 +1150,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       flaws: flaws ?? this.flaws,
       experiencePoints: experiencePoints ?? this.experiencePoints,
       proficiencyBonus: proficiencyBonus ?? this.proficiencyBonus,
+      spells: spells ?? this.spells,
+      defeatedBosses: defeatedBosses ?? this.defeatedBosses,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1125,6 +1219,16 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (proficiencyBonus.present) {
       map['proficiency_bonus'] = Variable<int>(proficiencyBonus.value);
     }
+    if (spells.present) {
+      map['spells'] = Variable<String>(
+        $CharactersTable.$converterspells.toSql(spells.value),
+      );
+    }
+    if (defeatedBosses.present) {
+      map['defeated_bosses'] = Variable<String>(
+        $CharactersTable.$converterdefeatedBosses.toSql(defeatedBosses.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1154,6 +1258,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('flaws: $flaws, ')
           ..write('experiencePoints: $experiencePoints, ')
           ..write('proficiencyBonus: $proficiencyBonus, ')
+          ..write('spells: $spells, ')
+          ..write('defeatedBosses: $defeatedBosses, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2473,6 +2579,8 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<String?> flaws,
       Value<int> experiencePoints,
       Value<int> proficiencyBonus,
+      Value<List<String>> spells,
+      Value<List<String>> defeatedBosses,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -2497,6 +2605,8 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<String?> flaws,
       Value<int> experiencePoints,
       Value<int> proficiencyBonus,
+      Value<List<String>> spells,
+      Value<List<String>> defeatedBosses,
       Value<int> rowid,
     });
 
@@ -2666,6 +2776,18 @@ class $$CharactersTableFilterComposer
   ColumnFilters<int> get proficiencyBonus => $composableBuilder(
     column: $table.proficiencyBonus,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get spells => $composableBuilder(
+    column: $table.spells,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get defeatedBosses => $composableBuilder(
+    column: $table.defeatedBosses,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   Expression<bool> attributesRefs(
@@ -2852,6 +2974,16 @@ class $$CharactersTableOrderingComposer
     column: $table.proficiencyBonus,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get spells => $composableBuilder(
+    column: $table.spells,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defeatedBosses => $composableBuilder(
+    column: $table.defeatedBosses,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -2942,6 +3074,15 @@ class $$CharactersTableAnnotationComposer
     column: $table.proficiencyBonus,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get spells =>
+      $composableBuilder(column: $table.spells, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get defeatedBosses =>
+      $composableBuilder(
+        column: $table.defeatedBosses,
+        builder: (column) => column,
+      );
 
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
@@ -3071,6 +3212,8 @@ class $$CharactersTableTableManager
                 Value<String?> flaws = const Value.absent(),
                 Value<int> experiencePoints = const Value.absent(),
                 Value<int> proficiencyBonus = const Value.absent(),
+                Value<List<String>> spells = const Value.absent(),
+                Value<List<String>> defeatedBosses = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -3093,6 +3236,8 @@ class $$CharactersTableTableManager
                 flaws: flaws,
                 experiencePoints: experiencePoints,
                 proficiencyBonus: proficiencyBonus,
+                spells: spells,
+                defeatedBosses: defeatedBosses,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3117,6 +3262,8 @@ class $$CharactersTableTableManager
                 Value<String?> flaws = const Value.absent(),
                 Value<int> experiencePoints = const Value.absent(),
                 Value<int> proficiencyBonus = const Value.absent(),
+                Value<List<String>> spells = const Value.absent(),
+                Value<List<String>> defeatedBosses = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -3139,6 +3286,8 @@ class $$CharactersTableTableManager
                 flaws: flaws,
                 experiencePoints: experiencePoints,
                 proficiencyBonus: proficiencyBonus,
+                spells: spells,
+                defeatedBosses: defeatedBosses,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

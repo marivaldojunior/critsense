@@ -19,6 +19,9 @@ abstract interface class ICharacterRepository {
   /// Retorna todos os itens do personagem identificado por [characterId].
   Future<List<InventoryItem>> getCharacterInventory(String characterId);
 
+  /// Remove o item de inventário identificado por [itemId] do repositório.
+  Future<void> deleteInventoryItem(String itemId);
+
   /// Retorna as notas de sessão do personagem identificado por [characterId],
   /// ordenadas da mais recente para a mais antiga.
   Future<List<SessionNote>> getSessionNotes(String characterId);

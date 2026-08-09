@@ -40,6 +40,10 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<DeleteCharacterEvent>(_onDeleteCharacter);
     on<AddInventoryItemEvent>(_onAddInventoryItem);
     on<ToggleProficiencyEvent>(_onToggleProficiency);
+    on<AddSpellToCharacterEvent>(_onAddSpellToCharacter);
+    on<AddBossToCharacterEvent>(_onAddBossToCharacter);
+    on<RemoveSpellFromCharacterEvent>(_onRemoveSpellFromCharacter);
+    on<RemoveBossFromCharacterEvent>(_onRemoveBossFromCharacter);
   }
 
   /// Carrega todos os personagens ao receber [LoadCharactersEvent].
@@ -94,32 +98,35 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     }
   }
 
-  /// Alterna [ToggleProficiencyEvent.proficiency] na lista de proficiências
-  /// do personagem [ToggleProficiencyEvent.characterId], persiste e emite a
+  /// Aplica [transform] ao personagem [characterId] no estado atual (se
+  /// ele existir e estiver carregado), persiste o resultado e emite a
   /// lista atualizada em memória — sem recarregar do repositório, já que o
   /// resultado da alteração já é conhecido localmente.
-  Future<void> _onToggleProficiency(
-    ToggleProficiencyEvent event,
+  ///
+  /// [transform] retorna `null` para sinalizar "nada a fazer" (ex: tentar
+  /// remover uma magia que o personagem não tem) — nesse caso nenhum save
+  /// nem emit acontece, mantendo os handlers idempotentes sem cada um
+  /// precisar checar isso por conta própria.
+  ///
+  /// Handler compartilhado por todo evento que só modifica um campo de um
+  /// [Character] já carregado (proficiências, magias, abates...), evitando
+  /// repetir a mesma busca por índice + save + `CharacterLoaded` novo em
+  /// cada um deles.
+  Future<void> _updateCharacter(
     Emitter<CharacterState> emit,
+    String characterId,
+    Character? Function(Character character) transform,
   ) async {
     final currentState = state;
     if (currentState is! CharacterLoaded) return;
 
     final index = currentState.characters.indexWhere(
-      (c) => c.id == event.characterId,
+      (c) => c.id == characterId,
     );
     if (index == -1) return;
 
-    final character = currentState.characters[index];
-    final hasProficiency = character.proficiencies.contains(
-      event.proficiency,
-    );
-    final updatedProficiencies = hasProficiency
-        ? (character.proficiencies.toList()..remove(event.proficiency))
-        : [...character.proficiencies, event.proficiency];
-    final updatedCharacter = character.copyWith(
-      proficiencies: updatedProficiencies,
-    );
+    final updatedCharacter = transform(currentState.characters[index]);
+    if (updatedCharacter == null) return;
 
     try {
       await _saveCharacter(updatedCharacter);
@@ -129,6 +136,77 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     } catch (e) {
       emit(CharacterError(e.toString()));
     }
+  }
+
+  /// Alterna [ToggleProficiencyEvent.proficiency] na lista de proficiências
+  /// do personagem [ToggleProficiencyEvent.characterId].
+  Future<void> _onToggleProficiency(
+    ToggleProficiencyEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      final hasProficiency = character.proficiencies.contains(
+        event.proficiency,
+      );
+      final updatedProficiencies = hasProficiency
+          ? (character.proficiencies.toList()..remove(event.proficiency))
+          : [...character.proficiencies, event.proficiency];
+      return character.copyWith(proficiencies: updatedProficiencies);
+    });
+  }
+
+  /// Vincula [AddSpellToCharacterEvent.spell] ao personagem
+  /// [AddSpellToCharacterEvent.characterId].
+  Future<void> _onAddSpellToCharacter(
+    AddSpellToCharacterEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      if (character.spells.contains(event.spell)) return null;
+      return character.copyWith(spells: [...character.spells, event.spell]);
+    });
+  }
+
+  /// Desvincula [RemoveSpellFromCharacterEvent.spell] do personagem
+  /// [RemoveSpellFromCharacterEvent.characterId].
+  Future<void> _onRemoveSpellFromCharacter(
+    RemoveSpellFromCharacterEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      if (!character.spells.contains(event.spell)) return null;
+      return character.copyWith(
+        spells: character.spells.toList()..remove(event.spell),
+      );
+    });
+  }
+
+  /// Registra [AddBossToCharacterEvent.boss] como derrotado pelo
+  /// personagem [AddBossToCharacterEvent.characterId].
+  Future<void> _onAddBossToCharacter(
+    AddBossToCharacterEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      if (character.defeatedBosses.contains(event.boss)) return null;
+      return character.copyWith(
+        defeatedBosses: [...character.defeatedBosses, event.boss],
+      );
+    });
+  }
+
+  /// Remove [RemoveBossFromCharacterEvent.boss] do registro de abates do
+  /// personagem [RemoveBossFromCharacterEvent.characterId].
+  Future<void> _onRemoveBossFromCharacter(
+    RemoveBossFromCharacterEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      if (!character.defeatedBosses.contains(event.boss)) return null;
+      return character.copyWith(
+        defeatedBosses: character.defeatedBosses.toList()..remove(event.boss),
+      );
+    });
   }
 
   // ---------------------------------------------------------------------

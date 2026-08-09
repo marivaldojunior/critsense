@@ -21,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -52,6 +52,14 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(characters, characters.flaws);
         await m.addColumn(characters, characters.experiencePoints);
         await m.addColumn(characters, characters.proficiencyBonus);
+      }
+      if (from < 6) {
+        // Magias e monstros/chefes derrotados vinculados ao personagem —
+        // ver [StringListConverter] em `tables.dart`. O `withDefault('[]')`
+        // da coluna garante que as linhas já existentes recebam uma lista
+        // vazia válida em vez de `NULL`.
+        await m.addColumn(characters, characters.spells);
+        await m.addColumn(characters, characters.defeatedBosses);
       }
     },
   );

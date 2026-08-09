@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+
 import '../../../domain/entities/character.dart';
 import '../../bloc/character_bloc.dart';
 
@@ -86,7 +88,80 @@ class _TraitsLoreTabState extends State<TraitsLoreTab> {
           minLines: 5,
           onChanged: (v) => _onFieldChanged((c) => c.copyWith(background: v)),
         ),
+        const SizedBox(height: 24),
+        Text(
+          'Monstros & Chefes Derrotados',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const Divider(),
+        _DefeatedBossesSection(characterId: widget.character.id),
       ],
+    );
+  }
+}
+
+/// Seção "Monstros & Chefes Derrotados": lê `character.defeatedBosses` ao
+/// vivo do [CharacterBloc] — os abates registrados via Compêndio (ver
+/// [MonsterDetailScreen]) aparecem aqui assim que persistidos, sem
+/// recarregar a ficha.
+class _DefeatedBossesSection extends StatelessWidget {
+  const _DefeatedBossesSection({required this.characterId});
+
+  final String characterId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return BlocBuilder<CharacterBloc, CharacterState>(
+      buildWhen: (previous, current) => !identical(
+        previous.findCharacter(characterId),
+        current.findCharacter(characterId),
+      ),
+      builder: (context, state) {
+        final defeatedBosses =
+            state.findCharacter(characterId)?.defeatedBosses ?? const [];
+
+        if (defeatedBosses.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'Este herói ainda não tem grandes abates registrados.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          children: [
+            for (final boss in defeatedBosses)
+              Card(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                child: ListTile(
+                  leading: const DnDIcon(
+                    assetPath: 'assets/icons/damage/slashing.svg',
+                    size: 24,
+                  ),
+                  title: Text(
+                    boss,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: 'Remover registro de abate',
+                    onPressed: () => context.read<CharacterBloc>().add(
+                      RemoveBossFromCharacterEvent(characterId, boss),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

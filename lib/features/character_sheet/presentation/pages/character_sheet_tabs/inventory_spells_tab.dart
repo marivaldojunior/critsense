@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
 
 import '../../../domain/entities/inventory_item.dart';
+import '../../../domain/usecases/delete_inventory_item_usecase.dart';
 import '../../../domain/usecases/get_character_inventory_usecase.dart';
+import '../../bloc/character_bloc.dart';
 
 /// Aba "Inventário & Magias" da ficha.
 ///
-/// O inventário já é uma feature persistida ([InventoryItem]/
-/// [GetCharacterInventoryUseCase]), então esta aba o carrega e exibe. Magias
-/// por personagem ainda não existem no domínio — só o compêndio de magias
-/// (feature `compendium`), sem vínculo com a ficha — por isso a seção
-/// "Magias" é, por ora, um estado informativo, e não uma lista vazia
-/// disfarçada de "carregando".
+/// O inventário é uma feature persistida em sua própria tabela relacional
+/// ([InventoryItem]/[GetCharacterInventoryUseCase], carregada localmente
+/// via [FutureBuilder] e recarregada após cada remoção). Já as magias
+/// vivem diretamente no [Character] (`character.spells`), então essa
+/// seção escuta o [CharacterBloc] para refletir em tempo real qualquer
+/// magia vinculada pelo Compêndio, sem precisar sair e voltar à ficha.
 class InventorySpellsTab extends StatefulWidget {
   const InventorySpellsTab({super.key, required this.characterId});
 
@@ -26,6 +29,7 @@ class InventorySpellsTab extends StatefulWidget {
 
 class _InventorySpellsTabState extends State<InventorySpellsTab> {
   final _getInventory = sl<GetCharacterInventoryUseCase>();
+  final _deleteInventoryItem = sl<DeleteInventoryItemUseCase>();
 
   late Future<List<InventoryItem>> _inventoryFuture;
 
@@ -33,6 +37,16 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
   void initState() {
     super.initState();
     _inventoryFuture = _getInventory(widget.characterId);
+  }
+
+  /// Remove [item] do inventário e recarrega a lista para refletir a
+  /// exclusão — mesmo padrão usado para excluir notas de sessão.
+  Future<void> _removeInventoryItem(InventoryItem item) async {
+    await _deleteInventoryItem(item.id);
+    if (!mounted) return;
+    setState(() {
+      _inventoryFuture = _getInventory(widget.characterId);
+    });
   }
 
   @override
@@ -56,26 +70,7 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
         const SizedBox(height: 24),
         Text('Magias', style: theme.textTheme.titleMedium),
         const Divider(),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            children: [
-              DnDIcon(
-                assetPath: 'assets/icons/game/spell.svg',
-                size: 22,
-                color: theme.colorScheme.outline,
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'A vinculação de magias por personagem ainda não está '
-                  'disponível — consulte o Compêndio de Magias na tela '
-                  'inicial para pesquisar magias.',
-                ),
-              ),
-            ],
-          ),
-        ),
+        _SpellsSection(characterId: widget.characterId),
       ],
     );
   }
@@ -101,8 +96,53 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
     return Column(
       key: const ValueKey('loaded'),
       children: [
-        for (final item in items) _InventoryItemTile(item: item),
+        for (final item in items)
+          _InventoryItemTile(
+            item: item,
+            onDelete: () => _removeInventoryItem(item),
+          ),
       ],
+    );
+  }
+}
+
+/// Seção "Magias": lê `character.spells` ao vivo do [CharacterBloc] — os
+/// nomes de magias vinculadas via Compêndio (ver [SpellDetailScreen])
+/// aparecem aqui assim que persistidos, sem recarregar a tela.
+class _SpellsSection extends StatelessWidget {
+  const _SpellsSection({required this.characterId});
+
+  final String characterId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CharacterBloc, CharacterState>(
+      buildWhen: (previous, current) => !identical(
+        previous.findCharacter(characterId),
+        current.findCharacter(characterId),
+      ),
+      builder: (context, state) {
+        final spells = state.findCharacter(characterId)?.spells ?? const [];
+
+        if (spells.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Text('Nenhuma magia vinculada ainda.'),
+          );
+        }
+
+        return Column(
+          children: [
+            for (final spell in spells)
+              _SpellTile(
+                name: spell,
+                onDelete: () => context.read<CharacterBloc>().add(
+                  RemoveSpellFromCharacterEvent(characterId, spell),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -139,16 +179,17 @@ class _InventorySkeleton extends StatelessWidget {
 }
 
 class _InventoryItemTile extends StatelessWidget {
-  const _InventoryItemTile({required this.item});
+  const _InventoryItemTile({required this.item, required this.onDelete});
 
   final InventoryItem item;
+  final VoidCallback onDelete;
 
   /// Ícone temático por categoria de equipamento; `entity/pack.svg` cobre
   /// categorias sem ícone dedicado (ex: "Adventuring Gear", "Tool").
   String get _iconAsset => switch (item.equipmentCategory.toLowerCase()) {
     'weapon' => 'assets/icons/entity/weapon.svg',
     'armor' => 'assets/icons/entity/armor.svg',
-    _ => 'assets/icons/entity/pack.svg',
+    _ => 'assets/icons/entity/loot.svg',
   };
 
   @override
@@ -157,12 +198,40 @@ class _InventoryItemTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: DnDIcon(assetPath: _iconAsset, size: 24),
-        title: Text(
-          item.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(item.equipmentCategory),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: 'Remover do inventário',
+          onPressed: onDelete,
+        ),
+      ),
+    );
+  }
+}
+
+/// Item da lista de magias vinculadas ao personagem.
+class _SpellTile extends StatelessWidget {
+  const _SpellTile({required this.name, required this.onDelete});
+
+  final String name;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: const DnDIcon(
+          assetPath: 'assets/icons/spell/evocation.svg',
+          size: 24,
+        ),
+        title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: 'Remover magia',
+          onPressed: onDelete,
+        ),
       ),
     );
   }

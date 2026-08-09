@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/monster_detail.dart';
@@ -83,8 +85,65 @@ class MonsterDetailScreen extends StatelessWidget {
                   ),
               },
             ),
+            // Fixo na base da tela — "Registrar Abate" fica sempre
+            // alcançável na thumb zone, seguindo o mesmo padrão de CTA
+            // primário fixo já usado no Rolador de Dados e no Formulário
+            // de Personagem. Só existe com o monstro já carregado.
+            bottomNavigationBar: state is MonsterDetailLoaded
+                ? _RegisterKillBar(monster: state.monster)
+                : null,
           );
         },
+      ),
+    );
+  }
+}
+
+/// Barra fixa com o CTA "Registrar Abate": abre o [CharacterPickerBottomSheet]
+/// e, se um personagem for escolhido, registra o monstro como derrotado por
+/// ele via [AddBossToCharacterEvent].
+class _RegisterKillBar extends StatelessWidget {
+  final MonsterDetail monster;
+
+  const _RegisterKillBar({required this.monster});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () => _registerKill(context, monster),
+            icon: const DnDIcon(
+              assetPath: 'assets/icons/monster/dragon.svg',
+              size: 24,
+            ),
+            label: const Text('Registrar Abate'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _registerKill(BuildContext context, MonsterDetail monster) async {
+    final character = await CharacterPickerBottomSheet.show(context);
+    if (character == null) return;
+    if (!context.mounted) return;
+
+    context.read<CharacterBloc>().add(
+      AddBossToCharacterEvent(character.id, monster.name),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${monster.name} registrado como abatido por ${character.name}.',
+        ),
       ),
     );
   }

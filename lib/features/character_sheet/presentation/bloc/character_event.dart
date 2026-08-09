@@ -55,3 +55,48 @@ final class AddInventoryItemEvent extends CharacterEvent {
 
   const AddInventoryItemEvent(this.item);
 }
+
+/// Solicita ao BLoC que vincule [spell] (índice/nome da magia) ao
+/// personagem [characterId], persistindo o resultado. Idempotente: se a
+/// magia já está registrada, não faz nada.
+final class AddSpellToCharacterEvent extends CharacterEvent {
+  /// Personagem que passa a conhecer a magia.
+  final String characterId;
+
+  /// Índice ou nome da magia no compêndio.
+  final String spell;
+
+  const AddSpellToCharacterEvent(this.characterId, this.spell);
+}
+
+/// Solicita ao BLoC que registre [boss] (índice/nome do monstro) como
+/// derrotado pelo personagem [characterId], persistindo o resultado.
+/// Idempotente: se o monstro já está registrado, não faz nada.
+final class AddBossToCharacterEvent extends CharacterEvent {
+  /// Personagem que derrotou o monstro.
+  final String characterId;
+
+  /// Índice ou nome do monstro no compêndio.
+  final String boss;
+
+  const AddBossToCharacterEvent(this.characterId, this.boss);
+}
+
+/// Solicita ao BLoC que desvincule [spell] do personagem [characterId],
+/// persistindo o resultado — para desfazer um vínculo criado por engano.
+final class RemoveSpellFromCharacterEvent extends CharacterEvent {
+  final String characterId;
+  final String spell;
+
+  const RemoveSpellFromCharacterEvent(this.characterId, this.spell);
+}
+
+/// Solicita ao BLoC que remova [boss] do registro de abates do personagem
+/// [characterId], persistindo o resultado — para desfazer um registro
+/// criado por engano.
+final class RemoveBossFromCharacterEvent extends CharacterEvent {
+  final String characterId;
+  final String boss;
+
+  const RemoveBossFromCharacterEvent(this.characterId, this.boss);
+}

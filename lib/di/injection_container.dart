@@ -6,6 +6,7 @@ import 'package:crit_sense/features/character_sheet/domain/repositories/i_charac
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_session_note_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/delete_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_session_note_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_character_inventory_usecase.dart';
@@ -107,6 +108,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetCharacterInventoryUseCase>(
     () => GetCharacterInventoryUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<DeleteInventoryItemUseCase>(
+    () => DeleteInventoryItemUseCase(sl<ICharacterRepository>()),
   );
   sl.registerLazySingleton<GetSessionNotesUseCase>(
     () => GetSessionNotesUseCase(sl<ICharacterRepository>()),

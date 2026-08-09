@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/equipment_detail.dart';
@@ -55,11 +59,48 @@ class EquipmentDetailScreen extends StatelessWidget {
                   ),
               },
             ),
+            // Só existe com o equipamento já carregado — precisa dos dados
+            // dele (nome, categoria) para montar o item de inventário.
+            floatingActionButton: state is EquipmentDetailLoaded
+                ? FloatingActionButton(
+                    onPressed: () =>
+                        _addEquipmentToCharacter(context, state.equipment),
+                    tooltip: 'Adicionar a um personagem',
+                    child: const Icon(Icons.add),
+                  )
+                : null,
           );
         },
       ),
     );
   }
+}
+
+/// Abre o [CharacterPickerBottomSheet] e, se um personagem for escolhido,
+/// adiciona [equipment] ao inventário dele via [AddInventoryItemEvent].
+Future<void> _addEquipmentToCharacter(
+  BuildContext context,
+  EquipmentDetail equipment,
+) async {
+  final character = await CharacterPickerBottomSheet.show(context);
+  if (character == null) return;
+  if (!context.mounted) return;
+
+  final item = InventoryItem(
+    id: const Uuid().v4(),
+    characterId: character.id,
+    itemIndex: equipment.index,
+    name: equipment.name,
+    equipmentCategory: equipment.equipmentCategory,
+  );
+
+  context.read<CharacterBloc>().add(AddInventoryItemEvent(item));
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('${equipment.name} adicionado a ${character.name}.'),
+    ),
+  );
 }
 
 /// Corpo da tela com todos os detalhes do equipamento.

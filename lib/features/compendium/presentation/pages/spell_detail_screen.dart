@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
 import '../../../../di/injection_container.dart';
 import '../../domain/entities/spell_detail.dart';
@@ -41,10 +43,12 @@ class SpellDetailScreen extends StatelessWidget {
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child: switch (state) {
-                SpellDetailInitial() =>
-                  const SizedBox.shrink(key: ValueKey('initial')),
-                SpellDetailLoading() =>
-                  const _SpellDetailSkeleton(key: ValueKey('loading')),
+                SpellDetailInitial() => const SizedBox.shrink(
+                  key: ValueKey('initial'),
+                ),
+                SpellDetailLoading() => const _SpellDetailSkeleton(
+                  key: ValueKey('loading'),
+                ),
                 SpellDetailLoaded(:final spell) => _SpellDetailBody(
                   key: const ValueKey('loaded'),
                   spell: spell,
@@ -56,11 +60,39 @@ class SpellDetailScreen extends StatelessWidget {
                   ),
               },
             ),
+            // Só existe com a magia já carregada — precisa do nome dela
+            // para vincular ao personagem escolhido.
+            floatingActionButton: state is SpellDetailLoaded
+                ? FloatingActionButton(
+                    onPressed: () => _addSpellToCharacter(context, state.spell),
+                    tooltip: 'Adicionar a um personagem',
+                    child: const Icon(Icons.add),
+                  )
+                : null,
           );
         },
       ),
     );
   }
+}
+
+/// Abre o [CharacterPickerBottomSheet] e, se um personagem for escolhido,
+/// vincula [spell] a ele via [AddSpellToCharacterEvent].
+Future<void> _addSpellToCharacter(
+  BuildContext context,
+  SpellDetail spell,
+) async {
+  final character = await CharacterPickerBottomSheet.show(context);
+  if (character == null) return;
+  if (!context.mounted) return;
+
+  context.read<CharacterBloc>().add(
+    AddSpellToCharacterEvent(character.id, spell.name),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('${spell.name} adicionada a ${character.name}.')),
+  );
 }
 
 /// Corpo da tela com todos os detalhes da magia.
@@ -92,17 +124,17 @@ class _SpellDetailBody extends StatelessWidget {
               _InfoChip(
                 iconAsset: 'assets/icons/entity/time.svg',
                 label: spell.castingTime,
-                color: colorScheme.secondary,
+                color: colorScheme.primary,
               ),
               _InfoChip(
                 iconAsset: 'assets/icons/attribute/range.svg',
                 label: spell.range,
-                color: colorScheme.tertiary,
+                color: colorScheme.primary,
               ),
               _InfoChip(
                 iconAsset: 'assets/icons/combat/round.svg',
                 label: spell.duration,
-                color: colorScheme.secondary,
+                color: colorScheme.primary,
               ),
               _InfoChip(
                 iconAsset: 'assets/icons/entity/wand.svg',

@@ -190,21 +190,15 @@ class _ProficienciesPanel extends StatelessWidget {
 
   final Character character;
 
-  Character? _findSelf(CharacterState state) {
-    if (state is! CharacterLoaded) return null;
-    for (final c in state.characters) {
-      if (c.id == character.id) return c;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CharacterBloc, CharacterState>(
-      buildWhen: (previous, current) =>
-          !identical(_findSelf(previous), _findSelf(current)),
+      buildWhen: (previous, current) => !identical(
+        previous.findCharacter(character.id),
+        current.findCharacter(character.id),
+      ),
       builder: (context, state) {
-        final liveCharacter = _findSelf(state) ?? character;
+        final liveCharacter = state.findCharacter(character.id) ?? character;
         final bloc = context.read<CharacterBloc>();
 
         return ListView(

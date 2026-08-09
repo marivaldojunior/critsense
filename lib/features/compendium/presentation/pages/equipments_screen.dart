@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../../di/injection_container.dart';
@@ -163,92 +164,33 @@ class _EquipmentTile extends StatelessWidget {
     );
   }
 
-  /// Abre um BottomSheet para escolher em qual personagem adicionar o item.
-  void _showCharacterPicker(BuildContext context) {
-    // Captura o CharacterBloc antes de entrar no showModalBottomSheet, pois
-    // o contexto do modal não tem acesso direto à árvore de widgets pai.
-    final characterBloc = context.read<CharacterBloc>();
+  /// Abre o [CharacterPickerBottomSheet] e, se um personagem for escolhido,
+  /// adiciona o item ao inventário dele.
+  ///
+  /// A API de listagem não fornece categoria do equipamento; valor padrão
+  /// substituível ao buscar os detalhes futuramente (a tela de detalhes já
+  /// usa a categoria real — ver [EquipmentDetailScreen]).
+  Future<void> _showCharacterPicker(BuildContext context) async {
+    final character = await CharacterPickerBottomSheet.show(context);
+    if (character == null) return;
+    if (!context.mounted) return;
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) {
-        return BlocBuilder<CharacterBloc, CharacterState>(
-          // Usa o BLoC já existente no contexto pai via bloc:, sem criar outro.
-          bloc: characterBloc,
-          builder: (_, state) {
-            if (state is! CharacterLoaded || state.characters.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: Text('Nenhum personagem disponível.')),
-              );
-            }
+    final item = InventoryItem(
+      id: const Uuid().v4(),
+      characterId: character.id,
+      itemIndex: equipment.index,
+      name: equipment.name,
+      equipmentCategory: 'Unknown',
+    );
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Text(
-                    'Adicionar a qual personagem?',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                const Divider(height: 1),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: state.characters.length,
-                    itemBuilder: (_, index) {
-                      final character = state.characters[index];
-                      return ListTile(
-                        leading: const DnDIcon(
-                          assetPath: 'assets/icons/game/character.svg',
-                          size: 26,
-                        ),
-                        title: Text(
-                          character.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          '${character.characterClass} • Nível ${character.level}',
-                        ),
-                        onTap: () {
-                          final item = InventoryItem(
-                            id: const Uuid().v4(),
-                            characterId: character.id,
-                            itemIndex: equipment.index,
-                            name: equipment.name,
-                            // A API de listagem não fornece categoria; valor
-                            // padrão substituível ao buscar detalhes futuramente.
-                            equipmentCategory: 'Unknown',
-                          );
+    // Cross-feature: dispara o Command no BLoC de character_sheet a partir
+    // da feature compendium, sem acoplamento direto entre as duas features.
+    context.read<CharacterBloc>().add(AddInventoryItemEvent(item));
 
-                          // Cross-feature: dispara o Command no BLoC de
-                          // character_sheet a partir da feature compendium,
-                          // sem acoplamento direto entre as duas features.
-                          characterBloc.add(AddInventoryItemEvent(item));
-
-                          Navigator.pop(sheetContext);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${equipment.name} adicionado a ${character.name}.',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${equipment.name} adicionado a ${character.name}.'),
+      ),
     );
   }
 }
