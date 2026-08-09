@@ -44,6 +44,11 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<AddBossToCharacterEvent>(_onAddBossToCharacter);
     on<RemoveSpellFromCharacterEvent>(_onRemoveSpellFromCharacter);
     on<RemoveBossFromCharacterEvent>(_onRemoveBossFromCharacter);
+    on<ApplyDamageEvent>(_onApplyDamage);
+    on<HealHpEvent>(_onHealHp);
+    on<AddTempHpEvent>(_onAddTempHp);
+    on<TakeShortRestEvent>(_onTakeShortRest);
+    on<TakeLongRestEvent>(_onTakeLongRest);
   }
 
   /// Carrega todos os personagens ao receber [LoadCharactersEvent].
@@ -205,6 +210,84 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       if (!character.defeatedBosses.contains(event.boss)) return null;
       return character.copyWith(
         defeatedBosses: character.defeatedBosses.toList()..remove(event.boss),
+      );
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Gerenciamento de Vida — regras do SRD do D&D 5e.
+  // ---------------------------------------------------------------------
+
+  /// Aplica [ApplyDamageEvent.amount] de dano ao personagem
+  /// [ApplyDamageEvent.characterId]: o dano é primeiro absorvido pelos PV
+  /// temporários — só o que sobra depois de zerá-los desconta dos PV
+  /// atuais, que nunca ficam abaixo de zero.
+  Future<void> _onApplyDamage(
+    ApplyDamageEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      final absorbedByTemp = event.amount < character.temporaryHitPoints
+          ? event.amount
+          : character.temporaryHitPoints;
+      final remainingDamage = event.amount - absorbedByTemp;
+      final updatedCurrentHp = character.currentHitPoints - remainingDamage;
+
+      return character.copyWith(
+        currentHitPoints: updatedCurrentHp < 0 ? 0 : updatedCurrentHp,
+        temporaryHitPoints: character.temporaryHitPoints - absorbedByTemp,
+      );
+    });
+  }
+
+  /// Cura [HealHpEvent.amount] PV do personagem [HealHpEvent.characterId],
+  /// sem ultrapassar o PV máximo.
+  Future<void> _onHealHp(HealHpEvent event, Emitter<CharacterState> emit) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      final updatedCurrentHp = character.currentHitPoints + event.amount;
+      return character.copyWith(
+        currentHitPoints: updatedCurrentHp > character.maxHitPoints
+            ? character.maxHitPoints
+            : updatedCurrentHp,
+      );
+    });
+  }
+
+  /// Concede [AddTempHpEvent.amount] de PV temporário ao personagem
+  /// [AddTempHpEvent.characterId]. PV temporário não se acumula: só
+  /// substitui o valor atual se o novo for maior — um valor menor ou igual
+  /// é ignorado (retorna `null`, sem persistir nada).
+  Future<void> _onAddTempHp(
+    AddTempHpEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      if (event.amount <= character.temporaryHitPoints) return null;
+      return character.copyWith(temporaryHitPoints: event.amount);
+    });
+  }
+
+  /// Aplica um Descanso Curto ao personagem [TakeShortRestEvent.characterId].
+  ///
+  /// Sem um sistema de Dados de Vida modelado no app, um Descanso Curto não
+  /// altera PV por si só — ver a documentação de [TakeShortRestEvent].
+  Future<void> _onTakeShortRest(
+    TakeShortRestEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) => null);
+  }
+
+  /// Aplica um Descanso Longo ao personagem [TakeLongRestEvent.characterId]:
+  /// PV atual volta ao máximo e PV temporário zera.
+  Future<void> _onTakeLongRest(
+    TakeLongRestEvent event,
+    Emitter<CharacterState> emit,
+  ) {
+    return _updateCharacter(emit, event.characterId, (character) {
+      return character.copyWith(
+        currentHitPoints: character.maxHitPoints,
+        temporaryHitPoints: 0,
       );
     });
   }

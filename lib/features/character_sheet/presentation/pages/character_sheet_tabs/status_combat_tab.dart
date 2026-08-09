@@ -9,6 +9,7 @@ import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
 import '../../bloc/character_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
+import '../../widgets/hp_management_sheet.dart';
 
 /// Aba "Status & Combate" da ficha: os blocos centrais da primeira página
 /// da ficha oficial — CA/Iniciativa/Deslocamento, PV e as duas listas de
@@ -157,7 +158,17 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// Bloco central de Pontos de Vida: barra animada com máximo, atual e temporário.
+/// Ações de descanso disponíveis no menu do cartão de PV.
+enum _RestType { short, long }
+
+/// Bloco central de Pontos de Vida: barra animada com máximo, atual e
+/// temporário, mais os controles de dano/cura/PV temporário e descanso.
+///
+/// Reativo via [BlocBuilder] (mesmo padrão do [_ProficienciesPanel]): PV é
+/// alterado por [ApplyDamageEvent]/[HealHpEvent]/[AddTempHpEvent]/
+/// [TakeShortRestEvent]/[TakeLongRestEvent] disparados a partir daqui, e a
+/// barra precisa refletir o resultado imediatamente sem esperar o usuário
+/// sair e voltar à ficha.
 class _HpCard extends StatelessWidget {
   const _HpCard({required this.character});
 
@@ -165,15 +176,71 @@ class _HpCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: AnimatedHpBar(
-          currentHitPoints: character.currentHitPoints,
-          maxHitPoints: character.maxHitPoints,
-          temporaryHitPoints: character.temporaryHitPoints,
-        ),
+    return BlocBuilder<CharacterBloc, CharacterState>(
+      buildWhen: (previous, current) => !identical(
+        previous.findCharacter(character.id),
+        current.findCharacter(character.id),
       ),
+      builder: (context, state) {
+        final liveCharacter = state.findCharacter(character.id) ?? character;
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AnimatedHpBar(
+                  currentHitPoints: liveCharacter.currentHitPoints,
+                  maxHitPoints: liveCharacter.maxHitPoints,
+                  temporaryHitPoints: liveCharacter.temporaryHitPoints,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: () => showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) =>
+                              HpManagementSheet(characterId: liveCharacter.id),
+                        ),
+                        icon: const Icon(Icons.favorite_border),
+                        label: const Text('Gerenciar Vida'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    PopupMenuButton<_RestType>(
+                      tooltip: 'Descanso',
+                      icon: const Icon(Icons.bedtime_outlined),
+                      onSelected: (type) {
+                        final bloc = context.read<CharacterBloc>();
+                        switch (type) {
+                          case _RestType.short:
+                            bloc.add(TakeShortRestEvent(liveCharacter.id));
+                          case _RestType.long:
+                            bloc.add(TakeLongRestEvent(liveCharacter.id));
+                        }
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(
+                          value: _RestType.short,
+                          child: Text('Descanso Curto'),
+                        ),
+                        PopupMenuItem(
+                          value: _RestType.long,
+                          child: Text('Descanso Longo'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

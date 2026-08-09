@@ -100,3 +100,58 @@ final class RemoveBossFromCharacterEvent extends CharacterEvent {
 
   const RemoveBossFromCharacterEvent(this.characterId, this.boss);
 }
+
+// ---------------------------------------------------------------------------
+// Gerenciamento de Vida — ver as regras de PV/PV temporário e descanso do
+// SRD do D&D 5e aplicadas em `CharacterBloc._onApplyDamage` etc.
+// ---------------------------------------------------------------------------
+
+/// Solicita ao BLoC que aplique [amount] de dano ao personagem
+/// [characterId]: consome primeiro os PV temporários, só depois os PV
+/// atuais (nunca abaixo de zero).
+final class ApplyDamageEvent extends CharacterEvent {
+  final String characterId;
+  final int amount;
+
+  const ApplyDamageEvent(this.characterId, this.amount);
+}
+
+/// Solicita ao BLoC que cure [amount] de PV do personagem [characterId],
+/// sem ultrapassar o PV máximo.
+final class HealHpEvent extends CharacterEvent {
+  final String characterId;
+  final int amount;
+
+  const HealHpEvent(this.characterId, this.amount);
+}
+
+/// Solicita ao BLoC que conceda [amount] de PV temporário ao personagem
+/// [characterId]. PV temporário não se acumula: só substitui o valor atual
+/// se [amount] for maior.
+final class AddTempHpEvent extends CharacterEvent {
+  final String characterId;
+  final int amount;
+
+  const AddTempHpEvent(this.characterId, this.amount);
+}
+
+/// Solicita ao BLoC que aplique um Descanso Curto ao personagem
+/// [characterId].
+///
+/// Sem um sistema de Dados de Vida modelado no app, um Descanso Curto não
+/// restaura PV automaticamente por si só (regra correta do SRD: cura no
+/// descanso curto exige gastar Dados de Vida) — o evento existe para o
+/// fluxo da UI e para acomodar essa regra quando for implementada.
+final class TakeShortRestEvent extends CharacterEvent {
+  final String characterId;
+
+  const TakeShortRestEvent(this.characterId);
+}
+
+/// Solicita ao BLoC que aplique um Descanso Longo ao personagem
+/// [characterId]: PV atual volta ao máximo e PV temporário zera.
+final class TakeLongRestEvent extends CharacterEvent {
+  final String characterId;
+
+  const TakeLongRestEvent(this.characterId);
+}
