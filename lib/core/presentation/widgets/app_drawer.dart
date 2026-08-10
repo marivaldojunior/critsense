@@ -96,7 +96,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const DnDIcon(
-              assetPath: 'assets/icons/dice/d20.svg',
+              assetPath: 'assets/icons/location/tavern.svg',
               size: 28,
             ),
             title: const Text('Início'),

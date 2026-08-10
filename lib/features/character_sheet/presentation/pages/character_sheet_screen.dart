@@ -54,7 +54,7 @@ class CharacterSheetScreen extends StatelessWidget {
         if (!isLowHp) return sheet;
 
         return Theme(
-          data: ThemeData(
+          data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.red,
               brightness: Theme.of(context).brightness,

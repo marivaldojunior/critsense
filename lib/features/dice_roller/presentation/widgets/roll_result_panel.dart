@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
 
 /// Exibe o resultado da última rolagem: total em destaque no topo e, abaixo,
 /// o "extrato" visual de cada dado — um bloco por [SingleDieResult] com seu
@@ -14,19 +16,9 @@ import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart
 /// Não traz superfície própria (sem [Card]): é exibido dentro de um
 /// [AlertDialog] pelo chamador, que já fornece o fundo/elevação.
 class RollResultPanel extends StatelessWidget {
-  const RollResultPanel({
-    super.key,
-    required this.result,
-    required this.onRollAgain,
-  });
+  const RollResultPanel({super.key, required this.result});
 
   final DiceRollResult result;
-
-  /// Repete a rolagem do pool atual sem fechar o dialog — quem fornece este
-  /// callback (o [RollFlowDialog]) é responsável por disparar
-  /// `DiceRollRequested` no [DiceBloc], que já reaproveita `state.pool` e
-  /// `state.modifier` correntes.
-  final VoidCallback onRollAgain;
 
   static final Color _criticalSuccessColor = Colors.green.shade600;
 
@@ -94,7 +86,16 @@ class RollResultPanel extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           FilledButton.tonalIcon(
-            onPressed: onRollAgain,
+            // Fecha primeiro este dialog (route corrente) e só então dispara
+            // a nova rolagem: o `BlocConsumer` da `DiceScreen` continua
+            // montado por baixo do dialog e reabre um `RollFlowDialog` novo
+            // assim que vir a transição idle -> rolling. Despachar o evento
+            // antes do pop empilharia um segundo dialog por cima deste, já
+            // que o antigo nunca teria sido fechado.
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<DiceBloc>().add(const DiceRollRequested());
+            },
             icon: const Icon(Icons.refresh),
             label: const Text('Rolar Novamente'),
           ),
