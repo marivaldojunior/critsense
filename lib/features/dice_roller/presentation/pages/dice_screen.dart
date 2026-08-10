@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +46,16 @@ class _DiceViewState extends State<_DiceView> {
   /// do BLoC sempre que a rolagem concluída contém um d20 crítico (natural 20).
   late final ConfettiController _confettiController;
 
+  /// Instância única, reaproveitada em toda rolagem — ver [_playRollSound].
+  /// Criar um `AudioPlayer` novo por rolagem (como uma versão anterior desta
+  /// tela fazia, dentro do próprio `AnimatedRollingDice`) é frágil: dar
+  /// dispose e criar o player nativo de novo a cada rolagem é o padrão que a
+  /// própria documentação do `audioplayers` desaconselha, e na prática o som
+  /// parava de tocar a partir da segunda rolagem (botão "Rolar Novamente" ou
+  /// shake). Mantendo um único player pela vida da tela, cada rolagem nova
+  /// só chama `play()` de novo nele.
+  final _audioPlayer = AudioPlayer();
+
   /// Tipo de dado atualmente centralizado no [DiceTypeCarousel] — é ele que
   /// o botão "Adicionar ao Pool" envia ao [DiceBloc].
   DiceType _focusedDiceType = DiceType.values.first;
@@ -54,15 +65,35 @@ class _DiceViewState extends State<_DiceView> {
   /// `previous`, que `BlocConsumer.listener` não expõe.
   DiceRollStatus? _previousStatus;
 
+  /// `true` enquanto o `RollFlowDialog` aberto por [showDialog] está na
+  /// tela — usado só pelo listener de shake, para saber se precisa fechar
+  /// um dialog de resultado já aberto antes de pedir uma rolagem nova (ver
+  /// o listener de `HardwareBridge.onShakeDetected` abaixo).
+  bool _isRollDialogOpen = false;
+
   @override
   void initState() {
     super.initState();
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 2),
     );
+    unawaited(_audioPlayer.setPlayerMode(PlayerMode.lowLatency));
     _shakeSub = HardwareBridge.onShakeDetected.listen((_) {
       if (!mounted) return;
-      context.read<DiceBloc>().add(const DiceShakeDetected());
+
+      final bloc = context.read<DiceBloc>();
+      // Um shake com o dialog de resultado já aberto (rolagem anterior
+      // concluída, `status == idle`) precisa fechá-lo antes de pedir uma
+      // rolagem nova — do contrário o listener abaixo abriria um segundo
+      // dialog empilhado por cima do primeiro, que nunca foi fechado.
+      // Só faz isso com `status == idle`: se o dialog aberto é o da própria
+      // física em andamento (`status == rolling`), o próprio `DiceBloc` já
+      // ignora o shake (ver `_onDiceShakeDetected`), então fechá-lo aqui só
+      // interromperia a rolagem em curso sem nada para reabri-lo.
+      if (_isRollDialogOpen && bloc.state.status == DiceRollStatus.idle) {
+        Navigator.of(context).pop();
+      }
+      bloc.add(const DiceShakeDetected());
     });
   }
 
@@ -70,7 +101,18 @@ class _DiceViewState extends State<_DiceView> {
   void dispose() {
     _shakeSub?.cancel();
     _confettiController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
+  }
+
+  /// Toca o som de rolagem correspondente ao tamanho do [pool]: um único
+  /// dado soa diferente de vários rolando juntos.
+  Future<void> _playRollSound(Map<DiceType, int> pool) {
+    final totalDice = pool.values.fold(0, (sum, count) => sum + count);
+    final soundFile = totalDice > 1
+        ? 'sounds/dices_roll.mp3'
+        : 'sounds/dice_roll.mp3';
+    return _audioPlayer.play(AssetSource(soundFile));
   }
 
   @override
@@ -87,9 +129,13 @@ class _DiceViewState extends State<_DiceView> {
         final previousStatus = _previousStatus;
         _previousStatus = state.status;
 
-        // idle -> rolling: abre o dialog único que acompanha toda a rolagem.
+        // idle -> rolling: abre o dialog único que acompanha toda a rolagem
+        // e dispara o som correspondente ao tamanho do pool.
         if (previousStatus != DiceRollStatus.rolling &&
             state.status == DiceRollStatus.rolling) {
+          _playRollSound(state.pool);
+
+          _isRollDialogOpen = true;
           showDialog<void>(
             context: context,
             barrierDismissible: false,
@@ -97,7 +143,7 @@ class _DiceViewState extends State<_DiceView> {
               value: context.read<DiceBloc>(),
               child: const RollFlowDialog(),
             ),
-          );
+          ).then((_) => _isRollDialogOpen = false);
           return;
         }
 

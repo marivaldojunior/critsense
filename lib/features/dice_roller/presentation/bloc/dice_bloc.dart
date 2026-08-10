@@ -89,6 +89,12 @@ class DiceBloc extends Bloc<DiceEvent, DiceState> {
   void _onDiceShakeDetected(DiceShakeDetected event, Emitter<DiceState> emit) {
     // Ignora o shake se o pool estiver vazio: não há o que rolar.
     if (state.totalDiceCount == 0) return;
+    // Ignora shakes durante uma rolagem em andamento: sem essa guarda, um
+    // segundo shake no meio da animação dispararia um `DiceRollRequested`
+    // concorrente, cujo resultado sobrescreveria silenciosamente o da
+    // rolagem já em curso sem nenhuma transição visível de status para a UI
+    // reagir (rolling -> rolling não conta como mudança de status).
+    if (state.status == DiceRollStatus.rolling) return;
     add(const DiceRollRequested());
   }
 }
