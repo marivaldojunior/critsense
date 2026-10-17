@@ -132,7 +132,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TE.3** Exporte e importe personagens em JSON.
 
 #### Fase F — Segurança dos dados, recursos de classe e mesa
-- [ ] **TF.1** Copie o arquivo do banco antes de cada migração de versão.
+- [x] **TF.1** Copie o arquivo do banco antes de cada migração de versão.
 - [ ] **TF.2** Edite nome, raça, classe, tendência e antecedente depois da criação.
 - [ ] **TF.3** Permita o ajuste manual do PV máximo (talentos, itens e correções).
 - [ ] **TF.4** Conte os usos dos recursos de classe (Fúria, Retomar o Fôlego e outros) e recupere os usos nos descansos.

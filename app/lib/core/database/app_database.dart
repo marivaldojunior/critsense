@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'database_backup.dart';
 import 'tables.dart';
 
 // Arquivo gerado pelo build_runner. Execute:
@@ -30,8 +31,12 @@ class AppDatabase extends _$AppDatabase {
   /// Cria a instância recebendo o executor de queries.
   AppDatabase(super.e);
 
+  /// Versão atual do schema. Fica numa constante para o backup comparar com
+  /// a versão do arquivo antes de abrir o banco.
+  static const currentVersion = 12;
+
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => currentVersion;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -131,9 +136,7 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(inventoryItems, column);
         }
         // Os itens antigos não têm peso nem dados de combate.
-        await customStatement(
-          'UPDATE inventory_items SET details_loaded = 0',
-        );
+        await customStatement('UPDATE inventory_items SET details_loaded = 0');
         for (final column in [
           characters.copper,
           characters.silver,
@@ -200,6 +203,7 @@ class AppDatabase extends _$AppDatabase {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'critsense.sqlite'));
+      DatabaseBackup.backupBeforeMigration(file, targetVersion: currentVersion);
 
       return NativeDatabase.createInBackground(file);
     });
