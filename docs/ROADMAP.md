@@ -113,7 +113,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 
 #### Gerador de NPCs
 - [x] **T1.9** Crie o prompt versionado `prompts/npc-generator/v1/` (`system.st` e `user.st`).
-- [ ] **T1.10** Crie o endpoint `POST /api/v1/npcs/generate`. Converta a saída para um record Java e valide com Bean Validation.
+- [x] **T1.10** Crie o endpoint `POST /api/v1/npcs/generate`. Converta a saída para um record Java e valide com Bean Validation.
 - [ ] **T1.11** Escreva testes com JUnit 5 e Testcontainers. Use um `ChatModel` falso nos testes, para não chamar o provedor real no CI.
 
 #### CI

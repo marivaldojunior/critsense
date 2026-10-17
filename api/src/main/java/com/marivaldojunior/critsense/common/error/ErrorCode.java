@@ -21,6 +21,7 @@ public enum ErrorCode {
     AI_INVALID_OUTPUT(HttpStatus.BAD_GATEWAY, "Resposta inválida da IA"),
     AI_PROVIDER_ERROR(HttpStatus.BAD_GATEWAY, "Falha no provedor de IA"),
     AI_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "Tempo limite da IA esgotado"),
+    AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "IA não configurada"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno");
 
     private final HttpStatus status;
