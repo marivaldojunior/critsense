@@ -122,7 +122,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 #### Fase D — Criação e evolução
 - [x] **TD.1** Aplique os bônus de atributo e o deslocamento da raça do SRD.
 - [x] **TD.2** Adicione a matriz padrão e a rolagem 4d6 na criação.
-- [ ] **TD.3** Crie o fluxo de subir de nível (XP, PV, proficiência, aumento de atributo e espaços de magia).
+- [x] **TD.3** Crie o fluxo de subir de nível (XP, PV, proficiência, aumento de atributo e espaços de magia).
 - [ ] **TD.4** Mostre as características de classe e de raça do SRD.
 - [ ] **TD.5** Adicione as proficiências em armaduras, armas e ferramentas, e os idiomas.
 

@@ -10,6 +10,7 @@ import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/skill.dart';
 import '../../domain/rules/hit_point_rules.dart';
+import '../../domain/rules/level_rules.dart';
 import '../../domain/rules/spell_rules.dart';
 import '../../domain/usecases/add_inventory_item_usecase.dart';
 import '../../domain/usecases/delete_character_usecase.dart';
@@ -142,6 +143,23 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         emit,
         event.characterId,
         (c) => c.copyWith(coins: c.coins.withAmount(event.coin, event.amount)),
+      ),
+    );
+    on<AddExperienceEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withExperienceAdded(event.amount),
+      ),
+    );
+    on<LevelUpEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withLevelUp(
+          hitDieResult: event.hitDieResult,
+          abilityIncreases: event.abilityIncreases,
+        ),
       ),
     );
     on<SetSpeedEvent>(

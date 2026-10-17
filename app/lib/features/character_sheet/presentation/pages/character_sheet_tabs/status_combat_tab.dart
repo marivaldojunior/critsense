@@ -15,6 +15,7 @@ import '../../widgets/attacks_card.dart';
 import '../../widgets/conditions_card.dart';
 import '../../widgets/death_saves_card.dart';
 import '../../widgets/hp_management_sheet.dart';
+import '../../widgets/level_up_sheet.dart';
 import '../../widgets/number_edit_dialog.dart';
 import '../../widgets/short_rest_sheet.dart';
 
@@ -47,6 +48,8 @@ class StatusCombatTab extends StatelessWidget {
             character: live,
             armorClass: armorClassWithEquipment(live, items),
           ),
+          const SizedBox(height: 10),
+          LevelProgressCard(character: live),
           const SizedBox(height: 10),
           _HpCard(character: live),
           const SizedBox(height: 10),

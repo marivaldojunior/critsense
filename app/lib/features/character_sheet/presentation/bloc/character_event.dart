@@ -250,3 +250,30 @@ final class SetCoinsEvent extends CharacterEvent {
 
   const SetCoinsEvent(this.characterId, this.coin, this.amount);
 }
+
+// ---------------------------------------------------------------------------
+// Evolução — ver `LevelRules`.
+// ---------------------------------------------------------------------------
+
+/// Soma [amount] de XP ao personagem [characterId].
+final class AddExperienceEvent extends CharacterEvent {
+  final String characterId;
+  final int amount;
+
+  const AddExperienceEvent(this.characterId, this.amount);
+}
+
+/// Sobe um nível do personagem [characterId] com o valor do dado de vida
+/// [hitDieResult] (sem a CON) e o Aumento de Valor de Atributo
+/// [abilityIncreases], quando o nível tem um.
+final class LevelUpEvent extends CharacterEvent {
+  final String characterId;
+  final int hitDieResult;
+  final Map<AttributeType, int> abilityIncreases;
+
+  const LevelUpEvent(
+    this.characterId, {
+    required this.hitDieResult,
+    this.abilityIncreases = const {},
+  });
+}

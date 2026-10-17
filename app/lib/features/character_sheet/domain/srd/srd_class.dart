@@ -56,7 +56,18 @@ enum SrdClass {
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
     armorTraining: {'light', 'medium', 'shield'},
     weaponCategories: {},
-    weaponIndices: {'club', 'dagger', 'dart', 'javelin', 'mace', 'quarterstaff', 'scimitar', 'sickle', 'sling', 'spear'},
+    weaponIndices: {
+      'club',
+      'dagger',
+      'dart',
+      'javelin',
+      'mace',
+      'quarterstaff',
+      'scimitar',
+      'sickle',
+      'sling',
+      'spear',
+    },
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.wisdom,
     preparesSpells: true,
@@ -109,7 +120,13 @@ enum SrdClass {
     savingThrows: {AttributeType.constitution, AttributeType.charisma},
     armorTraining: {},
     weaponCategories: {},
-    weaponIndices: {'dagger', 'dart', 'sling', 'quarterstaff', 'crossbow-light'},
+    weaponIndices: {
+      'dagger',
+      'dart',
+      'sling',
+      'quarterstaff',
+      'crossbow-light',
+    },
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.charisma,
   ),
@@ -128,7 +145,13 @@ enum SrdClass {
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
     armorTraining: {},
     weaponCategories: {},
-    weaponIndices: {'dagger', 'dart', 'sling', 'quarterstaff', 'crossbow-light'},
+    weaponIndices: {
+      'dagger',
+      'dart',
+      'sling',
+      'quarterstaff',
+      'crossbow-light',
+    },
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.intelligence,
     preparesSpells: true,
@@ -183,6 +206,23 @@ enum SrdClass {
     return (category != null && weaponCategories.contains(category)) ||
         weaponIndices.contains(weaponIndex);
   }
+
+  /// Níveis com Aumento de Valor de Atributo: 4, 8, 12, 16 e 19 em todas as
+  /// classes, mais 6 e 14 no Guerreiro e 10 no Ladino.
+  Set<int> get abilityScoreImprovementLevels => {
+    4,
+    8,
+    12,
+    16,
+    19,
+    if (this == fighter) ...{6, 14},
+    if (this == rogue) 10,
+  };
+
+  /// Níveis de Aumento de Valor de Atributo de uma classe que pode não ser
+  /// do SRD (fora do SRD, vale a tabela comum).
+  static Set<int> abilityScoreImprovementLevelsFor(SrdClass? srdClass) =>
+      srdClass?.abilityScoreImprovementLevels ?? {4, 8, 12, 16, 19};
 
   /// Dado de vida usado quando a classe não é do SRD.
   static const int defaultHitDie = 8;

@@ -116,3 +116,27 @@ AbilityScoreRoll rollAbilityScore(Random random) {
     ..sort((a, b) => b.compareTo(a));
   return (dice: dice, total: dice[0] + dice[1] + dice[2]);
 }
+
+/// XP mínimo de cada nível do SRD (posição 0 = nível 1).
+const experienceThresholds = [
+  0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, //
+  85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000,
+  355000,
+];
+
+/// Nível máximo de personagem.
+const maxCharacterLevel = 20;
+
+/// XP necessário para chegar ao nível seguinte a [level], ou `null` no 20º.
+int? experienceForNextLevel(int level) =>
+    level >= maxCharacterLevel ? null : experienceThresholds[level];
+
+/// Nível que [experiencePoints] permite pela tabela do SRD.
+int levelForExperience(int experiencePoints) {
+  var level = 1;
+  while (level < maxCharacterLevel &&
+      experiencePoints >= experienceThresholds[level]) {
+    level++;
+  }
+  return level;
+}
