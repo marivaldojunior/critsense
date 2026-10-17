@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,6 +39,7 @@ public class AiGateway implements DisposableBean {
     private final Duration timeout;
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
+    @Autowired
     public AiGateway(CritsenseProperties properties) {
         this(properties.ai().timeout());
     }

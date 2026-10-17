@@ -56,6 +56,12 @@ critsense:
       # Chamadas de IA por usuário, por minuto.
       requests-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:10}
 
+springdoc:
+  # Chaves em ordem alfabética: o contrato gerado fica estável entre execuções,
+  # e o diff de contracts/openapi.yaml mostra só mudanças reais.
+  writer-with-order-by-keys: true
+  default-produces-media-type: application/json
+
 management:
   endpoints:
     web:
