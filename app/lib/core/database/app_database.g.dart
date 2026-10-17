@@ -4622,6 +4622,275 @@ class CharacterSpellsCompanion extends UpdateCompanion<CharacterSpellData> {
   }
 }
 
+class $ApiCacheTable extends ApiCache
+    with TableInfo<$ApiCacheTable, ApiCacheEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ApiCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _requestKeyMeta = const VerificationMeta(
+    'requestKey',
+  );
+  @override
+  late final GeneratedColumn<String> requestKey = GeneratedColumn<String>(
+    'request_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [requestKey, body, fetchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'api_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ApiCacheEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('request_key')) {
+      context.handle(
+        _requestKeyMeta,
+        requestKey.isAcceptableOrUnknown(data['request_key']!, _requestKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_requestKeyMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {requestKey};
+  @override
+  ApiCacheEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ApiCacheEntry(
+      requestKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}request_key'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ApiCacheTable createAlias(String alias) {
+    return $ApiCacheTable(attachedDatabase, alias);
+  }
+}
+
+class ApiCacheEntry extends DataClass implements Insertable<ApiCacheEntry> {
+  final String requestKey;
+  final String body;
+  final DateTime fetchedAt;
+  const ApiCacheEntry({
+    required this.requestKey,
+    required this.body,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['request_key'] = Variable<String>(requestKey);
+    map['body'] = Variable<String>(body);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  ApiCacheCompanion toCompanion(bool nullToAbsent) {
+    return ApiCacheCompanion(
+      requestKey: Value(requestKey),
+      body: Value(body),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory ApiCacheEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ApiCacheEntry(
+      requestKey: serializer.fromJson<String>(json['requestKey']),
+      body: serializer.fromJson<String>(json['body']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'requestKey': serializer.toJson<String>(requestKey),
+      'body': serializer.toJson<String>(body),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  ApiCacheEntry copyWith({
+    String? requestKey,
+    String? body,
+    DateTime? fetchedAt,
+  }) => ApiCacheEntry(
+    requestKey: requestKey ?? this.requestKey,
+    body: body ?? this.body,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  ApiCacheEntry copyWithCompanion(ApiCacheCompanion data) {
+    return ApiCacheEntry(
+      requestKey: data.requestKey.present
+          ? data.requestKey.value
+          : this.requestKey,
+      body: data.body.present ? data.body.value : this.body,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApiCacheEntry(')
+          ..write('requestKey: $requestKey, ')
+          ..write('body: $body, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(requestKey, body, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ApiCacheEntry &&
+          other.requestKey == this.requestKey &&
+          other.body == this.body &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class ApiCacheCompanion extends UpdateCompanion<ApiCacheEntry> {
+  final Value<String> requestKey;
+  final Value<String> body;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const ApiCacheCompanion({
+    this.requestKey = const Value.absent(),
+    this.body = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ApiCacheCompanion.insert({
+    required String requestKey,
+    required String body,
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : requestKey = Value(requestKey),
+       body = Value(body),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<ApiCacheEntry> custom({
+    Expression<String>? requestKey,
+    Expression<String>? body,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (requestKey != null) 'request_key': requestKey,
+      if (body != null) 'body': body,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ApiCacheCompanion copyWith({
+    Value<String>? requestKey,
+    Value<String>? body,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return ApiCacheCompanion(
+      requestKey: requestKey ?? this.requestKey,
+      body: body ?? this.body,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (requestKey.present) {
+      map['request_key'] = Variable<String>(requestKey.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApiCacheCompanion(')
+          ..write('requestKey: $requestKey, ')
+          ..write('body: $body, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4632,6 +4901,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CharacterSpellsTable characterSpells = $CharacterSpellsTable(
     this,
   );
+  late final $ApiCacheTable apiCache = $ApiCacheTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4642,6 +4912,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     inventoryItems,
     sessionNotes,
     characterSpells,
+    apiCache,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7653,6 +7924,170 @@ typedef $$CharacterSpellsTableProcessedTableManager =
       CharacterSpellData,
       PrefetchHooks Function({bool characterId})
     >;
+typedef $$ApiCacheTableCreateCompanionBuilder =
+    ApiCacheCompanion Function({
+      required String requestKey,
+      required String body,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$ApiCacheTableUpdateCompanionBuilder =
+    ApiCacheCompanion Function({
+      Value<String> requestKey,
+      Value<String> body,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$ApiCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $ApiCacheTable> {
+  $$ApiCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get requestKey => $composableBuilder(
+    column: $table.requestKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ApiCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $ApiCacheTable> {
+  $$ApiCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get requestKey => $composableBuilder(
+    column: $table.requestKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ApiCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ApiCacheTable> {
+  $$ApiCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get requestKey => $composableBuilder(
+    column: $table.requestKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$ApiCacheTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ApiCacheTable,
+          ApiCacheEntry,
+          $$ApiCacheTableFilterComposer,
+          $$ApiCacheTableOrderingComposer,
+          $$ApiCacheTableAnnotationComposer,
+          $$ApiCacheTableCreateCompanionBuilder,
+          $$ApiCacheTableUpdateCompanionBuilder,
+          (
+            ApiCacheEntry,
+            BaseReferences<_$AppDatabase, $ApiCacheTable, ApiCacheEntry>,
+          ),
+          ApiCacheEntry,
+          PrefetchHooks Function()
+        > {
+  $$ApiCacheTableTableManager(_$AppDatabase db, $ApiCacheTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ApiCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ApiCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ApiCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> requestKey = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ApiCacheCompanion(
+                requestKey: requestKey,
+                body: body,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String requestKey,
+                required String body,
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ApiCacheCompanion.insert(
+                requestKey: requestKey,
+                body: body,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ApiCacheTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ApiCacheTable,
+      ApiCacheEntry,
+      $$ApiCacheTableFilterComposer,
+      $$ApiCacheTableOrderingComposer,
+      $$ApiCacheTableAnnotationComposer,
+      $$ApiCacheTableCreateCompanionBuilder,
+      $$ApiCacheTableUpdateCompanionBuilder,
+      (
+        ApiCacheEntry,
+        BaseReferences<_$AppDatabase, $ApiCacheTable, ApiCacheEntry>,
+      ),
+      ApiCacheEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7667,4 +8102,6 @@ class $AppDatabaseManager {
       $$SessionNotesTableTableManager(_db, _db.sessionNotes);
   $$CharacterSpellsTableTableManager get characterSpells =>
       $$CharacterSpellsTableTableManager(_db, _db.characterSpells);
+  $$ApiCacheTableTableManager get apiCache =>
+      $$ApiCacheTableTableManager(_db, _db.apiCache);
 }

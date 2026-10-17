@@ -351,3 +351,15 @@ class CharacterSpells extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Cópia das respostas GET do compêndio, para uso sem internet (versão 12).
+/// A chave é a URL completa da requisição (ver `OfflineCacheInterceptor`).
+@DataClassName('ApiCacheEntry')
+class ApiCache extends Table {
+  TextColumn get requestKey => text()();
+  TextColumn get body => text()();
+  DateTimeColumn get fetchedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {requestKey};
+}

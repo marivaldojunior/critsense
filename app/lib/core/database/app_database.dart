@@ -23,6 +23,7 @@ part 'app_database.g.dart';
     InventoryItems,
     SessionNotes,
     CharacterSpells,
+    ApiCache,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -30,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -147,6 +148,10 @@ class AppDatabase extends _$AppDatabase {
         // Proficiências em armaduras, armas e ferramentas, e idiomas.
         await m.addColumn(characters, characters.otherProficiencies);
         await m.addColumn(characters, characters.languages);
+      }
+      if (from < 12) {
+        // Cópia do compêndio para uso sem internet.
+        await m.createTable(apiCache);
       }
     },
   );

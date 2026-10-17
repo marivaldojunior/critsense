@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:crit_sense/core/database/app_database.dart';
+import 'package:crit_sense/core/network/drift_api_cache_store.dart';
+import 'package:crit_sense/core/network/offline_cache_interceptor.dart';
 import 'package:crit_sense/core/theme/theme_cubit.dart';
 import 'package:crit_sense/features/character_sheet/data/repositories/character_repository_impl.dart';
 import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
@@ -207,14 +209,21 @@ Future<void> init() async {
   // Os timeouts evitam que uma tela de compêndio fique presa no skeleton sem
   // rede: depois do limite, o Dio lança `DioException` e a tela mostra o
   // estado de erro.
+  //
+  // O OfflineCacheInterceptor guarda cada resposta do compêndio no banco e a
+  // devolve quando não há internet (ver o interceptor).
   sl.registerLazySingleton<Dio>(
-    () => Dio(
-      BaseOptions(
-        baseUrl: CompendiumRemoteDataSourceImpl.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 20),
-      ),
-    ),
+    () =>
+        Dio(
+            BaseOptions(
+              baseUrl: CompendiumRemoteDataSourceImpl.baseUrl,
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 20),
+            ),
+          )
+          ..interceptors.add(
+            OfflineCacheInterceptor(DriftApiCacheStore(sl<AppDatabase>())),
+          ),
   );
 
   // Factory: cada tela recebe um BLoC zerado, evitando estado compartilhado.
