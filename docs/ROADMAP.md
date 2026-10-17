@@ -75,7 +75,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 
 #### Arquitetura
 - [x] **T0.5** Crie um `SessionNotesBloc` e mova para ele as chamadas de use case da [session_notes_screen.dart](../lib/features/character_sheet/presentation/pages/session_notes_screen.dart).
-- [ ] **T0.6** Crie um `InventoryBloc` e mova para ele as chamadas de use case da [inventory_spells_tab.dart](../lib/features/character_sheet/presentation/pages/character_sheet_tabs/inventory_spells_tab.dart).
+- [x] **T0.6** Crie um `InventoryBloc` e mova para ele as chamadas de use case da [inventory_spells_tab.dart](../lib/features/character_sheet/presentation/pages/character_sheet_tabs/inventory_spells_tab.dart).
 - [ ] **T0.7** Faça o shake passar pelo `ISensorDataSource` e pelo `DiceBloc`. Remova o uso direto do `HardwareBridge` na [dice_screen.dart](../lib/features/dice_roller/presentation/pages/dice_screen.dart).
 - [ ] **T0.8** Configure o `Dio` com `BaseOptions` (`baseUrl`, `connectTimeout`, `receiveTimeout`). Remova as URLs repetidas do datasource do compêndio.
 - [ ] **T0.9** Salve o tema escolhido pelo usuário. Corrija o botão de tema, que para de funcionar depois do logout.

@@ -14,6 +14,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/get_session_
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/inventory_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/point_buy_cubit.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/session_notes_bloc.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
@@ -91,6 +92,14 @@ Future<void> init() async {
       sl<GetSessionNotesUseCase>(),
       sl<AddSessionNoteUseCase>(),
       sl<DeleteSessionNoteUseCase>(),
+    ),
+  );
+
+  // Factory: cada abertura da aba de inventário recebe um BLoC próprio.
+  sl.registerFactory<InventoryBloc>(
+    () => InventoryBloc(
+      sl<GetCharacterInventoryUseCase>(),
+      sl<DeleteInventoryItemUseCase>(),
     ),
   );
 

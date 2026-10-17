@@ -6,85 +6,87 @@ import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
 
 import '../../../domain/entities/inventory_item.dart';
-import '../../../domain/usecases/delete_inventory_item_usecase.dart';
-import '../../../domain/usecases/get_character_inventory_usecase.dart';
 import '../../bloc/character_bloc.dart';
+import '../../bloc/inventory_bloc.dart';
 
 /// Aba "Inventário & Magias" da ficha.
 ///
 /// O inventário é uma feature persistida em sua própria tabela relacional
-/// ([InventoryItem]/[GetCharacterInventoryUseCase], carregada localmente
-/// via [FutureBuilder] e recarregada após cada remoção). Já as magias
-/// vivem diretamente no [Character] (`character.spells`), então essa
-/// seção escuta o [CharacterBloc] para refletir em tempo real qualquer
+/// ([InventoryItem]), com o estado no [InventoryBloc] criado por esta aba.
+/// Já as magias vivem diretamente no [Character] (`character.spells`), então
+/// essa seção escuta o [CharacterBloc] para refletir em tempo real qualquer
 /// magia vinculada pelo Compêndio, sem precisar sair e voltar à ficha.
-class InventorySpellsTab extends StatefulWidget {
+class InventorySpellsTab extends StatelessWidget {
   const InventorySpellsTab({super.key, required this.characterId});
 
   final String characterId;
 
   @override
-  State<InventorySpellsTab> createState() => _InventorySpellsTabState();
-}
-
-class _InventorySpellsTabState extends State<InventorySpellsTab> {
-  final _getInventory = sl<GetCharacterInventoryUseCase>();
-  final _deleteInventoryItem = sl<DeleteInventoryItemUseCase>();
-
-  late Future<List<InventoryItem>> _inventoryFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _inventoryFuture = _getInventory(widget.characterId);
-  }
-
-  /// Remove [item] do inventário e recarrega a lista para refletir a
-  /// exclusão — mesmo padrão usado para excluir notas de sessão.
-  Future<void> _removeInventoryItem(InventoryItem item) async {
-    await _deleteInventoryItem(item.id);
-    if (!mounted) return;
-    setState(() {
-      _inventoryFuture = _getInventory(widget.characterId);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text('Inventário', style: theme.textTheme.titleMedium),
-        const Divider(),
-        FutureBuilder<List<InventoryItem>>(
-          future: _inventoryFuture,
-          builder: (context, snapshot) {
-            return AnimatedSwitcher(
+    return BlocProvider<InventoryBloc>(
+      create: (_) => sl<InventoryBloc>()..add(LoadInventoryEvent(characterId)),
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('Inventário', style: theme.textTheme.titleMedium),
+          const Divider(),
+          BlocConsumer<InventoryBloc, InventoryState>(
+            listenWhen: (previous, current) =>
+                current.errorMessage != null &&
+                current.status != InventoryStatus.failure,
+            listener: (context, state) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            },
+            builder: (context, state) => AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: _buildInventoryBody(snapshot),
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        Text('Magias', style: theme.textTheme.titleMedium),
-        const Divider(),
-        _SpellsSection(characterId: widget.characterId),
-      ],
+              child: _buildInventoryBody(context, state),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('Magias', style: theme.textTheme.titleMedium),
+          const Divider(),
+          _SpellsSection(characterId: characterId),
+        ],
+      ),
     );
   }
 
-  /// Resolve o corpo da seção de Inventário a partir do [snapshot] do
-  /// [FutureBuilder] — usado como `child` do [AnimatedSwitcher] em [build],
-  /// daí cada branch carregar uma [ValueKey] distinta para o Flutter
-  /// detectar a troca e disparar o fade de 300ms.
-  Widget _buildInventoryBody(AsyncSnapshot<List<InventoryItem>> snapshot) {
-    if (snapshot.connectionState != ConnectionState.done) {
-      return const _InventorySkeleton(key: ValueKey('loading'));
+  /// Resolve o corpo da seção de Inventário a partir do [state] — usado
+  /// como `child` do [AnimatedSwitcher] em [build], daí cada branch carregar
+  /// uma [ValueKey] distinta para o Flutter detectar a troca e disparar o
+  /// fade de 300ms.
+  Widget _buildInventoryBody(BuildContext context, InventoryState state) {
+    switch (state.status) {
+      case InventoryStatus.initial:
+      case InventoryStatus.loading:
+        return const _InventorySkeleton(key: ValueKey('loading'));
+      case InventoryStatus.failure:
+        return Padding(
+          key: const ValueKey('failure'),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text('Não foi possível carregar o inventário.'),
+              ),
+              TextButton(
+                onPressed: () => context.read<InventoryBloc>().add(
+                  LoadInventoryEvent(characterId),
+                ),
+                child: const Text('Tentar novamente'),
+              ),
+            ],
+          ),
+        );
+      case InventoryStatus.success:
+        break;
     }
 
-    final items = snapshot.data ?? const [];
+    final items = state.items;
     if (items.isEmpty) {
       return const Padding(
         key: ValueKey('empty'),
@@ -99,7 +101,9 @@ class _InventorySpellsTabState extends State<InventorySpellsTab> {
         for (final item in items)
           _InventoryItemTile(
             item: item,
-            onDelete: () => _removeInventoryItem(item),
+            onDelete: () => context.read<InventoryBloc>().add(
+              DeleteInventoryItemEvent(item),
+            ),
           ),
       ],
     );
