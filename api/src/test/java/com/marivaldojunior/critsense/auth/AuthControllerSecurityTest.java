@@ -13,6 +13,7 @@ import com.marivaldojunior.critsense.common.error.ApiException;
 import com.marivaldojunior.critsense.common.error.ErrorCode;
 import com.marivaldojunior.critsense.config.CritsenseProperties;
 import com.marivaldojunior.critsense.config.SecurityConfig;
+import com.marivaldojunior.critsense.ratelimit.AiRateLimiter;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * válido, token ausente ou vencido e o formato dos erros 401.
  */
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, JwtTokenService.class})
+@Import({SecurityConfig.class, JwtTokenService.class, AiRateLimiter.class})
 @EnableConfigurationProperties(CritsenseProperties.class)
 class AuthControllerSecurityTest {
 

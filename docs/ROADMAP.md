@@ -108,7 +108,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 
 #### Autenticação e limites
 - [x] **T1.6** Crie o cadastro e o login com JWT (Spring Security). Crie a tabela de usuários com Flyway.
-- [ ] **T1.7** Adicione rate limit por usuário com Bucket4j nos endpoints de IA. Devolva `429` com o cabeçalho `Retry-After`.
+- [x] **T1.7** Adicione rate limit por usuário com Bucket4j nos endpoints de IA. Devolva `429` com o cabeçalho `Retry-After`.
 - [ ] **T1.8** Configure timeout e retry nas chamadas ao LLM. Devolva `504` quando o provedor demorar demais.
 
 #### Gerador de NPCs
