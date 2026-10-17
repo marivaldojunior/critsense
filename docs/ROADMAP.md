@@ -117,9 +117,9 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [x] **T1.11** Escreva testes com JUnit 5 e Testcontainers. Use um `ChatModel` falso nos testes, para não chamar o provedor real no CI.
 
 #### CI
-- [ ] **T1.12** Crie o workflow da API (build, testes, lint) com filtro `paths: api/**`.
-- [ ] **T1.13** Crie o workflow do Flutter (`flutter analyze`, `flutter test`) com filtro de `paths`.
-- [ ] **T1.14** Adicione no CI uma verificação de que o `contracts/openapi.yaml` está igual ao contrato gerado pela API.
+- [x] **T1.12** Crie o workflow da API (build, testes, lint) com filtro `paths: api/**`.
+- [x] **T1.13** Crie o workflow do Flutter (`flutter analyze`, `flutter test`) com filtro de `paths`.
+- [x] **T1.14** Adicione no CI uma verificação de que o `contracts/openapi.yaml` está igual ao contrato gerado pela API.
 
 #### Lado Flutter
 - [ ] **T1.15** Gere o cliente Dart do OpenAPI em `app/packages/critsense_api_client`. Teste se ele funciona com os `dependency_overrides` atuais.
