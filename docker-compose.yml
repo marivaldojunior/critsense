@@ -1,0 +1,41 @@
+# Ambiente local: API do CritSense + PostgreSQL.
+#
+#   1. Copie .env.example para .env e preencha as chaves.
+#   2. docker compose up --build
+#
+# A API fica em http://localhost:8080 e a documentação em
+# http://localhost:8080/swagger-ui.html.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: critsense
+      POSTGRES_USER: ${DB_USER:-critsense}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-critsense}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/critsense
+      DB_USER: ${DB_USER:-critsense}
+      DB_PASSWORD: ${DB_PASSWORD:-critsense}
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres-data:
