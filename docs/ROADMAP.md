@@ -87,7 +87,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 #### Testes
 - [x] **T0.11** Escreva testes para o `DiceBloc` (pool, modificador, vantagem e desvantagem).
 - [x] **T0.12** Escreva testes para o `PointBuyCubit` (custo, limite de 27 pontos).
-- [ ] **T0.13** Escreva testes para os BLoCs do compêndio (debounce, filtros, paginação do Bestiário).
+- [x] **T0.13** Escreva testes para os BLoCs do compêndio (debounce, filtros, paginação do Bestiário).
 - [ ] **T0.14** Escreva testes para o `CharacterRepositoryImpl` e as migrações do Drift, com banco em memória.
 
 #### Documentação
