@@ -1,0 +1,12 @@
+# Configuração extra dos testes. O Spring lê este arquivo depois do
+# application.yml principal, então só os valores daqui mudam.
+critsense:
+  security:
+    jwt:
+      secret: test-secret-with-at-least-32-characters!!
+spring:
+  ai:
+    model:
+      # Os testes nunca chamam um provedor real; quem precisa de um ChatModel
+      # registra um falso.
+      chat: none

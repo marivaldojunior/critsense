@@ -42,6 +42,12 @@ spring:
       # o padrão do Spring AI.
 
 critsense:
+  security:
+    jwt:
+      # Sem valor padrão de propósito: a API não sobe sem JWT_SECRET.
+      secret: ${JWT_SECRET:}
+      ttl: ${JWT_TTL:24h}
+      issuer: critsense-api
   ai:
     # Tempo máximo de uma chamada de IA, do lado da API. Acima disso, a API
     # devolve 504 para o cliente.
