@@ -53,6 +53,15 @@ void main() {
     return bloc;
   }
 
+  /// Rola a lista até [finder] aparecer (o ListView só constrói o que está
+  /// perto da tela).
+  Future<void> scrollTo(WidgetTester tester, Finder finder) =>
+      tester.scrollUntilVisible(
+        finder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
   testWidgets('mostra CA, iniciativa, proficiência e dados de vida '
       'calculados', (tester) async {
     await pumpTab(tester, buildTestCharacter());
@@ -122,6 +131,7 @@ void main() {
       ),
     );
 
+    await scrollTo(tester, find.text('Envenenado'));
     expect(find.text('Envenenado'), findsOneWidget);
     expect(find.text('Agarrado'), findsOneWidget);
     expect(find.text('2. Deslocamento reduzido à metade.'), findsOneWidget);

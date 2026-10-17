@@ -49,17 +49,19 @@ class StatusCombatTab extends StatelessWidget {
             armorClass: armorClassWithEquipment(live, items),
           ),
           const SizedBox(height: 10),
-          LevelProgressCard(character: live),
-          const SizedBox(height: 10),
           _HpCard(character: live),
-          const SizedBox(height: 10),
-          AttacksCard(attacks: weaponAttacks(live, items)),
+          // Com 0 PV, as salvaguardas vêm logo abaixo do PV: é o que o
+          // jogador precisa ver primeiro.
           if (live.currentHitPoints == 0 && live.maxHitPoints > 0) ...[
             const SizedBox(height: 10),
             DeathSavesCard(character: live),
           ],
           const SizedBox(height: 10),
+          AttacksCard(attacks: weaponAttacks(live, items)),
+          const SizedBox(height: 10),
           ConditionsCard(character: live),
+          const SizedBox(height: 10),
+          LevelProgressCard(character: live),
         ];
 
         return LayoutBuilder(
