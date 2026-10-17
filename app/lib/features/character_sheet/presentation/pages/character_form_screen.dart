@@ -20,10 +20,11 @@ import '../../domain/entities/character.dart';
 import '../../domain/rules/srd_rules.dart';
 import '../../domain/srd/srd_class.dart';
 import '../../domain/srd/srd_race.dart';
+import '../bloc/ability_scores_cubit.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/form_options_bloc.dart';
 import '../bloc/point_buy_cubit.dart';
-import '../widgets/point_buy_section.dart';
+import '../widgets/ability_scores_section.dart';
 
 /// Tela de criação de um novo personagem via formulário.
 ///
@@ -132,9 +133,20 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       return;
     }
 
+    final abilityScores = context.read<AbilityScoresCubit>().state;
+    final baseAttributes = abilityScores.method == AbilityScoreMethod.pointBuy
+        ? context.read<PointBuyCubit>().state.attributes
+        : abilityScores.attributes;
+    if (baseAttributes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dê um valor a cada atributo.')),
+      );
+      return;
+    }
+
     final level = int.parse(_levelCtrl.text);
     final attributes = applyRacialBonuses(
-      context.read<PointBuyCubit>().state.attributes,
+      baseAttributes,
       race,
       chosen: _chosenRacialBonuses,
     );
@@ -179,6 +191,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
           create: (_) => sl<FormOptionsBloc>()..add(LoadFormOptionsEvent()),
         ),
         BlocProvider<PointBuyCubit>(create: (_) => sl<PointBuyCubit>()),
+        BlocProvider<AbilityScoresCubit>(create: (_) => AbilityScoresCubit()),
       ],
       // O `Scaffold` é montado inteiro dentro do `builder` do BlocBuilder —
       // não só o `body` — porque `bottomNavigationBar` também precisa do
@@ -364,7 +377,12 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
           const SizedBox(height: 24),
           _SectionHeader(title: 'Atributos'),
           const SizedBox(height: 4),
-          const PointBuySection(),
+          Text(
+            'Valores base, antes dos bônus raciais.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          const AbilityScoresSection(),
           const SizedBox(height: 24),
         ],
       ),

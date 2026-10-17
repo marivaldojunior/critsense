@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../entities/condition.dart';
 import '../srd/srd_class.dart';
 
@@ -99,4 +101,18 @@ int startingMaxHitPoints({
     constitutionModifier: constitutionModifier,
   );
   return atFirstLevel + perLevel * (level.clamp(1, 20) - 1);
+}
+
+/// Matriz padrão de atributos do SRD.
+const standardAbilityArray = [15, 14, 13, 12, 10, 8];
+
+/// Uma rolagem de atributo: os 4 dados (do maior ao menor) e a soma dos 3
+/// maiores.
+typedef AbilityScoreRoll = ({List<int> dice, int total});
+
+/// Rola 4d6 e descarta o menor dado.
+AbilityScoreRoll rollAbilityScore(Random random) {
+  final dice = [for (var i = 0; i < 4; i++) random.nextInt(6) + 1]
+    ..sort((a, b) => b.compareTo(a));
+  return (dice: dice, total: dice[0] + dice[1] + dice[2]);
 }
