@@ -1,6 +1,6 @@
 # ⚔️ CritSense
 
-**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio oficial (magias, equipamentos e bestiário) e rolador de dados físico, tudo em um único app **offline-first**, construído com padrões de arquitetura de nível corporativo.
+**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio do SRD 5.1 (magias, equipamentos e bestiário) e rolador de dados físico, em um único app. As fichas funcionam **offline**; o compêndio precisa de internet.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
@@ -15,8 +15,8 @@
 O projeto é estruturado sob os princípios de **Clean Architecture**, com cada feature isolada em três camadas — `domain`, `data` e `presentation` — garantindo baixo acoplamento, alta testabilidade e regras de negócio livres de dependências de framework ou infraestrutura.
 
 * **Injeção de Dependência (`get_it`):** todo o grafo de dependências (DataSources → Repositories → Use Cases → BLoCs) é registrado centralmente em [lib/di/injection_container.dart](lib/di/injection_container.dart), com `LazySingleton` para recursos compartilhados (conexão SQLite, cliente HTTP) e `Factory` para estado de UI isolado por tela.
-* **Gerenciamento de estado previsível (`flutter_bloc`):** cada feature expõe seu estado através de eventos e states imutáveis (`Equatable`), eliminando mutação implícita e tornando toda transição de estado rastreável e testável — coberto com testes de BLoC usando `bloc_test` e `mocktail`.
-* **Persistência local com Drift/SQLite:** camada de dados com migrações versionadas (`MigrationStrategy`), transações atômicas, UPSERTs e cascade delete via foreign keys — sem depender de conectividade para uso contínuo do app (*Offline-First*).
+* **Gerenciamento de estado previsível (`flutter_bloc`):** cada feature expõe seu estado através de eventos e states imutáveis (atualizados via `copyWith`), eliminando mutação implícita e tornando toda transição de estado rastreável e testável. As telas não chamam use cases diretamente: todo acesso a dados passa por um BLoC/Cubit.
+* **Persistência local com Drift/SQLite:** camada de dados com migrações versionadas (`MigrationStrategy`), transações atômicas, UPSERTs e cascade delete via foreign keys. Os dados das fichas não dependem de conexão.
 * **Integração cruzada entre features:** o módulo `compendium` dispara eventos diretamente nos BLoCs de `character_sheet` (ex: `AddInventoryItemEvent`, `AddSpellToCharacterEvent`, `AddBossToCharacterEvent`), mantendo baixo acoplamento sem um mediador central — cada feature conhece apenas o contrato do evento que dispara.
 
 ---
@@ -27,11 +27,12 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 * **Criação via Point Buy:** alocação dos 27 pontos entre os seis atributos, com regras de custo/limite aplicadas em tempo real (`PointBuyCubit`).
 * **Status de Combate completo:** Classe de Armadura, iniciativa, deslocamento, pontos de vida (atuais/máximos/temporários), experiência e bônus de proficiência.
 * **Diário de Campanha:** notas de sessão por personagem com criação via formulário validado e **exclusão com sistema de Undo** — a nota some da lista imediatamente e só é removida do banco se o usuário não tocar em "Desfazer" dentro da janela do `SnackBar`.
-* **Persistência local offline-first:** todos os dados (atributos, inventário, magias, notas, chefes derrotados) sobrevivem sem conexão, com schema versionado e migrações incrementais no Drift.
+* **Persistência local:** todos os dados da ficha (atributos, proficiências, inventário, magias, notas, chefes derrotados) ficam no aparelho, com schema versionado e migrações incrementais no Drift.
 
 ### 📚 Compêndio D&D 5e
 * Integração com a **API 5e-bits** via `Dio`, cobrindo **Magias**, **Equipamentos** e **Bestiário**, cada um com tela de listagem e detalhe dedicadas (stat blocks completos para monstros, componentes/duração para magias, dano/CA para equipamentos).
 * Busca por nome e filtros rápidos (nível, categoria, Classe de Desafio) combinados em um único fluxo reativo por feature.
+* **Precisa de internet:** o compêndio não tem cache local. Sem conexão, as telas mostram o estado de erro depois do timeout do `Dio`.
 
 ### 🔗 Integração Cruzada (Compêndio → Personagem)
 * Adição direta de **magias** e **itens de equipamento** ao inventário de um personagem a partir das telas de detalhe do compêndio.
@@ -41,13 +42,16 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 ### 🎲 Rolador de Dados
 * Pool com múltiplos tipos e quantidades de dados (d4 a d100).
 * Modificador global configurável e modos de **vantagem/desvantagem** aplicados especificamente ao d20.
-* **Suporte a hardware:** disparo de rolagem via sensor de movimento do dispositivo (shake), além do CTA manual fixo na tela.
+* **Suporte a hardware:** disparo de rolagem via sensor de movimento do dispositivo (shake), além do CTA manual fixo na tela, e vibração em acerto crítico e falha crítica. Os canais nativos estão em `MainActivity.kt` (Android) e `AppDelegate.swift` (iOS). A versão iOS ainda não foi compilada nem testada num aparelho.
+
+### 🔐 Login
+* A tela de login é só visual: ela valida os campos e abre a Home, sem autenticação real. A autenticação vai chegar com a API própria (ver o [roadmap](docs/ROADMAP.md)).
 
 ---
 
 ## 🎨 Destaques de UI/UX e Performance
 
-* **Design System em Material Design 3:** paleta inteira derivada de uma única semente via `ColorScheme.fromSeed`, com temas claro/escuro consistentes e cores semânticas reservadas (verde/vermelho) para sucesso e falha crítica.
+* **Design System em Material Design 3:** paleta inteira derivada de uma única semente via `ColorScheme.fromSeed`, com temas claro/escuro consistentes e cores semânticas reservadas (verde/vermelho) para sucesso e falha crítica. O tema escolhido fica salvo entre aberturas do app (`ThemeCubit` + `shared_preferences`).
 * **Busca reativa com `RxDart`:** transformador de eventos customizado aplica `debounceTime` + `switchMap` nos BLoCs de busca do compêndio, cancelando requisições obsoletas e evitando chamadas excessivas à API a cada tecla digitada.
 * **Skeleton Loading com `shimmer`:** transições suaves entre estados de carregamento e conteúdo real, com esqueletos que imitam o layout final (listagens e telas de detalhe).
 * **Paginação infinita:** Bestiário consumido sob demanda via `ScrollController`, disparando novas páginas ao atingir 90% do scroll, sem travar a renderização de listas extensas.
@@ -79,3 +83,35 @@ flutter run
 flutter test
 flutter analyze
 ```
+
+Os testes usam `mocktail` e cobrem os BLoCs de todas as features, as regras de rolagem do `DiceRepositoryImpl`, o `CharacterRepositoryImpl` e as migrações do Drift (com um banco SQLite em memória). O pacote `bloc_test` está no `pubspec.yaml`, mas os testes não o usam: ele conflita com os `dependency_overrides` necessários para o `drift_dev` (ver o comentário no `pubspec.yaml`).
+
+**Build de release (Android):**
+
+1. Crie uma chave de upload com o `keytool` (o comando está em [android/key.properties.example](android/key.properties.example)).
+2. Copie `android/key.properties.example` para `android/key.properties` e preencha os dados da chave.
+3. Gere o APK:
+
+```bash
+flutter build apk --release
+```
+
+Sem o `android/key.properties`, o release é assinado com a chave de debug. Esse APK serve para testes, mas não para publicação.
+
+---
+
+## 🗺️ Roadmap
+
+As próximas fases (API própria em Java com funcionalidades de IA) estão em [docs/ROADMAP.md](docs/ROADMAP.md).
+
+---
+
+## 📄 Licenças e Atribuições
+
+**Conteúdo de regras (SRD 5.1).** This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
+
+**Dados do compêndio.** As magias, equipamentos e monstros vêm da [D&D 5e API](https://www.dnd5eapi.co) do projeto [5e-bits](https://github.com/5e-bits), que publica o conteúdo do SRD 5.1.
+
+**Ícones.** Os ícones em `assets/icons/` são o [Intrinsical's D&D 5e Icon Set](https://github.com/intrinsical/tw-dnd/tree/main/icons), de [David Kor Kian Wei](https://github.com/intrinsical), sob a licença [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). O texto da licença está em [assets/icons/LICENSE](assets/icons/LICENSE).
+
+O CritSense não tem vínculo com a Wizards of the Coast nem é endossado por ela.
