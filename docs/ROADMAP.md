@@ -26,7 +26,7 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 4. **Conflito de dependências.** O `pubspec.yaml` força `analyzer: ^13.0.0` em `dependency_overrides`. O cliente gerado pode usar `built_value` ou `json_serializable`, que dependem do `analyzer`. Gere o cliente como um pacote separado (`app/packages/critsense_api_client`) e teste o `build_runner` antes de integrar.
 5. **Autenticação.** A proposta não define a autenticação, mas o rate limit depende dela. Para o MVP, use JWT com Spring Security e um cadastro simples (usuário e senha). Não guarde a senha no app. Guarde só o token, com `flutter_secure_storage`.
 6. **Licenças.** A proposta cita o SRD 5.1 (CC-BY-4.0). O SRD 5.2 também é CC-BY-4.0, mas use uma só versão para os dados de regras. Os ícones de `assets/icons/` usam CC-BY-SA 4.0, e o README atual não tem essa atribuição.
-7. **Prompts.** Guarde os prompts em `api/src/main/resources/prompts/` como templates (`.st`), com versão no nome do arquivo (ex.: `npc-generator.v1.st`).
+7. **Prompts.** Guarde os prompts em `api/src/main/resources/prompts/` como templates (`.st`), com uma pasta por versão (ex.: `prompts/npc-generator/v1/system.st` e `user.st`).
 
 ### 1.3 Estrutura do repositório
 
@@ -112,7 +112,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [x] **T1.8** Configure timeout e retry nas chamadas ao LLM. Devolva `504` quando o provedor demorar demais.
 
 #### Gerador de NPCs
-- [ ] **T1.9** Crie o prompt versionado `prompts/npc-generator.v1.st`.
+- [x] **T1.9** Crie o prompt versionado `prompts/npc-generator/v1/` (`system.st` e `user.st`).
 - [ ] **T1.10** Crie o endpoint `POST /api/v1/npcs/generate`. Converta a saída para um record Java e valide com Bean Validation.
 - [ ] **T1.11** Escreva testes com JUnit 5 e Testcontainers. Use um `ChatModel` falso nos testes, para não chamar o provedor real no CI.
 
