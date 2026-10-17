@@ -97,6 +97,40 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 #### Bugs encontrados durante a Fase 0
 - [x] **T0.17** Salve as proficiências do personagem no banco. Antes, a tabela `characters` não tinha uma coluna para elas, e as perícias e os testes de resistência marcados se perdiam ao reabrir o app.
 
+### Ficha completa de D&D 5e (app)
+
+Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo seguem o SRD 5.1 e ficam no código (domínio), sem IA e sem API.
+
+#### Fase A — Combate e descanso
+- [ ] **TA.1** Guarde os dados de vida (tipo pela classe e quantos restam). Gaste os dados no Descanso Curto e devolva metade no Descanso Longo.
+- [ ] **TA.2** Mostre as salvaguardas contra a morte com PV 0 (3 sucessos, 3 falhas, 20 natural e 1 natural).
+- [ ] **TA.3** Marque as condições do SRD e os 6 níveis de exaustão.
+- [ ] **TA.4** Calcule a iniciativa (DES), o bônus de proficiência (nível) e a CA sem armadura.
+- [ ] **TA.5** Adicione o marcador de inspiração.
+
+#### Fase B — Magias
+- [ ] **TB.1** Guarde os espaços de magia por nível (tabelas do SRD, incluindo a Magia de Pacto do Bruxo) e recupere os espaços nos descansos.
+- [ ] **TB.2** Calcule a CD de resistência e o bônus de ataque mágico pelo atributo de conjuração da classe.
+- [ ] **TB.3** Guarde as magias com índice, nível e estado de preparada, e mostre os truques separados.
+
+#### Fase C — Inventário e equipamento
+- [ ] **TC.1** Adicione quantidade e peso aos itens, com o total carregado e o limite de carga.
+- [ ] **TC.2** Adicione as moedas (PC, PP, PE, PO, PL).
+- [ ] **TC.3** Marque itens equipados e itens sintonizados (no máximo 3). Calcule a CA pela armadura e pelo escudo equipados.
+- [ ] **TC.4** Gere os ataques das armas equipadas (bônus de ataque e dano).
+
+#### Fase D — Criação e evolução
+- [ ] **TD.1** Aplique os bônus de atributo e o deslocamento da raça do SRD.
+- [ ] **TD.2** Adicione a matriz padrão e a rolagem 4d6 na criação.
+- [ ] **TD.3** Crie o fluxo de subir de nível (XP, PV, proficiência, aumento de atributo e espaços de magia).
+- [ ] **TD.4** Mostre as características de classe e de raça do SRD.
+- [ ] **TD.5** Adicione as proficiências em armaduras, armas e ferramentas, e os idiomas.
+
+#### Fase E — Integração e robustez
+- [ ] **TE.1** Role testes, salvaguardas, iniciativa e ataques direto da ficha.
+- [ ] **TE.2** Guarde no aparelho os dados do compêndio já consultados, para uso sem internet.
+- [ ] **TE.3** Exporte e importe personagens em JSON.
+
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
 #### Estrutura
@@ -126,7 +160,10 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [ ] **T1.16** Ligue a tela de login à API. Guarde o token com `flutter_secure_storage`.
 - [ ] **T1.17** Crie a feature `ai_tools` com a tela do gerador de NPCs. Trate os estados de carregamento, erro, limite atingido (`429`) e sem conexão.
 
-### Fase 2 — Encontros e resumo de sessão
+### Fase 2 — Encontros e resumo de sessão (pausada)
+
+A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e a IA no aparelho estiverem prontas.
+
 
 #### Montador de encontros
 - [ ] **T2.1** Importe os monstros do SRD (nome, CR, XP, tipo) para o PostgreSQL com uma migração Flyway.
@@ -139,7 +176,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [ ] **T2.6** Crie o endpoint `POST /api/v1/sessions/summarize`. Ele recebe as notas no corpo da requisição. Defina um tamanho máximo para o texto.
 - [ ] **T2.7** Adicione na tela de notas de sessão um botão "Resumir sessão" que envia as notas do Drift para a API.
 
-### Fase 3 — Narração com streaming (SSE)
+### Fase 3 — Narração com streaming (SSE) (pausada)
 
 - [ ] **T3.1** Crie o endpoint `GET` ou `POST /api/v1/narration/stream` com `text/event-stream`, usando o streaming do Spring AI.
 - [ ] **T3.2** Defina os eventos SSE (`token`, `done`, `error`) e documente esses eventos no contrato.
