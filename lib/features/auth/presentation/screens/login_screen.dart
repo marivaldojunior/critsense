@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/core/presentation/widgets/theme_toggle_button.dart';
 import 'package:crit_sense/features/home/presentation/pages/home_screen.dart';
 
 /// Tela de login: nova porta de entrada do app, exibida antes da
 /// [HomeScreen].
 ///
-/// Recebe [onToggleTheme] da raiz do app ([CritSenseApp]) — mesmo padrão já
-/// usado pela [HomeScreen], que é quem detém o [ThemeMode] atual via
-/// `ValueNotifier`. Ao autenticar, repassa esse mesmo callback adiante para
-/// que a alternância de tema continue funcionando dentro da Home.
+/// O botão de tema usa o `ThemeCubit` da raiz do app, então funciona também
+/// quando a tela é recriada pelo `AppDrawer` após o logout.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, this.onToggleTheme});
-
-  /// Opcional: quando a tela é recriada pelo [AppDrawer] após logout, não há
-  /// um `ThemeMode` de origem para repassar, então o botão de tema fica
-  /// inerte (`IconButton.onPressed` nulo já trata isso sem erro).
-  final VoidCallback? onToggleTheme;
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -47,9 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(onToggleTheme: widget.onToggleTheme ?? () {}),
-        ),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     }
   }
@@ -57,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -68,15 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // com o fundo colorido (colorScheme.primary), não com a surface —
         // por isso precisa ser sobrescrito aqui para acompanhar o tema.
         foregroundColor: theme.colorScheme.onSurface,
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            ),
-            tooltip: isDark ? 'Ativar tema claro' : 'Ativar tema escuro',
-          ),
-        ],
+        actions: const [ThemeToggleButton()],
       ),
       body: SafeArea(
         child: Center(
@@ -88,7 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const DnDIcon(assetPath: 'assets/icons/dice/d20.svg', size: 80),
+                  const DnDIcon(
+                    assetPath: 'assets/icons/dice/d20.svg',
+                    size: 80,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'CritSense',
@@ -152,7 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                      Expanded(
+                        child: Divider(color: theme.colorScheme.outlineVariant),
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
@@ -162,7 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                      Expanded(
+                        child: Divider(color: theme.colorScheme.outlineVariant),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:crit_sense/core/database/app_database.dart';
+import 'package:crit_sense/core/theme/theme_cubit.dart';
 import 'package:crit_sense/features/character_sheet/data/repositories/character_repository_impl.dart';
 import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
@@ -63,6 +65,12 @@ final sl = GetIt.instance;
 /// arquivo legível como um grafo de dependências de baixo para cima.
 Future<void> init() async {
   // ─── Infraestrutura ────────────────────────────────────────────────────────
+  //
+  // `SharedPreferences` é carregado aqui, antes do `runApp`, para o
+  // `ThemeCubit` ler o tema salvo de forma síncrona já no primeiro frame.
+  final preferences = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(preferences);
+  sl.registerFactory<ThemeCubit>(() => ThemeCubit(sl<SharedPreferences>()));
   //
   // `AppDatabase` é registrado como `LazySingleton` — única instância global.
   // O SQLite aplica um lock exclusivo no arquivo `.sqlite` enquanto está aberto:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/core/presentation/widgets/theme_toggle_button.dart';
 import 'package:crit_sense/features/character_sheet/presentation/pages/character_list_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/bestiary_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/equipments_screen.dart';
@@ -17,11 +18,7 @@ import 'package:crit_sense/features/dice_roller/presentation/pages/dice_screen.d
 /// `Navigator` — então toda tela empurrada a partir daqui já os herda
 /// automaticamente via `context.read`, sem precisar redeclará-los aqui.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.onToggleTheme});
-
-  /// Alterna entre os temas claro e escuro. Fornecido pela raiz do app
-  /// ([CritSenseApp]), que é quem detém o [ThemeMode] atual.
-  final VoidCallback onToggleTheme;
+  const HomeScreen({super.key});
 
   static final List<_FeatureItem> _features = [
     _FeatureItem(
@@ -58,21 +55,11 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('CritSense'),
-        actions: [
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            ),
-            tooltip: isDark ? 'Ativar tema claro' : 'Ativar tema escuro',
-          ),
-        ],
+        actions: const [ThemeToggleButton()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

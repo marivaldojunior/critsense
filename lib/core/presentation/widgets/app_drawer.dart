@@ -48,11 +48,9 @@ class AppDrawer extends StatelessWidget {
 
   /// Fecha o drawer e volta até a primeira rota da pilha (a `HomeScreen`
   /// pós-login) em vez de um `pushReplacement`/`pushAndRemoveUntil` que a
-  /// recriaria — a `HomeScreen` exige `onToggleTheme`, callback que o
-  /// Drawer não recebe. Voltar até a rota original reaproveita a instância
-  /// já existente, com o callback correto, e ainda assim "não empilha
-  /// telas infinitamente": o efeito prático é o mesmo de um
-  /// `popUntil` + replace.
+  /// recriaria. Voltar até a rota original reaproveita a instância já
+  /// existente e ainda assim "não empilha telas infinitamente": o efeito
+  /// prático é o mesmo de um `popUntil` + replace.
   void _goHome(BuildContext context) {
     Navigator.pop(context);
     Navigator.popUntil(context, (route) => route.isFirst);

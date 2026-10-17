@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/core/theme/theme_cubit.dart';
 import 'package:crit_sense/di/injection_container.dart' as di;
 import 'package:crit_sense/features/auth/presentation/screens/login_screen.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
@@ -14,35 +15,34 @@ import 'package:crit_sense/features/character_sheet/presentation/bloc/character_
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
-  runApp(CritSenseApp());
+  runApp(const CritSenseApp());
 }
 
 /// Widget raiz do aplicativo.
 ///
 /// Responsabilidade única: configurar o [MaterialApp] com temas e rota
-/// inicial, e manter qual [ThemeMode] está ativo. Não contém lógica de
-/// negócio — apenas o estado efêmero de UI do tema escolhido pelo usuário.
+/// inicial. O [ThemeMode] ativo vem do [ThemeCubit], que também o salva
+/// entre aberturas do app.
 class CritSenseApp extends StatelessWidget {
-  CritSenseApp({super.key});
-
-  /// Tema claro é o padrão ao abrir o app; o usuário alterna via botão
-  /// exposto na [HomeScreen]. `ValueNotifier` é suficiente aqui pois é
-  /// estado de UI puro, sem persistência ou regra de negócio — não
-  /// justifica um BLoC dedicado.
-  final ValueNotifier<ThemeMode> _themeMode = ValueNotifier(ThemeMode.light);
+  const CritSenseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CharacterBloc>(
-      // Provedor raiz, acima do Navigator: qualquer tela empurrada a partir
-      // daqui (Personagens, Equipamentos) herda a mesma instância via
-      // `context.read`, sem precisar redeclará-la a cada rota. Fica fora do
-      // ValueListenableBuilder abaixo para que a troca de tema nunca recrie
-      // o CharacterBloc.
-      create: (_) => di.sl<CharacterBloc>()..add(const LoadCharactersEvent()),
-      child: ValueListenableBuilder<ThemeMode>(
-        valueListenable: _themeMode,
-        builder: (context, mode, _) => MaterialApp(
+    return MultiBlocProvider(
+      providers: [
+        // Provedores raiz, acima do Navigator: qualquer tela empurrada a
+        // partir daqui (Personagens, Equipamentos, Login após logout) herda
+        // a mesma instância via `context.read`, sem precisar redeclará-la a
+        // cada rota. Ficam fora do BlocBuilder abaixo para que a troca de
+        // tema nunca recrie o CharacterBloc.
+        BlocProvider<ThemeCubit>(create: (_) => di.sl<ThemeCubit>()),
+        BlocProvider<CharacterBloc>(
+          create: (_) =>
+              di.sl<CharacterBloc>()..add(const LoadCharactersEvent()),
+        ),
+      ],
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, mode) => MaterialApp(
           title: 'Crit Sense',
           debugShowCheckedModeBanner: false,
           theme: _buildLightTheme(),
@@ -56,19 +56,7 @@ class CritSenseApp extends StatelessWidget {
           // para baixo, deixando um espaço em branco acima da AppBar.
           builder: (context, child) =>
               SafeArea(top: false, child: child ?? const SizedBox.shrink()),
-          home: LoginScreen(
-            // Lê `_themeMode.value` no momento do toque, não o `mode`
-            // capturado nesta closure: telas empurradas via Navigator (como
-            // a HomeScreen, alcançada por pushReplacement a partir daqui)
-            // não são reconstruídas quando o ValueListenableBuilder acima
-            // reage a uma troca de tema, então ficariam com este callback
-            // "congelado" no `mode` de quando foram criadas — sempre
-            // alternando a partir do mesmo valor antigo em vez do atual.
-            onToggleTheme: () => _themeMode.value =
-                _themeMode.value == ThemeMode.dark
-                    ? ThemeMode.light
-                    : ThemeMode.dark,
-          ),
+          home: const LoginScreen(),
         ),
       ),
     );
