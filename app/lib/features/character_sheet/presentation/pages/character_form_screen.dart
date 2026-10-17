@@ -14,7 +14,10 @@ import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/compendium/domain/entities/api_reference.dart';
 
 import '../../domain/entities/alignment.dart' as dnd;
+import '../../domain/entities/attribute.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/rules/srd_rules.dart';
+import '../../domain/srd/srd_class.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/form_options_bloc.dart';
 import '../bloc/point_buy_cubit.dart';
@@ -112,11 +115,12 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
 
     final level = int.parse(_levelCtrl.text);
     final attributes = context.read<PointBuyCubit>().state.attributes;
-    // HP máximo calculado pela fórmula base: 10 + (Constituição × Nível).
-    final maxHp = 10 + attributes.constitution * level;
-    // Bônus de proficiência pela progressão padrão do SRD do D&D 5e: +2 do
-    // nível 1 ao 4, subindo +1 a cada 4 níveis (5, 9, 13, 17).
-    final proficiencyBonus = 2 + (level - 1) ~/ 4;
+    final srdClass = SrdClass.fromName(_selectedClass!);
+    final maxHp = startingMaxHitPoints(
+      hitDie: srdClass?.hitDie ?? SrdClass.defaultHitDie,
+      constitutionModifier: attributeModifier(attributes.constitution),
+      level: level,
+    );
 
     final character = Character(
       id: const Uuid().v4(),
@@ -124,12 +128,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       race: _selectedRace!,
       characterClass: _selectedClass!,
       level: level,
-      // CA, iniciativa e deslocamento ainda não têm campo próprio no
-      // formulário — nascem com os valores-base do SRD (CA 10 sem
-      // armadura, iniciativa neutra, 30 pés de deslocamento) e ficam
-      // editáveis quando a tela de ficha ganhar esses campos.
-      armorClass: 10,
-      initiative: 0,
       speed: 30,
       maxHitPoints: maxHp,
       currentHitPoints: maxHp,
@@ -137,13 +135,11 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       attributes: attributes,
       alignment: _selectedAlignment!,
       background: _backgroundCtrl.text.trim(),
-      // Traços de personalidade também ainda não têm campo no formulário.
       personalityTraits: '',
       ideals: '',
       bonds: '',
       flaws: '',
       experiencePoints: 0,
-      proficiencyBonus: proficiencyBonus,
       avatarPath: _avatarImage?.path,
     );
 

@@ -45,8 +45,6 @@ void main() {
       race: 'Humano',
       characterClass: 'Guerreiro',
       level: 1,
-      armorClass: 10,
-      initiative: 0,
       speed: 30,
       maxHitPoints: maxHitPoints,
       currentHitPoints: currentHitPoints,
@@ -66,7 +64,6 @@ void main() {
       bonds: '',
       flaws: '',
       experiencePoints: 0,
-      proficiencyBonus: 2,
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
+import '../../domain/entities/condition.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
@@ -152,12 +153,20 @@ extension _CharacterDataMapper on CharacterData {
       race: raca,
       characterClass: classe,
       level: nivel,
-      armorClass: armorClass,
-      initiative: initiative,
+      armorClassBonus: armorClassBonus,
       speed: speed,
       maxHitPoints: maxHitPoints,
       currentHitPoints: currentHitPoints,
       temporaryHitPoints: temporaryHitPoints,
+      hitDiceUsed: hitDiceUsed,
+      deathSaveSuccesses: deathSaveSuccesses,
+      deathSaveFailures: deathSaveFailures,
+      conditions: conditions
+          .map(Condition.fromName)
+          .whereType<Condition>()
+          .toList(),
+      exhaustionLevel: exhaustionLevel,
+      inspiration: inspiration,
       attributes: attrData._toDomain(),
       alignment: alignment ?? '',
       background: background ?? '',
@@ -166,7 +175,6 @@ extension _CharacterDataMapper on CharacterData {
       bonds: bonds ?? '',
       flaws: flaws ?? '',
       experiencePoints: experiencePoints,
-      proficiencyBonus: proficiencyBonus,
       proficiencies: proficiencies
           .map(_proficiencyFromKey)
           .whereType<Proficiency>()
@@ -232,12 +240,20 @@ extension _CharacterToCompanion on Character {
       raca: Value(race),
       classe: Value(characterClass),
       nivel: Value(level),
+      // Valores calculados, gravados só como referência (ver `tables.dart`).
       armorClass: Value(armorClass),
       initiative: Value(initiative),
+      armorClassBonus: Value(armorClassBonus),
       speed: Value(speed),
       maxHitPoints: Value(maxHitPoints),
       currentHitPoints: Value(currentHitPoints),
       temporaryHitPoints: Value(temporaryHitPoints),
+      hitDiceUsed: Value(hitDiceUsed),
+      deathSaveSuccesses: Value(deathSaveSuccesses),
+      deathSaveFailures: Value(deathSaveFailures),
+      conditions: Value(conditions.map((c) => c.name).toList()),
+      exhaustionLevel: Value(exhaustionLevel),
+      inspiration: Value(inspiration),
       alignment: Value(alignment),
       background: Value(background),
       personalityTraits: Value(personalityTraits),

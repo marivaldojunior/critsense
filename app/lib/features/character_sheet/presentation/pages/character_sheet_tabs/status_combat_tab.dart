@@ -9,75 +9,121 @@ import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
 import '../../bloc/character_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
+import '../../widgets/conditions_card.dart';
+import '../../widgets/death_saves_card.dart';
 import '../../widgets/hp_management_sheet.dart';
+import '../../widgets/number_edit_dialog.dart';
+import '../../widgets/short_rest_sheet.dart';
 
 /// Aba "Status & Combate" da ficha: os blocos centrais da primeira página
-/// da ficha oficial — CA/Iniciativa/Deslocamento, PV e as duas listas de
-/// proficiência (Testes de Resistência e Perícias).
+/// da ficha oficial — CA/Iniciativa/Deslocamento, PV, dados de vida,
+/// salvaguardas contra a morte, condições e as duas listas de proficiência
+/// (Testes de Resistência e Perícias).
 ///
-/// Só a seção de proficiências (últimos dois blocos) é reativa via
-/// [BlocBuilder]: os cartões de CA/Iniciativa/Deslocamento/PV usam o
-/// [character] recebido diretamente, então marcar uma perícia não os
-/// reconstrói — apenas a lista de proficiências correspondente.
+/// A aba inteira lê o personagem ao vivo do [CharacterBloc]: qualquer
+/// mudança (dano, condição, proficiência) aparece na hora.
 class StatusCombatTab extends StatelessWidget {
   const StatusCombatTab({super.key, required this.character});
 
+  /// Personagem da abertura da tela; usado só até o BLoC ter a versão atual.
   final Character character;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 600;
-        final topStats = _TopStats(character: character);
-        final proficiencies = _ProficienciesPanel(character: character);
-
-        if (isWide) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: topStats,
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 16, 16, 16),
-                  child: proficiencies,
-                ),
-              ),
-            ],
-          );
-        }
-
-        return Column(
-          children: [
-            Padding(padding: const EdgeInsets.all(16), child: topStats),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: proficiencies,
-              ),
-            ),
+    return BlocBuilder<CharacterBloc, CharacterState>(
+      buildWhen: (previous, current) => !identical(
+        previous.findCharacter(character.id),
+        current.findCharacter(character.id),
+      ),
+      builder: (context, state) {
+        final live = state.findCharacter(character.id) ?? character;
+        final combat = <Widget>[
+          _TopStats(character: live),
+          const SizedBox(height: 10),
+          _HpCard(character: live),
+          if (live.currentHitPoints == 0 && live.maxHitPoints > 0) ...[
+            const SizedBox(height: 10),
+            DeathSavesCard(character: live),
           ],
+          const SizedBox(height: 10),
+          ConditionsCard(character: live),
+        ];
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth >= 600) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: combat,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 16, 16),
+                      children: [_ProficienciesPanel(character: live)],
+                    ),
+                  ),
+                ],
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                ...combat,
+                const SizedBox(height: 16),
+                _ProficienciesPanel(character: live),
+              ],
+            );
+          },
         );
       },
     );
   }
 }
 
-/// Bloco superior (CA/Iniciativa/Deslocamento) + bloco central (PV).
+String _signed(int value) => value >= 0 ? '+$value' : '$value';
+
 class _TopStats extends StatelessWidget {
   const _TopStats({required this.character});
 
   final Character character;
 
+  Future<void> _editArmorClassBonus(BuildContext context) async {
+    final bloc = context.read<CharacterBloc>();
+    final bonus = await showNumberEditDialog(
+      context,
+      title: 'Bônus extra de CA',
+      initialValue: character.armorClassBonus,
+      allowNegative: true,
+      helperText:
+          'A CA é calculada pela DES e pela classe. Use este bônus para '
+          'itens mágicos ou magias ativas.',
+    );
+    if (bonus != null) bloc.add(SetArmorClassBonusEvent(character.id, bonus));
+  }
+
+  Future<void> _editSpeed(BuildContext context) async {
+    final bloc = context.read<CharacterBloc>();
+    final speed = await showNumberEditDialog(
+      context,
+      title: 'Deslocamento base (pés)',
+      initialValue: character.speed,
+    );
+    if (speed != null) bloc.add(SetSpeedEvent(character.id, speed));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final speedLabel = character.effectiveSpeed == character.speed
+        ? '${character.speed} pés'
+        : '${character.effectiveSpeed} pés (base ${character.speed})';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -88,6 +134,7 @@ class _TopStats extends StatelessWidget {
                 iconAsset: 'assets/icons/attribute/ac.svg',
                 label: 'CA',
                 value: '${character.armorClass}',
+                onTap: () => _editArmorClassBonus(context),
               ),
             ),
             const SizedBox(width: 10),
@@ -95,9 +142,7 @@ class _TopStats extends StatelessWidget {
               child: _StatCard(
                 iconAsset: 'assets/icons/combat/initiative.svg',
                 label: 'Iniciativa',
-                value: character.initiative >= 0
-                    ? '+${character.initiative}'
-                    : '${character.initiative}',
+                value: _signed(character.initiative),
               ),
             ),
             const SizedBox(width: 10),
@@ -105,51 +150,197 @@ class _TopStats extends StatelessWidget {
               child: _StatCard(
                 iconAsset: 'assets/icons/movement/walking.svg',
                 label: 'Deslocamento',
-                value: '${character.speed} pés',
+                value: speedLabel,
+                onTap: () => _editSpeed(context),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
-        _HpCard(character: character),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                iconAsset: 'assets/icons/attribute/bonus.svg',
+                label: 'Bônus de Proficiência',
+                value: _signed(character.proficiencyBonus),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _StatCard(
+                iconAsset: 'assets/icons/game/inspiration.svg',
+                label: character.inspiration
+                    ? 'Com inspiração'
+                    : 'Sem inspiração',
+                value: character.inspiration ? 'Sim' : 'Não',
+                highlighted: character.inspiration,
+                onTap: () => context.read<CharacterBloc>().add(
+                  ToggleInspirationEvent(character.id),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 }
 
-/// Cartão pequeno e uniforme para CA/Iniciativa/Deslocamento.
 class _StatCard extends StatelessWidget {
   const _StatCard({
     required this.iconAsset,
     required this.label,
     required this.value,
+    this.onTap,
+    this.highlighted = false,
   });
 
   final String iconAsset;
   final String label;
   final String value;
 
+  /// Quando presente, o cartão é editável/alternável ao tocar.
+  final VoidCallback? onTap;
+  final bool highlighted;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
+      color: highlighted ? theme.colorScheme.primaryContainer : null,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          child: Column(
+            children: [
+              DnDIcon(assetPath: iconAsset, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _RestType { short, long }
+
+class _HpCard extends StatelessWidget {
+  const _HpCard({required this.character});
+
+  final Character character;
+
+  Future<void> _confirmLongRest(BuildContext context) async {
+    final bloc = context.read<CharacterBloc>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Descanso Longo'),
+        content: const Text(
+          'PV voltam ao máximo, o PV temporário zera, metade dos dados de '
+          'vida volta e a exaustão diminui 1 nível.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Descansar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) bloc.add(TakeLongRestEvent(character.id));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DnDIcon(assetPath: iconAsset, size: 28),
+            AnimatedHpBar(
+              currentHitPoints: character.currentHitPoints,
+              maxHitPoints: character.maxHitPoints,
+              temporaryHitPoints: character.temporaryHitPoints,
+            ),
             const SizedBox(height: 8),
             Text(
-              value,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              'Dados de vida: ${character.hitDiceRemaining}/${character.level} '
+              '(d${character.hitDie})',
+              style: theme.textTheme.bodySmall,
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall,
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) =>
+                          HpManagementSheet(characterId: character.id),
+                    ),
+                    icon: const Icon(Icons.favorite_border),
+                    label: const Text('Gerenciar Vida'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                PopupMenuButton<_RestType>(
+                  tooltip: 'Descanso',
+                  icon: const DnDIcon(
+                    assetPath: 'assets/icons/game/rest.svg',
+                    size: 24,
+                  ),
+                  onSelected: (type) {
+                    switch (type) {
+                      case _RestType.short:
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<CharacterBloc>(),
+                            child: ShortRestSheet(characterId: character.id),
+                          ),
+                        );
+                      case _RestType.long:
+                        _confirmLongRest(context);
+                    }
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: _RestType.short,
+                      child: Text('Descanso Curto'),
+                    ),
+                    PopupMenuItem(
+                      value: _RestType.long,
+                      child: Text('Descanso Longo'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -158,100 +349,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// Ações de descanso disponíveis no menu do cartão de PV.
-enum _RestType { short, long }
-
-/// Bloco central de Pontos de Vida: barra animada com máximo, atual e
-/// temporário, mais os controles de dano/cura/PV temporário e descanso.
-///
-/// Reativo via [BlocBuilder] (mesmo padrão do [_ProficienciesPanel]): PV é
-/// alterado por [ApplyDamageEvent]/[HealHpEvent]/[AddTempHpEvent]/
-/// [TakeShortRestEvent]/[TakeLongRestEvent] disparados a partir daqui, e a
-/// barra precisa refletir o resultado imediatamente sem esperar o usuário
-/// sair e voltar à ficha.
-class _HpCard extends StatelessWidget {
-  const _HpCard({required this.character});
-
-  final Character character;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<CharacterBloc, CharacterState>(
-      buildWhen: (previous, current) => !identical(
-        previous.findCharacter(character.id),
-        current.findCharacter(character.id),
-      ),
-      builder: (context, state) {
-        final liveCharacter = state.findCharacter(character.id) ?? character;
-
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AnimatedHpBar(
-                  currentHitPoints: liveCharacter.currentHitPoints,
-                  maxHitPoints: liveCharacter.maxHitPoints,
-                  temporaryHitPoints: liveCharacter.temporaryHitPoints,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.tonalIcon(
-                        onPressed: () => showModalBottomSheet<void>(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (_) =>
-                              HpManagementSheet(characterId: liveCharacter.id),
-                        ),
-                        icon: const Icon(Icons.favorite_border),
-                        label: const Text('Gerenciar Vida'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    PopupMenuButton<_RestType>(
-                      tooltip: 'Descanso',
-                      icon: const Icon(Icons.bedtime_outlined),
-                      onSelected: (type) {
-                        final bloc = context.read<CharacterBloc>();
-                        switch (type) {
-                          case _RestType.short:
-                            bloc.add(TakeShortRestEvent(liveCharacter.id));
-                          case _RestType.long:
-                            bloc.add(TakeLongRestEvent(liveCharacter.id));
-                        }
-                      },
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(
-                          value: _RestType.short,
-                          child: Text('Descanso Curto'),
-                        ),
-                        PopupMenuItem(
-                          value: _RestType.long,
-                          child: Text('Descanso Longo'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Painel reativo com Sabedoria Passiva, Testes de Resistência e Perícias.
-///
-/// É a única parte da aba dentro de um [BlocBuilder]: o [buildWhen] só
-/// libera a reconstrução quando o objeto [Character] correspondente a
-/// [character] muda de identidade na lista do BLoC — o que só acontece
-/// quando [ToggleProficiencyEvent] gera uma cópia nova via `copyWith`. Os
-/// cartões de CA/PV da aba, fora deste widget, nunca são afetados.
 class _ProficienciesPanel extends StatelessWidget {
   const _ProficienciesPanel({required this.character});
 
@@ -259,66 +356,52 @@ class _ProficienciesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CharacterBloc, CharacterState>(
-      buildWhen: (previous, current) => !identical(
-        previous.findCharacter(character.id),
-        current.findCharacter(character.id),
-      ),
-      builder: (context, state) {
-        final liveCharacter = state.findCharacter(character.id) ?? character;
-        final bloc = context.read<CharacterBloc>();
+    final bloc = context.read<CharacterBloc>();
 
-        return ListView(
-          children: [
-            _PassiveWisdomBadge(value: bloc.passiveWisdom(liveCharacter)),
-            const SizedBox(height: 16),
-            Text(
-              'Testes de Resistência',
-              style: Theme.of(context).textTheme.titleSmall,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _PassiveWisdomBadge(value: bloc.passiveWisdom(character)),
+        const SizedBox(height: 16),
+        Text(
+          'Testes de Resistência',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const Divider(),
+        for (final attribute in AttributeType.values)
+          _ProficiencyRow(
+            iconAsset: attribute.iconAsset,
+            label: attribute.label,
+            modifier: bloc.savingThrowModifier(character, attribute),
+            checked: character.proficiencies.contains(
+              SavingThrowProficiency(attribute),
             ),
-            const Divider(),
-            for (final attribute in AttributeType.values)
-              _ProficiencyRow(
-                iconAsset: attribute.iconAsset,
-                label: attribute.label,
-                modifier: bloc.savingThrowModifier(liveCharacter, attribute),
-                checked: liveCharacter.proficiencies.contains(
-                  SavingThrowProficiency(attribute),
-                ),
-                onChanged: () => context.read<CharacterBloc>().add(
-                  ToggleProficiencyEvent(
-                    liveCharacter.id,
-                    SavingThrowProficiency(attribute),
-                  ),
-                ),
+            onChanged: () => bloc.add(
+              ToggleProficiencyEvent(
+                character.id,
+                SavingThrowProficiency(attribute),
               ),
-            const SizedBox(height: 16),
-            Text('Perícias', style: Theme.of(context).textTheme.titleSmall),
-            const Divider(),
-            for (final skill in Skill.values)
-              _ProficiencyRow(
-                iconAsset: skill.iconAsset,
-                label: skill.label,
-                sublabel: skill.attribute.label,
-                modifier: bloc.skillModifier(liveCharacter, skill),
-                checked: liveCharacter.proficiencies.contains(
-                  SkillProficiency(skill),
-                ),
-                onChanged: () => context.read<CharacterBloc>().add(
-                  ToggleProficiencyEvent(
-                    liveCharacter.id,
-                    SkillProficiency(skill),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
+            ),
+          ),
+        const SizedBox(height: 16),
+        Text('Perícias', style: Theme.of(context).textTheme.titleSmall),
+        const Divider(),
+        for (final skill in Skill.values)
+          _ProficiencyRow(
+            iconAsset: skill.iconAsset,
+            label: skill.label,
+            sublabel: skill.attribute.label,
+            modifier: bloc.skillModifier(character, skill),
+            checked: character.proficiencies.contains(SkillProficiency(skill)),
+            onChanged: () => bloc.add(
+              ToggleProficiencyEvent(character.id, SkillProficiency(skill)),
+            ),
+          ),
+      ],
     );
   }
 }
 
-/// Emblema da Sabedoria Passiva (Percepção): não é interativo, só leitura.
 class _PassiveWisdomBadge extends StatelessWidget {
   const _PassiveWisdomBadge({required this.value});
 

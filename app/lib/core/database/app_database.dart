@@ -21,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -73,6 +73,17 @@ class AppDatabase extends _$AppDatabase {
         // Proficiências em Perícias e Testes de Resistência. Antes desta
         // versão elas só existiam em memória e se perdiam ao reabrir o app.
         await m.addColumn(characters, characters.proficiencies);
+      }
+      if (from < 8) {
+        // Combate e descanso: dados de vida, salvaguardas contra a morte,
+        // condições, exaustão, inspiração e o bônus manual de CA.
+        await m.addColumn(characters, characters.armorClassBonus);
+        await m.addColumn(characters, characters.hitDiceUsed);
+        await m.addColumn(characters, characters.deathSaveSuccesses);
+        await m.addColumn(characters, characters.deathSaveFailures);
+        await m.addColumn(characters, characters.conditions);
+        await m.addColumn(characters, characters.exhaustionLevel);
+        await m.addColumn(characters, characters.inspiration);
       }
     },
   );

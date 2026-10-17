@@ -42,19 +42,17 @@ void main() {
   tearDown(() => bloc.close());
 
   /// Personagem base: DEX 14 (mod +2), WIS 12 (mod +1), FOR 7 (mod -2),
-  /// bônus de proficiência +2 e nenhuma proficiência marcada por padrão.
+  /// nível 1 (bônus de proficiência +2) e nenhuma proficiência marcada.
   Character buildCharacter({
     List<Proficiency> proficiencies = const [],
-    int proficiencyBonus = 2,
+    int level = 1,
   }) {
     return Character(
       id: 'test-id',
       name: 'Personagem de Teste',
       race: 'Humano',
       characterClass: 'Guerreiro',
-      level: 1,
-      armorClass: 10,
-      initiative: 0,
+      level: level,
       speed: 30,
       maxHitPoints: 10,
       currentHitPoints: 10,
@@ -74,7 +72,6 @@ void main() {
       bonds: '',
       flaws: '',
       experiencePoints: 0,
-      proficiencyBonus: proficiencyBonus,
       proficiencies: proficiencies,
     );
   }
@@ -100,10 +97,11 @@ void main() {
       expect(bloc.skillModifier(character, Skill.stealth), 2);
     });
 
-    test('acompanha o proficiencyBonus do personagem, não um valor fixo', () {
+    test('acompanha o bônus de proficiência do nível, não um valor fixo', () {
+      // Nível 5: bônus de proficiência +3.
       final character = buildCharacter(
         proficiencies: const [SkillProficiency(Skill.stealth)],
-        proficiencyBonus: 3,
+        level: 5,
       );
       expect(bloc.skillModifier(character, Skill.stealth), 5); // 2 + 3
     });

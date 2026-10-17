@@ -142,6 +142,21 @@ class Characters extends Table {
       .withDefault(const Constant('[]'))
       .map(const StringListConverter())();
 
+  // ── Combate e descanso (versão 8) ─────────────────────────────────────
+  // `armorClass`, `initiative` e `proficiencyBonus` (acima) continuam no
+  // banco, mas o app só grava neles o valor calculado: a fonte da verdade
+  // são as regras do domínio. O que o jogador ajusta à mão fica aqui.
+  IntColumn get armorClassBonus => integer().withDefault(const Constant(0))();
+  IntColumn get hitDiceUsed => integer().withDefault(const Constant(0))();
+  IntColumn get deathSaveSuccesses =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get deathSaveFailures => integer().withDefault(const Constant(0))();
+  TextColumn get conditions => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
+  IntColumn get exhaustionLevel => integer().withDefault(const Constant(0))();
+  BoolColumn get inspiration => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }

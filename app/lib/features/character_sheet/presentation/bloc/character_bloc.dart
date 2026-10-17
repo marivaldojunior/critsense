@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/entities/condition.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/skill.dart';
+import '../../domain/rules/hit_point_rules.dart';
 import '../../domain/usecases/add_inventory_item_usecase.dart';
 import '../../domain/usecases/delete_character_usecase.dart';
 import '../../domain/usecases/get_all_characters_usecase.dart';
@@ -49,6 +51,65 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<AddTempHpEvent>(_onAddTempHp);
     on<TakeShortRestEvent>(_onTakeShortRest);
     on<TakeLongRestEvent>(_onTakeLongRest);
+    on<SpendHitDieEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withHitDieSpent(event.roll),
+      ),
+    );
+    on<DeathSaveRolledEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withDeathSave(event.roll),
+      ),
+    );
+    on<SetDeathSavesEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withDeathSaves(
+          successes: event.successes,
+          failures: event.failures,
+        ),
+      ),
+    );
+    on<ToggleConditionEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withConditionToggled(event.condition),
+      ),
+    );
+    on<SetExhaustionEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withExhaustion(event.level),
+      ),
+    );
+    on<ToggleInspirationEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.copyWith(inspiration: !c.inspiration),
+      ),
+    );
+    on<SetArmorClassBonusEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.copyWith(armorClassBonus: event.bonus),
+      ),
+    );
+    on<SetSpeedEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => event.speed < 0 ? null : c.copyWith(speed: event.speed),
+      ),
+    );
   }
 
   /// Carrega todos os personagens ao receber [LoadCharactersEvent].
@@ -218,59 +279,40 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   // Gerenciamento de Vida — regras do SRD do D&D 5e.
   // ---------------------------------------------------------------------
 
-  /// Aplica [ApplyDamageEvent.amount] de dano ao personagem
-  /// [ApplyDamageEvent.characterId]: o dano é primeiro absorvido pelos PV
-  /// temporários — só o que sobra depois de zerá-los desconta dos PV
-  /// atuais, que nunca ficam abaixo de zero.
+  /// Dano, cura, PV temporário e descansos: as regras ficam no domínio
+  /// (ver `HitPointRules`); aqui só se aplica e se persiste o resultado.
   Future<void> _onApplyDamage(
     ApplyDamageEvent event,
     Emitter<CharacterState> emit,
   ) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      final absorbedByTemp = event.amount < character.temporaryHitPoints
-          ? event.amount
-          : character.temporaryHitPoints;
-      final remainingDamage = event.amount - absorbedByTemp;
-      final updatedCurrentHp = character.currentHitPoints - remainingDamage;
-
-      return character.copyWith(
-        currentHitPoints: updatedCurrentHp < 0 ? 0 : updatedCurrentHp,
-        temporaryHitPoints: character.temporaryHitPoints - absorbedByTemp,
-      );
-    });
+    return _updateCharacter(
+      emit,
+      event.characterId,
+      (c) => c.withDamage(event.amount),
+    );
   }
 
-  /// Cura [HealHpEvent.amount] PV do personagem [HealHpEvent.characterId],
-  /// sem ultrapassar o PV máximo.
   Future<void> _onHealHp(HealHpEvent event, Emitter<CharacterState> emit) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      final updatedCurrentHp = character.currentHitPoints + event.amount;
-      return character.copyWith(
-        currentHitPoints: updatedCurrentHp > character.maxHitPoints
-            ? character.maxHitPoints
-            : updatedCurrentHp,
-      );
-    });
+    return _updateCharacter(
+      emit,
+      event.characterId,
+      (c) => c.withHealing(event.amount),
+    );
   }
 
-  /// Concede [AddTempHpEvent.amount] de PV temporário ao personagem
-  /// [AddTempHpEvent.characterId]. PV temporário não se acumula: só
-  /// substitui o valor atual se o novo for maior — um valor menor ou igual
-  /// é ignorado (retorna `null`, sem persistir nada).
   Future<void> _onAddTempHp(
     AddTempHpEvent event,
     Emitter<CharacterState> emit,
   ) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      if (event.amount <= character.temporaryHitPoints) return null;
-      return character.copyWith(temporaryHitPoints: event.amount);
-    });
+    return _updateCharacter(
+      emit,
+      event.characterId,
+      (c) => c.withTemporaryHitPoints(event.amount),
+    );
   }
 
-  /// Aplica um Descanso Curto ao personagem [TakeShortRestEvent.characterId].
-  ///
-  /// Sem um sistema de Dados de Vida modelado no app, um Descanso Curto não
-  /// altera PV por si só — ver a documentação de [TakeShortRestEvent].
+  /// O Descanso Curto cura pelos dados de vida gastos ([SpendHitDieEvent]);
+  /// concluir o descanso, por enquanto, não muda mais nada.
   Future<void> _onTakeShortRest(
     TakeShortRestEvent event,
     Emitter<CharacterState> emit,
@@ -278,18 +320,11 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     return _updateCharacter(emit, event.characterId, (character) => null);
   }
 
-  /// Aplica um Descanso Longo ao personagem [TakeLongRestEvent.characterId]:
-  /// PV atual volta ao máximo e PV temporário zera.
   Future<void> _onTakeLongRest(
     TakeLongRestEvent event,
     Emitter<CharacterState> emit,
   ) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      return character.copyWith(
-        currentHitPoints: character.maxHitPoints,
-        temporaryHitPoints: 0,
-      );
-    });
+    return _updateCharacter(emit, event.characterId, (c) => c.afterLongRest());
   }
 
   // ---------------------------------------------------------------------
@@ -320,7 +355,9 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   /// [character]: mesma regra de [skillModifier], mas para o atributo
   /// diretamente em vez de uma perícia específica.
   int savingThrowModifier(Character character, AttributeType attribute) {
-    final abilityMod = attributeModifier(character.attributes.valueOf(attribute));
+    final abilityMod = attributeModifier(
+      character.attributes.valueOf(attribute),
+    );
     final isProficient = character.proficiencies.contains(
       SavingThrowProficiency(attribute),
     );

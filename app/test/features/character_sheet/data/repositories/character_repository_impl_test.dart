@@ -34,8 +34,7 @@ void main() {
     race: 'Anão',
     characterClass: 'Guerreiro',
     level: 3,
-    armorClass: 16,
-    initiative: 1,
+    armorClassBonus: 1,
     speed: 25,
     maxHitPoints: 30,
     currentHitPoints: currentHitPoints,
@@ -48,7 +47,6 @@ void main() {
     bonds: 'Clã',
     flaws: 'Orgulho',
     experiencePoints: 900,
-    proficiencyBonus: 2,
     avatarPath: '/tmp/thorin.png',
     spells: const ['Shield'],
     defeatedBosses: const ['Goblin Boss'],
@@ -82,8 +80,7 @@ void main() {
       expect(loaded.race, 'Anão');
       expect(loaded.characterClass, 'Guerreiro');
       expect(loaded.level, 3);
-      expect(loaded.armorClass, 16);
-      expect(loaded.initiative, 1);
+      expect(loaded.armorClassBonus, 1);
       expect(loaded.speed, 25);
       expect(loaded.maxHitPoints, 30);
       expect(loaded.currentHitPoints, 12);

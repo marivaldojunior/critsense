@@ -102,11 +102,11 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo seguem o SRD 5.1 e ficam no código (domínio), sem IA e sem API.
 
 #### Fase A — Combate e descanso
-- [ ] **TA.1** Guarde os dados de vida (tipo pela classe e quantos restam). Gaste os dados no Descanso Curto e devolva metade no Descanso Longo.
-- [ ] **TA.2** Mostre as salvaguardas contra a morte com PV 0 (3 sucessos, 3 falhas, 20 natural e 1 natural).
-- [ ] **TA.3** Marque as condições do SRD e os 6 níveis de exaustão.
-- [ ] **TA.4** Calcule a iniciativa (DES), o bônus de proficiência (nível) e a CA sem armadura.
-- [ ] **TA.5** Adicione o marcador de inspiração.
+- [x] **TA.1** Guarde os dados de vida (tipo pela classe e quantos restam). Gaste os dados no Descanso Curto e devolva metade no Descanso Longo.
+- [x] **TA.2** Mostre as salvaguardas contra a morte com PV 0 (3 sucessos, 3 falhas, 20 natural e 1 natural).
+- [x] **TA.3** Marque as condições do SRD e os 6 níveis de exaustão.
+- [x] **TA.4** Calcule a iniciativa (DES), o bônus de proficiência (nível) e a CA sem armadura.
+- [x] **TA.5** Adicione o marcador de inspiração.
 
 #### Fase B — Magias
 - [ ] **TB.1** Guarde os espaços de magia por nível (tabelas do SRD, incluindo a Magia de Pacto do Bruxo) e recupere os espaços nos descansos.

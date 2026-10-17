@@ -63,6 +63,12 @@ void main() {
       "DEFAULT '[]', \"defeated_bosses\" TEXT NOT NULL DEFAULT '[]', "
       'PRIMARY KEY ("id"))';
 
+  // Versão 7: igual à 6, com `proficiencies`.
+  final charactersV7 = charactersV6.replaceFirst(
+    'PRIMARY KEY ("id"))',
+    "\"proficiencies\" TEXT NOT NULL DEFAULT '[]', PRIMARY KEY (\"id\"))",
+  );
+
   /// Abre um [AppDatabase] sobre um banco em memória que começa na
   /// [version] informada, com as tabelas de [statements] e uma linha de
   /// personagem inserida por [insertCharacter].
@@ -120,12 +126,13 @@ void main() {
     expect(character.maxHitPoints, 30);
     expect(character.currentHitPoints, 12);
     expect(character.alignment, 'Leal e Bom');
-    expect(character.armorClass, 10);
-    expect(character.initiative, 0);
+    // Sem DES salva (padrão 8, mod. -1): CA 9 e iniciativa -1, calculadas.
+    expect(character.armorClass, 9);
+    expect(character.initiative, -1);
     expect(character.speed, 30);
     expect(character.temporaryHitPoints, 0);
     expect(character.experiencePoints, 0);
-    expect(character.proficiencyBonus, 2);
+    expect(character.proficiencyBonus, 2); // nível 3
     expect(character.personalityTraits, '');
     expect(character.spells, isEmpty);
     expect(character.defeatedBosses, isEmpty);
@@ -153,7 +160,8 @@ void main() {
       db,
     ).getAllCharacters()).single;
 
-    expect(character.armorClass, 16);
+    // A CA antiga (16, digitada) não vale mais: a CA é calculada.
+    expect(character.armorClassBonus, 0);
     expect(character.spells, isEmpty);
     expect(character.defeatedBosses, isEmpty);
   });
@@ -181,6 +189,39 @@ void main() {
 
     expect(character.proficiencies, isEmpty);
     expect(character.spells, ['Shield']);
+  });
+
+  test('da versão 7 para a atual: cria dados de vida, salvaguardas, '
+      'condições e inspiração com os valores padrão', () async {
+    final db = openLegacyDatabase(
+      version: 7,
+      statements: [
+        charactersV7,
+        attributesTable,
+        inventoryTable,
+        sessionNotesTable,
+      ],
+      insertCharacter:
+          "INSERT INTO characters (id, nome, raca, classe, nivel, "
+          "max_hit_points, current_hit_points, proficiencies) VALUES ('c1', "
+          "'Thorin', 'Anão', 'Fighter', 3, 30, 12, '[\"skill:athletics\"]')",
+    );
+    addTearDown(db.close);
+
+    final character = (await CharacterRepositoryImpl(
+      db,
+    ).getAllCharacters()).single;
+
+    expect(character.proficiencies, hasLength(1));
+    expect(character.hitDiceUsed, 0);
+    expect(character.hitDiceRemaining, 3);
+    expect(character.hitDie, 10); // Guerreiro
+    expect(character.deathSaveSuccesses, 0);
+    expect(character.deathSaveFailures, 0);
+    expect(character.conditions, isEmpty);
+    expect(character.exhaustionLevel, 0);
+    expect(character.inspiration, isFalse);
+    expect(character.armorClassBonus, 0);
   });
 
   test('a migração mantém as notas de sessão já salvas', () async {

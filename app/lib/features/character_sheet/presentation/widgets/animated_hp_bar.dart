@@ -51,8 +51,13 @@ class AnimatedHpBar extends StatelessWidget {
           children: [
             const DnDIcon(assetPath: 'assets/icons/hp/full.svg', size: 24),
             const SizedBox(width: 10),
-            Text('Pontos de Vida', style: theme.textTheme.labelMedium),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                'Pontos de Vida',
+                style: theme.textTheme.labelMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             Text(
               '$currentHitPoints / $maxHitPoints',
               style: theme.textTheme.titleMedium?.copyWith(

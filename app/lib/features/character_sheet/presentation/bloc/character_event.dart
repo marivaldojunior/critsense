@@ -135,13 +135,9 @@ final class AddTempHpEvent extends CharacterEvent {
   const AddTempHpEvent(this.characterId, this.amount);
 }
 
-/// Solicita ao BLoC que aplique um Descanso Curto ao personagem
-/// [characterId].
-///
-/// Sem um sistema de Dados de Vida modelado no app, um Descanso Curto não
-/// restaura PV automaticamente por si só (regra correta do SRD: cura no
-/// descanso curto exige gastar Dados de Vida) — o evento existe para o
-/// fluxo da UI e para acomodar essa regra quando for implementada.
+/// Solicita ao BLoC que conclua um Descanso Curto do personagem
+/// [characterId]. A cura do Descanso Curto vem dos dados de vida gastos
+/// durante ele (ver [SpendHitDieEvent]).
 final class TakeShortRestEvent extends CharacterEvent {
   final String characterId;
 
@@ -149,9 +145,79 @@ final class TakeShortRestEvent extends CharacterEvent {
 }
 
 /// Solicita ao BLoC que aplique um Descanso Longo ao personagem
-/// [characterId]: PV atual volta ao máximo e PV temporário zera.
+/// [characterId] (ver `HitPointRules.afterLongRest`).
 final class TakeLongRestEvent extends CharacterEvent {
   final String characterId;
 
   const TakeLongRestEvent(this.characterId);
+}
+
+/// Gasta um dado de vida do personagem [characterId] no Descanso Curto. A UI
+/// rola o dado e manda o valor em [roll], para mostrar o resultado ao
+/// jogador.
+final class SpendHitDieEvent extends CharacterEvent {
+  final String characterId;
+  final int roll;
+
+  const SpendHitDieEvent(this.characterId, this.roll);
+}
+
+// ---------------------------------------------------------------------------
+// Salvaguardas contra a morte, condições e outros marcadores da ficha.
+// ---------------------------------------------------------------------------
+
+/// Aplica uma salvaguarda contra a morte com o d20 [roll], rolado pela UI.
+final class DeathSaveRolledEvent extends CharacterEvent {
+  final String characterId;
+  final int roll;
+
+  const DeathSaveRolledEvent(this.characterId, this.roll);
+}
+
+/// Ajusta à mão os sucessos e as falhas das salvaguardas contra a morte.
+final class SetDeathSavesEvent extends CharacterEvent {
+  final String characterId;
+  final int successes;
+  final int failures;
+
+  const SetDeathSavesEvent(this.characterId, this.successes, this.failures);
+}
+
+/// Liga ou desliga a [condition] do personagem [characterId].
+final class ToggleConditionEvent extends CharacterEvent {
+  final String characterId;
+  final Condition condition;
+
+  const ToggleConditionEvent(this.characterId, this.condition);
+}
+
+/// Define o nível de exaustão (0 a 6) do personagem [characterId].
+final class SetExhaustionEvent extends CharacterEvent {
+  final String characterId;
+  final int level;
+
+  const SetExhaustionEvent(this.characterId, this.level);
+}
+
+/// Liga ou desliga a inspiração do personagem [characterId].
+final class ToggleInspirationEvent extends CharacterEvent {
+  final String characterId;
+
+  const ToggleInspirationEvent(this.characterId);
+}
+
+/// Define o bônus manual de CA do personagem [characterId].
+final class SetArmorClassBonusEvent extends CharacterEvent {
+  final String characterId;
+  final int bonus;
+
+  const SetArmorClassBonusEvent(this.characterId, this.bonus);
+}
+
+/// Define o deslocamento base do personagem [characterId], em pés.
+final class SetSpeedEvent extends CharacterEvent {
+  final String characterId;
+  final int speed;
+
+  const SetSpeedEvent(this.characterId, this.speed);
 }

@@ -247,6 +247,90 @@ class $CharactersTable extends Characters
     requiredDuringInsert: false,
     defaultValue: const Constant('[]'),
   ).withConverter<List<String>>($CharactersTable.$converterproficiencies);
+  static const VerificationMeta _armorClassBonusMeta = const VerificationMeta(
+    'armorClassBonus',
+  );
+  @override
+  late final GeneratedColumn<int> armorClassBonus = GeneratedColumn<int>(
+    'armor_class_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _hitDiceUsedMeta = const VerificationMeta(
+    'hitDiceUsed',
+  );
+  @override
+  late final GeneratedColumn<int> hitDiceUsed = GeneratedColumn<int>(
+    'hit_dice_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _deathSaveSuccessesMeta =
+      const VerificationMeta('deathSaveSuccesses');
+  @override
+  late final GeneratedColumn<int> deathSaveSuccesses = GeneratedColumn<int>(
+    'death_save_successes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _deathSaveFailuresMeta = const VerificationMeta(
+    'deathSaveFailures',
+  );
+  @override
+  late final GeneratedColumn<int> deathSaveFailures = GeneratedColumn<int>(
+    'death_save_failures',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> conditions =
+      GeneratedColumn<String>(
+        'conditions',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>($CharactersTable.$converterconditions);
+  static const VerificationMeta _exhaustionLevelMeta = const VerificationMeta(
+    'exhaustionLevel',
+  );
+  @override
+  late final GeneratedColumn<int> exhaustionLevel = GeneratedColumn<int>(
+    'exhaustion_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _inspirationMeta = const VerificationMeta(
+    'inspiration',
+  );
+  @override
+  late final GeneratedColumn<bool> inspiration = GeneratedColumn<bool>(
+    'inspiration',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("inspiration" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -272,6 +356,13 @@ class $CharactersTable extends Characters
     spells,
     defeatedBosses,
     proficiencies,
+    armorClassBonus,
+    hitDiceUsed,
+    deathSaveSuccesses,
+    deathSaveFailures,
+    conditions,
+    exhaustionLevel,
+    inspiration,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -434,6 +525,60 @@ class $CharactersTable extends Characters
         ),
       );
     }
+    if (data.containsKey('armor_class_bonus')) {
+      context.handle(
+        _armorClassBonusMeta,
+        armorClassBonus.isAcceptableOrUnknown(
+          data['armor_class_bonus']!,
+          _armorClassBonusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('hit_dice_used')) {
+      context.handle(
+        _hitDiceUsedMeta,
+        hitDiceUsed.isAcceptableOrUnknown(
+          data['hit_dice_used']!,
+          _hitDiceUsedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('death_save_successes')) {
+      context.handle(
+        _deathSaveSuccessesMeta,
+        deathSaveSuccesses.isAcceptableOrUnknown(
+          data['death_save_successes']!,
+          _deathSaveSuccessesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('death_save_failures')) {
+      context.handle(
+        _deathSaveFailuresMeta,
+        deathSaveFailures.isAcceptableOrUnknown(
+          data['death_save_failures']!,
+          _deathSaveFailuresMeta,
+        ),
+      );
+    }
+    if (data.containsKey('exhaustion_level')) {
+      context.handle(
+        _exhaustionLevelMeta,
+        exhaustionLevel.isAcceptableOrUnknown(
+          data['exhaustion_level']!,
+          _exhaustionLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('inspiration')) {
+      context.handle(
+        _inspirationMeta,
+        inspiration.isAcceptableOrUnknown(
+          data['inspiration']!,
+          _inspirationMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -541,6 +686,36 @@ class $CharactersTable extends Characters
           data['${effectivePrefix}proficiencies'],
         )!,
       ),
+      armorClassBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}armor_class_bonus'],
+      )!,
+      hitDiceUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}hit_dice_used'],
+      )!,
+      deathSaveSuccesses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}death_save_successes'],
+      )!,
+      deathSaveFailures: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}death_save_failures'],
+      )!,
+      conditions: $CharactersTable.$converterconditions.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}conditions'],
+        )!,
+      ),
+      exhaustionLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}exhaustion_level'],
+      )!,
+      inspiration: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}inspiration'],
+      )!,
     );
   }
 
@@ -554,6 +729,8 @@ class $CharactersTable extends Characters
   static TypeConverter<List<String>, String> $converterdefeatedBosses =
       const StringListConverter();
   static TypeConverter<List<String>, String> $converterproficiencies =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterconditions =
       const StringListConverter();
 }
 
@@ -635,6 +812,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   /// Mesma justificativa de default de [spells].
   final List<String> defeatedBosses;
   final List<String> proficiencies;
+  final int armorClassBonus;
+  final int hitDiceUsed;
+  final int deathSaveSuccesses;
+  final int deathSaveFailures;
+  final List<String> conditions;
+  final int exhaustionLevel;
+  final bool inspiration;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -659,6 +843,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.spells,
     required this.defeatedBosses,
     required this.proficiencies,
+    required this.armorClassBonus,
+    required this.hitDiceUsed,
+    required this.deathSaveSuccesses,
+    required this.deathSaveFailures,
+    required this.conditions,
+    required this.exhaustionLevel,
+    required this.inspiration,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -712,6 +903,17 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
         $CharactersTable.$converterproficiencies.toSql(proficiencies),
       );
     }
+    map['armor_class_bonus'] = Variable<int>(armorClassBonus);
+    map['hit_dice_used'] = Variable<int>(hitDiceUsed);
+    map['death_save_successes'] = Variable<int>(deathSaveSuccesses);
+    map['death_save_failures'] = Variable<int>(deathSaveFailures);
+    {
+      map['conditions'] = Variable<String>(
+        $CharactersTable.$converterconditions.toSql(conditions),
+      );
+    }
+    map['exhaustion_level'] = Variable<int>(exhaustionLevel);
+    map['inspiration'] = Variable<bool>(inspiration);
     return map;
   }
 
@@ -754,6 +956,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       spells: Value(spells),
       defeatedBosses: Value(defeatedBosses),
       proficiencies: Value(proficiencies),
+      armorClassBonus: Value(armorClassBonus),
+      hitDiceUsed: Value(hitDiceUsed),
+      deathSaveSuccesses: Value(deathSaveSuccesses),
+      deathSaveFailures: Value(deathSaveFailures),
+      conditions: Value(conditions),
+      exhaustionLevel: Value(exhaustionLevel),
+      inspiration: Value(inspiration),
     );
   }
 
@@ -788,6 +997,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       spells: serializer.fromJson<List<String>>(json['spells']),
       defeatedBosses: serializer.fromJson<List<String>>(json['defeatedBosses']),
       proficiencies: serializer.fromJson<List<String>>(json['proficiencies']),
+      armorClassBonus: serializer.fromJson<int>(json['armorClassBonus']),
+      hitDiceUsed: serializer.fromJson<int>(json['hitDiceUsed']),
+      deathSaveSuccesses: serializer.fromJson<int>(json['deathSaveSuccesses']),
+      deathSaveFailures: serializer.fromJson<int>(json['deathSaveFailures']),
+      conditions: serializer.fromJson<List<String>>(json['conditions']),
+      exhaustionLevel: serializer.fromJson<int>(json['exhaustionLevel']),
+      inspiration: serializer.fromJson<bool>(json['inspiration']),
     );
   }
   @override
@@ -817,6 +1033,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'spells': serializer.toJson<List<String>>(spells),
       'defeatedBosses': serializer.toJson<List<String>>(defeatedBosses),
       'proficiencies': serializer.toJson<List<String>>(proficiencies),
+      'armorClassBonus': serializer.toJson<int>(armorClassBonus),
+      'hitDiceUsed': serializer.toJson<int>(hitDiceUsed),
+      'deathSaveSuccesses': serializer.toJson<int>(deathSaveSuccesses),
+      'deathSaveFailures': serializer.toJson<int>(deathSaveFailures),
+      'conditions': serializer.toJson<List<String>>(conditions),
+      'exhaustionLevel': serializer.toJson<int>(exhaustionLevel),
+      'inspiration': serializer.toJson<bool>(inspiration),
     };
   }
 
@@ -844,6 +1067,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     List<String>? spells,
     List<String>? defeatedBosses,
     List<String>? proficiencies,
+    int? armorClassBonus,
+    int? hitDiceUsed,
+    int? deathSaveSuccesses,
+    int? deathSaveFailures,
+    List<String>? conditions,
+    int? exhaustionLevel,
+    bool? inspiration,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -870,6 +1100,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     spells: spells ?? this.spells,
     defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     proficiencies: proficiencies ?? this.proficiencies,
+    armorClassBonus: armorClassBonus ?? this.armorClassBonus,
+    hitDiceUsed: hitDiceUsed ?? this.hitDiceUsed,
+    deathSaveSuccesses: deathSaveSuccesses ?? this.deathSaveSuccesses,
+    deathSaveFailures: deathSaveFailures ?? this.deathSaveFailures,
+    conditions: conditions ?? this.conditions,
+    exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+    inspiration: inspiration ?? this.inspiration,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -920,6 +1157,27 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       proficiencies: data.proficiencies.present
           ? data.proficiencies.value
           : this.proficiencies,
+      armorClassBonus: data.armorClassBonus.present
+          ? data.armorClassBonus.value
+          : this.armorClassBonus,
+      hitDiceUsed: data.hitDiceUsed.present
+          ? data.hitDiceUsed.value
+          : this.hitDiceUsed,
+      deathSaveSuccesses: data.deathSaveSuccesses.present
+          ? data.deathSaveSuccesses.value
+          : this.deathSaveSuccesses,
+      deathSaveFailures: data.deathSaveFailures.present
+          ? data.deathSaveFailures.value
+          : this.deathSaveFailures,
+      conditions: data.conditions.present
+          ? data.conditions.value
+          : this.conditions,
+      exhaustionLevel: data.exhaustionLevel.present
+          ? data.exhaustionLevel.value
+          : this.exhaustionLevel,
+      inspiration: data.inspiration.present
+          ? data.inspiration.value
+          : this.inspiration,
     );
   }
 
@@ -948,7 +1206,14 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('proficiencyBonus: $proficiencyBonus, ')
           ..write('spells: $spells, ')
           ..write('defeatedBosses: $defeatedBosses, ')
-          ..write('proficiencies: $proficiencies')
+          ..write('proficiencies: $proficiencies, ')
+          ..write('armorClassBonus: $armorClassBonus, ')
+          ..write('hitDiceUsed: $hitDiceUsed, ')
+          ..write('deathSaveSuccesses: $deathSaveSuccesses, ')
+          ..write('deathSaveFailures: $deathSaveFailures, ')
+          ..write('conditions: $conditions, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('inspiration: $inspiration')
           ..write(')'))
         .toString();
   }
@@ -978,6 +1243,13 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     spells,
     defeatedBosses,
     proficiencies,
+    armorClassBonus,
+    hitDiceUsed,
+    deathSaveSuccesses,
+    deathSaveFailures,
+    conditions,
+    exhaustionLevel,
+    inspiration,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1005,7 +1277,14 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.proficiencyBonus == this.proficiencyBonus &&
           other.spells == this.spells &&
           other.defeatedBosses == this.defeatedBosses &&
-          other.proficiencies == this.proficiencies);
+          other.proficiencies == this.proficiencies &&
+          other.armorClassBonus == this.armorClassBonus &&
+          other.hitDiceUsed == this.hitDiceUsed &&
+          other.deathSaveSuccesses == this.deathSaveSuccesses &&
+          other.deathSaveFailures == this.deathSaveFailures &&
+          other.conditions == this.conditions &&
+          other.exhaustionLevel == this.exhaustionLevel &&
+          other.inspiration == this.inspiration);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1032,6 +1311,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<List<String>> spells;
   final Value<List<String>> defeatedBosses;
   final Value<List<String>> proficiencies;
+  final Value<int> armorClassBonus;
+  final Value<int> hitDiceUsed;
+  final Value<int> deathSaveSuccesses;
+  final Value<int> deathSaveFailures;
+  final Value<List<String>> conditions;
+  final Value<int> exhaustionLevel;
+  final Value<bool> inspiration;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1057,6 +1343,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.spells = const Value.absent(),
     this.defeatedBosses = const Value.absent(),
     this.proficiencies = const Value.absent(),
+    this.armorClassBonus = const Value.absent(),
+    this.hitDiceUsed = const Value.absent(),
+    this.deathSaveSuccesses = const Value.absent(),
+    this.deathSaveFailures = const Value.absent(),
+    this.conditions = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.inspiration = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1083,6 +1376,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.spells = const Value.absent(),
     this.defeatedBosses = const Value.absent(),
     this.proficiencies = const Value.absent(),
+    this.armorClassBonus = const Value.absent(),
+    this.hitDiceUsed = const Value.absent(),
+    this.deathSaveSuccesses = const Value.absent(),
+    this.deathSaveFailures = const Value.absent(),
+    this.conditions = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.inspiration = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1115,6 +1415,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<String>? spells,
     Expression<String>? defeatedBosses,
     Expression<String>? proficiencies,
+    Expression<int>? armorClassBonus,
+    Expression<int>? hitDiceUsed,
+    Expression<int>? deathSaveSuccesses,
+    Expression<int>? deathSaveFailures,
+    Expression<String>? conditions,
+    Expression<int>? exhaustionLevel,
+    Expression<bool>? inspiration,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1142,6 +1449,14 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (spells != null) 'spells': spells,
       if (defeatedBosses != null) 'defeated_bosses': defeatedBosses,
       if (proficiencies != null) 'proficiencies': proficiencies,
+      if (armorClassBonus != null) 'armor_class_bonus': armorClassBonus,
+      if (hitDiceUsed != null) 'hit_dice_used': hitDiceUsed,
+      if (deathSaveSuccesses != null)
+        'death_save_successes': deathSaveSuccesses,
+      if (deathSaveFailures != null) 'death_save_failures': deathSaveFailures,
+      if (conditions != null) 'conditions': conditions,
+      if (exhaustionLevel != null) 'exhaustion_level': exhaustionLevel,
+      if (inspiration != null) 'inspiration': inspiration,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1170,6 +1485,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<List<String>>? spells,
     Value<List<String>>? defeatedBosses,
     Value<List<String>>? proficiencies,
+    Value<int>? armorClassBonus,
+    Value<int>? hitDiceUsed,
+    Value<int>? deathSaveSuccesses,
+    Value<int>? deathSaveFailures,
+    Value<List<String>>? conditions,
+    Value<int>? exhaustionLevel,
+    Value<bool>? inspiration,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1196,6 +1518,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       spells: spells ?? this.spells,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
       proficiencies: proficiencies ?? this.proficiencies,
+      armorClassBonus: armorClassBonus ?? this.armorClassBonus,
+      hitDiceUsed: hitDiceUsed ?? this.hitDiceUsed,
+      deathSaveSuccesses: deathSaveSuccesses ?? this.deathSaveSuccesses,
+      deathSaveFailures: deathSaveFailures ?? this.deathSaveFailures,
+      conditions: conditions ?? this.conditions,
+      exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+      inspiration: inspiration ?? this.inspiration,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1278,6 +1607,29 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
         $CharactersTable.$converterproficiencies.toSql(proficiencies.value),
       );
     }
+    if (armorClassBonus.present) {
+      map['armor_class_bonus'] = Variable<int>(armorClassBonus.value);
+    }
+    if (hitDiceUsed.present) {
+      map['hit_dice_used'] = Variable<int>(hitDiceUsed.value);
+    }
+    if (deathSaveSuccesses.present) {
+      map['death_save_successes'] = Variable<int>(deathSaveSuccesses.value);
+    }
+    if (deathSaveFailures.present) {
+      map['death_save_failures'] = Variable<int>(deathSaveFailures.value);
+    }
+    if (conditions.present) {
+      map['conditions'] = Variable<String>(
+        $CharactersTable.$converterconditions.toSql(conditions.value),
+      );
+    }
+    if (exhaustionLevel.present) {
+      map['exhaustion_level'] = Variable<int>(exhaustionLevel.value);
+    }
+    if (inspiration.present) {
+      map['inspiration'] = Variable<bool>(inspiration.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1310,6 +1662,13 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('spells: $spells, ')
           ..write('defeatedBosses: $defeatedBosses, ')
           ..write('proficiencies: $proficiencies, ')
+          ..write('armorClassBonus: $armorClassBonus, ')
+          ..write('hitDiceUsed: $hitDiceUsed, ')
+          ..write('deathSaveSuccesses: $deathSaveSuccesses, ')
+          ..write('deathSaveFailures: $deathSaveFailures, ')
+          ..write('conditions: $conditions, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('inspiration: $inspiration, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2632,6 +2991,13 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<List<String>> spells,
       Value<List<String>> defeatedBosses,
       Value<List<String>> proficiencies,
+      Value<int> armorClassBonus,
+      Value<int> hitDiceUsed,
+      Value<int> deathSaveSuccesses,
+      Value<int> deathSaveFailures,
+      Value<List<String>> conditions,
+      Value<int> exhaustionLevel,
+      Value<bool> inspiration,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -2659,6 +3025,13 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<List<String>> spells,
       Value<List<String>> defeatedBosses,
       Value<List<String>> proficiencies,
+      Value<int> armorClassBonus,
+      Value<int> hitDiceUsed,
+      Value<int> deathSaveSuccesses,
+      Value<int> deathSaveFailures,
+      Value<List<String>> conditions,
+      Value<int> exhaustionLevel,
+      Value<bool> inspiration,
       Value<int> rowid,
     });
 
@@ -2846,6 +3219,42 @@ class $$CharactersTableFilterComposer
   get proficiencies => $composableBuilder(
     column: $table.proficiencies,
     builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get armorClassBonus => $composableBuilder(
+    column: $table.armorClassBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hitDiceUsed => $composableBuilder(
+    column: $table.hitDiceUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deathSaveSuccesses => $composableBuilder(
+    column: $table.deathSaveSuccesses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deathSaveFailures => $composableBuilder(
+    column: $table.deathSaveFailures,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get conditions => $composableBuilder(
+    column: $table.conditions,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get inspiration => $composableBuilder(
+    column: $table.inspiration,
+    builder: (column) => ColumnFilters(column),
   );
 
   Expression<bool> attributesRefs(
@@ -3047,6 +3456,41 @@ class $$CharactersTableOrderingComposer
     column: $table.proficiencies,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get armorClassBonus => $composableBuilder(
+    column: $table.armorClassBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hitDiceUsed => $composableBuilder(
+    column: $table.hitDiceUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deathSaveSuccesses => $composableBuilder(
+    column: $table.deathSaveSuccesses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deathSaveFailures => $composableBuilder(
+    column: $table.deathSaveFailures,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conditions => $composableBuilder(
+    column: $table.conditions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get inspiration => $composableBuilder(
+    column: $table.inspiration,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -3152,6 +3596,42 @@ class $$CharactersTableAnnotationComposer
         column: $table.proficiencies,
         builder: (column) => column,
       );
+
+  GeneratedColumn<int> get armorClassBonus => $composableBuilder(
+    column: $table.armorClassBonus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get hitDiceUsed => $composableBuilder(
+    column: $table.hitDiceUsed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get deathSaveSuccesses => $composableBuilder(
+    column: $table.deathSaveSuccesses,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get deathSaveFailures => $composableBuilder(
+    column: $table.deathSaveFailures,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get conditions =>
+      $composableBuilder(
+        column: $table.conditions,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get inspiration => $composableBuilder(
+    column: $table.inspiration,
+    builder: (column) => column,
+  );
 
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
@@ -3284,6 +3764,13 @@ class $$CharactersTableTableManager
                 Value<List<String>> spells = const Value.absent(),
                 Value<List<String>> defeatedBosses = const Value.absent(),
                 Value<List<String>> proficiencies = const Value.absent(),
+                Value<int> armorClassBonus = const Value.absent(),
+                Value<int> hitDiceUsed = const Value.absent(),
+                Value<int> deathSaveSuccesses = const Value.absent(),
+                Value<int> deathSaveFailures = const Value.absent(),
+                Value<List<String>> conditions = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> inspiration = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -3309,6 +3796,13 @@ class $$CharactersTableTableManager
                 spells: spells,
                 defeatedBosses: defeatedBosses,
                 proficiencies: proficiencies,
+                armorClassBonus: armorClassBonus,
+                hitDiceUsed: hitDiceUsed,
+                deathSaveSuccesses: deathSaveSuccesses,
+                deathSaveFailures: deathSaveFailures,
+                conditions: conditions,
+                exhaustionLevel: exhaustionLevel,
+                inspiration: inspiration,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3336,6 +3830,13 @@ class $$CharactersTableTableManager
                 Value<List<String>> spells = const Value.absent(),
                 Value<List<String>> defeatedBosses = const Value.absent(),
                 Value<List<String>> proficiencies = const Value.absent(),
+                Value<int> armorClassBonus = const Value.absent(),
+                Value<int> hitDiceUsed = const Value.absent(),
+                Value<int> deathSaveSuccesses = const Value.absent(),
+                Value<int> deathSaveFailures = const Value.absent(),
+                Value<List<String>> conditions = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> inspiration = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -3361,6 +3862,13 @@ class $$CharactersTableTableManager
                 spells: spells,
                 defeatedBosses: defeatedBosses,
                 proficiencies: proficiencies,
+                armorClassBonus: armorClassBonus,
+                hitDiceUsed: hitDiceUsed,
+                deathSaveSuccesses: deathSaveSuccesses,
+                deathSaveFailures: deathSaveFailures,
+                conditions: conditions,
+                exhaustionLevel: exhaustionLevel,
+                inspiration: inspiration,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
