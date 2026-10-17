@@ -1,6 +1,6 @@
 # ⚔️ CritSense
 
-**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio do SRD 5.1 (magias, equipamentos e bestiário) e rolador de dados físico, em um único app. As fichas funcionam **offline**; o compêndio precisa de internet.
+**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio do SRD 5.1 (magias, equipamentos e bestiário) e rolador de dados físico, em um único app. Tudo funciona **offline**: as fichas ficam no aparelho, e o compêndio guarda uma cópia de tudo o que já foi consultado.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
@@ -39,15 +39,22 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 ## ✨ Principais Funcionalidades
 
 ### 📜 Ficha de Personagem
-* **Criação via Point Buy:** alocação dos 27 pontos entre os seis atributos, com regras de custo/limite aplicadas em tempo real (`PointBuyCubit`).
-* **Status de Combate completo:** Classe de Armadura, iniciativa, deslocamento, pontos de vida (atuais/máximos/temporários), experiência e bônus de proficiência.
+* **Criação pelas regras do SRD:** compra de pontos, matriz padrão ou rolagem 4d6; bônus e deslocamento da raça; PV pelo dado de vida da classe; testes de resistência, proficiências de equipamento e idiomas preenchidos pela classe e pela raça.
+* **Combate:** CA calculada pela armadura, pelo escudo e pela Defesa sem Armadura; iniciativa e bônus de proficiência pelo atributo e pelo nível; ataques das armas equipadas (acuidade, distância, versátil).
+* **Vida e descanso:** dano com PV temporário, dano massivo, salvaguardas contra a morte, dados de vida no Descanso Curto e recuperação no Descanso Longo.
+* **Condições e exaustão:** as 14 condições do SRD e os 6 níveis de exaustão, com efeito no deslocamento e na vantagem/desvantagem das rolagens.
+* **Magia:** espaços de magia pelas tabelas do SRD (incluindo a Magia de Pacto), CD e ataque mágico, grimório com magias preparadas.
+* **Inventário:** quantidade, peso e limite de carga, moedas, itens equipados e sintonia (máximo de 3).
+* **Evolução:** XP pela tabela do SRD, subida de nível com PV (média ou rolagem), Aumento de Valor de Atributo e as características de classe e raça de cada nível.
+* **Rolar direto da ficha:** perícias, testes de resistência, iniciativa, ataques e dano, com vantagem e desvantagem sugeridas pelas condições.
+* **Backup:** exportar e importar personagens em JSON.
 * **Diário de Campanha:** notas de sessão por personagem com criação via formulário validado e **exclusão com sistema de Undo** — a nota some da lista imediatamente e só é removida do banco se o usuário não tocar em "Desfazer" dentro da janela do `SnackBar`.
 * **Persistência local:** todos os dados da ficha (atributos, proficiências, inventário, magias, notas, chefes derrotados) ficam no aparelho, com schema versionado e migrações incrementais no Drift.
 
 ### 📚 Compêndio D&D 5e
 * Integração com a **API 5e-bits** via `Dio`, cobrindo **Magias**, **Equipamentos** e **Bestiário**, cada um com tela de listagem e detalhe dedicadas (stat blocks completos para monstros, componentes/duração para magias, dano/CA para equipamentos).
 * Busca por nome e filtros rápidos (nível, categoria, Classe de Desafio) combinados em um único fluxo reativo por feature.
-* **Precisa de internet:** o compêndio não tem cache local. Sem conexão, as telas mostram o estado de erro depois do timeout do `Dio`.
+* **Sem internet:** um interceptor do `Dio` guarda no banco cada resposta do compêndio. Sem conexão, o app usa a última cópia; só o que nunca foi consultado mostra o estado de erro.
 
 ### 🔗 Integração Cruzada (Compêndio → Personagem)
 * Adição direta de **magias** e **itens de equipamento** ao inventário de um personagem a partir das telas de detalhe do compêndio.
