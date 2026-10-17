@@ -364,4 +364,53 @@ void main() {
 
     expect(version, db.schemaVersion);
   });
+
+  test(
+    'um banco da versão 9 migrado tem as mesmas colunas de um banco novo',
+    () async {
+      Future<Map<String, Set<String>>> columnsOf(AppDatabase db) async {
+        final tables = await db
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type = 'table' "
+              "AND name NOT LIKE 'sqlite_%'",
+            )
+            .map((row) => row.read<String>('name'))
+            .get();
+        return {
+          for (final table in tables)
+            table:
+                (await db
+                        .customSelect('PRAGMA table_info("$table")')
+                        .map((row) => row.read<String>('name'))
+                        .get())
+                    .toSet(),
+        };
+      }
+
+      final fresh = AppDatabase(NativeDatabase.memory());
+      addTearDown(fresh.close);
+      final migrated = AppDatabase(
+        NativeDatabase.memory(
+          setup: (rawDb) {
+            final userVersion =
+                rawDb.select('PRAGMA user_version').first.values.first as int;
+            if (userVersion != 0) return;
+            for (final statement in [
+              charactersV9,
+              attributesTable,
+              inventoryTable,
+              sessionNotesTable,
+              characterSpellsTable,
+            ]) {
+              rawDb.execute(statement);
+            }
+            rawDb.execute('PRAGMA user_version = 9');
+          },
+        ),
+      );
+      addTearDown(migrated.close);
+
+      expect(await columnsOf(migrated), await columnsOf(fresh));
+    },
+  );
 }

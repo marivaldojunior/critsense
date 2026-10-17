@@ -408,6 +408,26 @@ class $CharactersTable extends Characters
     defaultValue: const Constant(0),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+  otherProficiencies = GeneratedColumn<String>(
+    'other_proficiencies',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  ).withConverter<List<String>>($CharactersTable.$converterotherProficiencies);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> languages =
+      GeneratedColumn<String>(
+        'languages',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>($CharactersTable.$converterlanguages);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     nome,
@@ -446,6 +466,8 @@ class $CharactersTable extends Characters
     electrum,
     gold,
     platinum,
+    otherProficiencies,
+    languages,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -868,6 +890,18 @@ class $CharactersTable extends Characters
         DriftSqlType.int,
         data['${effectivePrefix}platinum'],
       )!,
+      otherProficiencies: $CharactersTable.$converterotherProficiencies.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}other_proficiencies'],
+        )!,
+      ),
+      languages: $CharactersTable.$converterlanguages.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}languages'],
+        )!,
+      ),
     );
   }
 
@@ -886,6 +920,10 @@ class $CharactersTable extends Characters
       const StringListConverter();
   static TypeConverter<List<int>, String> $converterspellSlotsUsed =
       const IntListConverter();
+  static TypeConverter<List<String>, String> $converterotherProficiencies =
+      const StringListConverter();
+  static TypeConverter<List<String>, String> $converterlanguages =
+      const StringListConverter();
 }
 
 class CharacterData extends DataClass implements Insertable<CharacterData> {
@@ -980,6 +1018,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   final int electrum;
   final int gold;
   final int platinum;
+  final List<String> otherProficiencies;
+  final List<String> languages;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -1018,6 +1058,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.electrum,
     required this.gold,
     required this.platinum,
+    required this.otherProficiencies,
+    required this.languages,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1093,6 +1135,16 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     map['electrum'] = Variable<int>(electrum);
     map['gold'] = Variable<int>(gold);
     map['platinum'] = Variable<int>(platinum);
+    {
+      map['other_proficiencies'] = Variable<String>(
+        $CharactersTable.$converterotherProficiencies.toSql(otherProficiencies),
+      );
+    }
+    {
+      map['languages'] = Variable<String>(
+        $CharactersTable.$converterlanguages.toSql(languages),
+      );
+    }
     return map;
   }
 
@@ -1149,6 +1201,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       electrum: Value(electrum),
       gold: Value(gold),
       platinum: Value(platinum),
+      otherProficiencies: Value(otherProficiencies),
+      languages: Value(languages),
     );
   }
 
@@ -1197,6 +1251,10 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       electrum: serializer.fromJson<int>(json['electrum']),
       gold: serializer.fromJson<int>(json['gold']),
       platinum: serializer.fromJson<int>(json['platinum']),
+      otherProficiencies: serializer.fromJson<List<String>>(
+        json['otherProficiencies'],
+      ),
+      languages: serializer.fromJson<List<String>>(json['languages']),
     );
   }
   @override
@@ -1240,6 +1298,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'electrum': serializer.toJson<int>(electrum),
       'gold': serializer.toJson<int>(gold),
       'platinum': serializer.toJson<int>(platinum),
+      'otherProficiencies': serializer.toJson<List<String>>(otherProficiencies),
+      'languages': serializer.toJson<List<String>>(languages),
     };
   }
 
@@ -1281,6 +1341,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     int? electrum,
     int? gold,
     int? platinum,
+    List<String>? otherProficiencies,
+    List<String>? languages,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -1321,6 +1383,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     electrum: electrum ?? this.electrum,
     gold: gold ?? this.gold,
     platinum: platinum ?? this.platinum,
+    otherProficiencies: otherProficiencies ?? this.otherProficiencies,
+    languages: languages ?? this.languages,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -1403,6 +1467,10 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       electrum: data.electrum.present ? data.electrum.value : this.electrum,
       gold: data.gold.present ? data.gold.value : this.gold,
       platinum: data.platinum.present ? data.platinum.value : this.platinum,
+      otherProficiencies: data.otherProficiencies.present
+          ? data.otherProficiencies.value
+          : this.otherProficiencies,
+      languages: data.languages.present ? data.languages.value : this.languages,
     );
   }
 
@@ -1445,7 +1513,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('silver: $silver, ')
           ..write('electrum: $electrum, ')
           ..write('gold: $gold, ')
-          ..write('platinum: $platinum')
+          ..write('platinum: $platinum, ')
+          ..write('otherProficiencies: $otherProficiencies, ')
+          ..write('languages: $languages')
           ..write(')'))
         .toString();
   }
@@ -1489,6 +1559,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     electrum,
     gold,
     platinum,
+    otherProficiencies,
+    languages,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1530,7 +1602,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.silver == this.silver &&
           other.electrum == this.electrum &&
           other.gold == this.gold &&
-          other.platinum == this.platinum);
+          other.platinum == this.platinum &&
+          other.otherProficiencies == this.otherProficiencies &&
+          other.languages == this.languages);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1571,6 +1645,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<int> electrum;
   final Value<int> gold;
   final Value<int> platinum;
+  final Value<List<String>> otherProficiencies;
+  final Value<List<String>> languages;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1610,6 +1686,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.electrum = const Value.absent(),
     this.gold = const Value.absent(),
     this.platinum = const Value.absent(),
+    this.otherProficiencies = const Value.absent(),
+    this.languages = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1650,6 +1728,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.electrum = const Value.absent(),
     this.gold = const Value.absent(),
     this.platinum = const Value.absent(),
+    this.otherProficiencies = const Value.absent(),
+    this.languages = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1696,6 +1776,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<int>? electrum,
     Expression<int>? gold,
     Expression<int>? platinum,
+    Expression<String>? otherProficiencies,
+    Expression<String>? languages,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1738,6 +1820,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (electrum != null) 'electrum': electrum,
       if (gold != null) 'gold': gold,
       if (platinum != null) 'platinum': platinum,
+      if (otherProficiencies != null) 'other_proficiencies': otherProficiencies,
+      if (languages != null) 'languages': languages,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1780,6 +1864,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<int>? electrum,
     Value<int>? gold,
     Value<int>? platinum,
+    Value<List<String>>? otherProficiencies,
+    Value<List<String>>? languages,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1820,6 +1906,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       electrum: electrum ?? this.electrum,
       gold: gold ?? this.gold,
       platinum: platinum ?? this.platinum,
+      otherProficiencies: otherProficiencies ?? this.otherProficiencies,
+      languages: languages ?? this.languages,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1948,6 +2036,18 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (platinum.present) {
       map['platinum'] = Variable<int>(platinum.value);
     }
+    if (otherProficiencies.present) {
+      map['other_proficiencies'] = Variable<String>(
+        $CharactersTable.$converterotherProficiencies.toSql(
+          otherProficiencies.value,
+        ),
+      );
+    }
+    if (languages.present) {
+      map['languages'] = Variable<String>(
+        $CharactersTable.$converterlanguages.toSql(languages.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1994,6 +2094,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('electrum: $electrum, ')
           ..write('gold: $gold, ')
           ..write('platinum: $platinum, ')
+          ..write('otherProficiencies: $otherProficiencies, ')
+          ..write('languages: $languages, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4613,6 +4715,8 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<int> electrum,
       Value<int> gold,
       Value<int> platinum,
+      Value<List<String>> otherProficiencies,
+      Value<List<String>> languages,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -4654,6 +4758,8 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<int> electrum,
       Value<int> gold,
       Value<int> platinum,
+      Value<List<String>> otherProficiencies,
+      Value<List<String>> languages,
       Value<int> rowid,
     });
 
@@ -4933,6 +5039,18 @@ class $$CharactersTableFilterComposer
   ColumnFilters<int> get platinum => $composableBuilder(
     column: $table.platinum,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get otherProficiencies => $composableBuilder(
+    column: $table.otherProficiencies,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get languages => $composableBuilder(
+    column: $table.languages,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   Expression<bool> attributesRefs(
@@ -5229,6 +5347,16 @@ class $$CharactersTableOrderingComposer
     column: $table.platinum,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get otherProficiencies => $composableBuilder(
+    column: $table.otherProficiencies,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get languages => $composableBuilder(
+    column: $table.languages,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -5396,6 +5524,15 @@ class $$CharactersTableAnnotationComposer
 
   GeneratedColumn<int> get platinum =>
       $composableBuilder(column: $table.platinum, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String>
+  get otherProficiencies => $composableBuilder(
+    column: $table.otherProficiencies,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get languages =>
+      $composableBuilder(column: $table.languages, builder: (column) => column);
 
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
@@ -5568,6 +5705,8 @@ class $$CharactersTableTableManager
                 Value<int> electrum = const Value.absent(),
                 Value<int> gold = const Value.absent(),
                 Value<int> platinum = const Value.absent(),
+                Value<List<String>> otherProficiencies = const Value.absent(),
+                Value<List<String>> languages = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -5607,6 +5746,8 @@ class $$CharactersTableTableManager
                 electrum: electrum,
                 gold: gold,
                 platinum: platinum,
+                otherProficiencies: otherProficiencies,
+                languages: languages,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5648,6 +5789,8 @@ class $$CharactersTableTableManager
                 Value<int> electrum = const Value.absent(),
                 Value<int> gold = const Value.absent(),
                 Value<int> platinum = const Value.absent(),
+                Value<List<String>> otherProficiencies = const Value.absent(),
+                Value<List<String>> languages = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -5687,6 +5830,8 @@ class $$CharactersTableTableManager
                 electrum: electrum,
                 gold: gold,
                 platinum: platinum,
+                otherProficiencies: otherProficiencies,
+                languages: languages,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

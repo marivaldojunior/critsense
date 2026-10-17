@@ -187,6 +187,14 @@ class Characters extends Table {
   IntColumn get gold => integer().withDefault(const Constant(0))();
   IntColumn get platinum => integer().withDefault(const Constant(0))();
 
+  // ── Outras proficiências e idiomas (versão 11) ────────────────────────
+  TextColumn get otherProficiencies => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
+  TextColumn get languages => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
+
   @override
   Set<Column> get primaryKey => {id};
 }

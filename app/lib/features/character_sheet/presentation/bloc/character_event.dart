@@ -301,3 +301,17 @@ final class UpdateLoreEvent extends CharacterEvent {
     this.background,
   });
 }
+
+/// Troca as proficiências em armaduras, armas e ferramentas e/ou os idiomas
+/// do personagem [characterId]. Listas `null` ficam como estão.
+final class UpdateProficienciesEvent extends CharacterEvent {
+  final String characterId;
+  final List<String>? otherProficiencies;
+  final List<String>? languages;
+
+  const UpdateProficienciesEvent(
+    this.characterId, {
+    this.otherProficiencies,
+    this.languages,
+  });
+}

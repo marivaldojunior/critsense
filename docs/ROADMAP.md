@@ -124,7 +124,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TD.2** Adicione a matriz padrão e a rolagem 4d6 na criação.
 - [x] **TD.3** Crie o fluxo de subir de nível (XP, PV, proficiência, aumento de atributo e espaços de magia).
 - [x] **TD.4** Mostre as características de classe e de raça do SRD.
-- [ ] **TD.5** Adicione as proficiências em armaduras, armas e ferramentas, e os idiomas.
+- [x] **TD.5** Adicione as proficiências em armaduras, armas e ferramentas, e os idiomas.
 
 #### Fase E — Integração e robustez
 - [ ] **TE.1** Role testes, salvaguardas, iniciativa e ataques direto da ficha.

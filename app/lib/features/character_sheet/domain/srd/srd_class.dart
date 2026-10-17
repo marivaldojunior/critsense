@@ -237,3 +237,46 @@ enum SrdClass {
     return null;
   }
 }
+
+/// Nome em português de cada treinamento de armadura e categoria de arma.
+const _trainingLabels = {
+  'light': 'Armaduras leves',
+  'medium': 'Armaduras médias',
+  'heavy': 'Armaduras pesadas',
+  'shield': 'Escudos',
+  'simple': 'Armas simples',
+  'martial': 'Armas marciais',
+};
+
+/// Nome em português das armas específicas das listas de proficiência.
+const _weaponLabels = {
+  'crossbow-hand': 'Besta de mão',
+  'crossbow-light': 'Besta leve',
+  'longsword': 'Espada longa',
+  'rapier': 'Rapieira',
+  'shortsword': 'Espada curta',
+  'club': 'Clava',
+  'dagger': 'Adaga',
+  'dart': 'Dardo',
+  'javelin': 'Azagaia',
+  'mace': 'Maça',
+  'quarterstaff': 'Bordão',
+  'scimitar': 'Cimitarra',
+  'sickle': 'Foice curta',
+  'sling': 'Funda',
+  'spear': 'Lança',
+};
+
+/// Proficiências em armaduras e armas da classe, com nomes para a ficha.
+List<String> defaultEquipmentProficiencies(SrdClass? srdClass) {
+  if (srdClass == null) return const [];
+  return [
+    for (final training in ['light', 'medium', 'heavy', 'shield'])
+      if (srdClass.armorTraining.contains(training)) _trainingLabels[training]!,
+    for (final category in ['simple', 'martial'])
+      if (srdClass.weaponCategories.contains(category))
+        _trainingLabels[category]!,
+    for (final weapon in srdClass.weaponIndices)
+      _weaponLabels[weapon] ?? weapon,
+  ];
+}

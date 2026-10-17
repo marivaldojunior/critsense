@@ -120,6 +120,13 @@ class Character {
   /// Moedas do personagem (PC, PP, PE, PO, PL).
   final Coins coins;
 
+  /// Proficiências em armaduras, armas e ferramentas (texto livre, ex:
+  /// "Armaduras leves", "Ferramentas de ladrão").
+  final List<String> otherProficiencies;
+
+  /// Idiomas que o personagem fala.
+  final List<String> languages;
+
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
   /// compêndio). Uma lista simples basta: o registro não carrega mais dados
   /// além do nome.
@@ -156,6 +163,8 @@ class Character {
     this.spellSlotsUsed = const [0, 0, 0, 0, 0, 0, 0, 0, 0],
     this.pactSlotsUsed = 0,
     this.coins = const Coins(),
+    this.otherProficiencies = const [],
+    this.languages = const [],
     this.defeatedBosses = const [],
   });
 
@@ -193,6 +202,8 @@ class Character {
     List<int>? spellSlotsUsed,
     int? pactSlotsUsed,
     Coins? coins,
+    List<String>? otherProficiencies,
+    List<String>? languages,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -225,6 +236,8 @@ class Character {
       spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
       pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
       coins: coins ?? this.coins,
+      otherProficiencies: otherProficiencies ?? this.otherProficiencies,
+      languages: languages ?? this.languages,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }

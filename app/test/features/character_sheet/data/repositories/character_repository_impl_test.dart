@@ -262,6 +262,26 @@ void main() {
       },
     );
 
+    test('guarda as outras proficiências e os idiomas', () async {
+      await repository.saveCharacter(
+        buildCharacter().copyWith(
+          otherProficiencies: const [
+            'Armaduras leves',
+            'Ferramentas de ladrão',
+          ],
+          languages: const ['Comum', 'Anão'],
+        ),
+      );
+
+      final loaded = (await repository.getAllCharacters()).single;
+
+      expect(loaded.otherProficiencies, [
+        'Armaduras leves',
+        'Ferramentas de ladrão',
+      ]);
+      expect(loaded.languages, ['Comum', 'Anão']);
+    });
+
     test('guarda as moedas', () async {
       await repository.saveCharacter(
         buildCharacter().copyWith(

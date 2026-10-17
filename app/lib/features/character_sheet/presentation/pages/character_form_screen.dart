@@ -17,6 +17,7 @@ import '../../domain/entities/alignment.dart' as dnd;
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/entities/proficiency.dart';
 import '../../domain/rules/srd_rules.dart';
 import '../../domain/srd/srd_class.dart';
 import '../../domain/srd/srd_race.dart';
@@ -175,6 +176,15 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       bonds: '',
       flaws: '',
       experiencePoints: 0,
+      // A classe já dá a proficiência em dois testes de resistência e em
+      // armaduras e armas; a raça dá os idiomas.
+      proficiencies: [
+        for (final attribute
+            in srdClass?.savingThrows ?? const <AttributeType>{})
+          SavingThrowProficiency(attribute),
+      ],
+      otherProficiencies: defaultEquipmentProficiencies(srdClass),
+      languages: race?.languages ?? const [],
       avatarPath: _avatarImage?.path,
     );
 

@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -142,6 +142,11 @@ class AppDatabase extends _$AppDatabase {
         ]) {
           await m.addColumn(characters, column);
         }
+      }
+      if (from < 11) {
+        // Proficiências em armaduras, armas e ferramentas, e idiomas.
+        await m.addColumn(characters, characters.otherProficiencies);
+        await m.addColumn(characters, characters.languages);
       }
     },
   );

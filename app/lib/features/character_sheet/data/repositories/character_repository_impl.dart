@@ -233,6 +233,8 @@ extension _CharacterDataMapper on CharacterData {
       avatarPath: avatarPath,
       spellSlotsUsed: spellSlotsUsed,
       pactSlotsUsed: pactSlotsUsed,
+      otherProficiencies: otherProficiencies,
+      languages: languages,
       coins: Coins({
         Coin.copper: copper,
         Coin.silver: silver,
@@ -326,6 +328,8 @@ extension _CharacterToCompanion on Character {
       spells: const Value([]),
       spellSlotsUsed: Value(spellSlotsUsed),
       pactSlotsUsed: Value(pactSlotsUsed),
+      otherProficiencies: Value(otherProficiencies),
+      languages: Value(languages),
       copper: Value(coins.of(Coin.copper)),
       silver: Value(coins.of(Coin.silver)),
       electrum: Value(coins.of(Coin.electrum)),

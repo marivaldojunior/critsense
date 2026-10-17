@@ -8,6 +8,7 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import '../../../domain/entities/character.dart';
 import '../../bloc/character_bloc.dart';
 import '../../widgets/features_section.dart';
+import '../../widgets/proficiencies_languages_card.dart';
 
 /// Aba "Características & Lore": os campos de texto longo do bloco lateral
 /// esquerdo da ficha oficial (Traços, Ideais, Vínculos, Fraquezas) mais o
@@ -81,6 +82,22 @@ class _TraitsLoreTabState extends State<TraitsLoreTab> {
               previous.findCharacter(widget.character.id)?.level !=
               current.findCharacter(widget.character.id)?.level,
           builder: (context, state) => FeaturesSection(
+            character:
+                state.findCharacter(widget.character.id) ?? widget.character,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Proficiências e Idiomas',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const Divider(),
+        BlocBuilder<CharacterBloc, CharacterState>(
+          buildWhen: (previous, current) => !identical(
+            previous.findCharacter(widget.character.id),
+            current.findCharacter(widget.character.id),
+          ),
+          builder: (context, state) => ProficienciesLanguagesCard(
             character:
                 state.findCharacter(widget.character.id) ?? widget.character,
           ),

@@ -175,6 +175,16 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         ),
       ),
     );
+    on<UpdateProficienciesEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.copyWith(
+          otherProficiencies: event.otherProficiencies,
+          languages: event.languages,
+        ),
+      ),
+    );
     on<SetSpeedEvent>(
       (event, emit) => _updateCharacter(
         emit,
