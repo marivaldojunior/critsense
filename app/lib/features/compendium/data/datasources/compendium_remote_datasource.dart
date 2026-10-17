@@ -70,7 +70,10 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
 
   /// URL base da API pública do D&D 5e, aplicada ao [Dio] em
   /// `injection_container.dart` via `BaseOptions.baseUrl`.
-  static const baseUrl = 'https://www.dnd5eapi.co/api/';
+  ///
+  /// `/api/2014/` é o conjunto de regras do SRD 5.1. O caminho antigo
+  /// `/api/` responde com um redirecionamento (301) para este.
+  static const baseUrl = 'https://www.dnd5eapi.co/api/2014/';
 
   // Caminhos relativos a [baseUrl].
   static const _spellsEndpoint = 'spells';
