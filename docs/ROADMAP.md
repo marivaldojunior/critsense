@@ -14,7 +14,7 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 | Resumo de sessão | As notas de sessão já ficam no Drift (`SessionNote`: `title`, `content`, `createdAt`). | O app envia as notas locais para a API. A API não precisa guardar as notas no MVP. |
 | Gerador de NPCs | Não existe. | Crie a feature `lib/features/ai_tools/` com as camadas `domain`, `data` e `presentation`, igual às outras features. |
 | Montador de encontros | O Bestiário já lê monstros da API 5e-bits. As entidades de domínio não têm `challengeRating` nem XP. | A API Java precisa de uma base própria de monstros do SRD com CR e XP. O cálculo determinístico não pode depender de uma API externa. |
-| Login | A [login_screen.dart](../lib/features/auth/presentation/screens/login_screen.dart) só valida campos vazios. | O rate limit "por usuário" precisa de uma identidade real. Ligue a tela de login a uma autenticação real da API. |
+| Login | A [login_screen.dart](../app/lib/features/auth/presentation/screens/login_screen.dart) só valida campos vazios. | O rate limit "por usuário" precisa de uma identidade real. Ligue a tela de login a uma autenticação real da API. |
 | Cliente HTTP | Existe um `Dio` singleton sem `baseUrl` e sem timeout. | Registre um segundo `Dio` só para a API do CritSense, com `baseUrl` por `--dart-define`, timeout e interceptor de token. |
 | Offline-first | A ficha funciona offline. O compêndio não funciona. | As features de IA precisam de rede. Mostre um estado "sem conexão" claro e não bloqueie o resto do app. |
 
@@ -23,20 +23,20 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 1. **Versão do Spring Boot.** A proposta pede Spring Boot 3.x. O Spring Boot 4.0 foi lançado em novembro de 2025, e o suporte gratuito da linha 3.5 terminou em 2026. Verifique as versões atuais no [Spring Initializr](https://start.spring.io) antes de criar o projeto. A recomendação é usar o Spring Boot 4.x com a versão do Spring AI compatível com ele.
 2. **Java.** O Java 21 funciona bem. O Java 25 também é LTS. Escolha um dos dois e use a mesma versão no Docker e no CI.
 3. **SSE e cliente gerado.** Os geradores OpenAPI para Dart (`dart-dio`) não tratam bem respostas `text/event-stream`. Use o cliente gerado para os endpoints comuns. Escreva um cliente SSE manual para a narração, com `Dio` e `ResponseType.stream`.
-4. **Conflito de dependências.** O `pubspec.yaml` força `analyzer: ^13.0.0` em `dependency_overrides`. O cliente gerado pode usar `built_value` ou `json_serializable`, que dependem do `analyzer`. Gere o cliente como um pacote separado (`packages/critsense_api_client`) e teste o `build_runner` antes de integrar.
+4. **Conflito de dependências.** O `pubspec.yaml` força `analyzer: ^13.0.0` em `dependency_overrides`. O cliente gerado pode usar `built_value` ou `json_serializable`, que dependem do `analyzer`. Gere o cliente como um pacote separado (`app/packages/critsense_api_client`) e teste o `build_runner` antes de integrar.
 5. **Autenticação.** A proposta não define a autenticação, mas o rate limit depende dela. Para o MVP, use JWT com Spring Security e um cadastro simples (usuário e senha). Não guarde a senha no app. Guarde só o token, com `flutter_secure_storage`.
 6. **Licenças.** A proposta cita o SRD 5.1 (CC-BY-4.0). O SRD 5.2 também é CC-BY-4.0, mas use uma só versão para os dados de regras. Os ícones de `assets/icons/` usam CC-BY-SA 4.0, e o README atual não tem essa atribuição.
 7. **Prompts.** Guarde os prompts em `api/src/main/resources/prompts/` como templates (`.st`), com versão no nome do arquivo (ex.: `npc-generator.v1.st`).
 
-### 1.3 Estrutura de repositório recomendada
+### 1.3 Estrutura do repositório
 
-Mantenha o Flutter na raiz e adicione a API em `api/`. Assim, o app atual não muda de lugar, e o contrato OpenAPI fica no mesmo repositório.
+Cada projeto fica na sua própria pasta: o app Flutter em `app/` e a API em `api/`. O contrato OpenAPI fica no mesmo repositório.
 
 ```
 crit_sense/
-├── lib/, test/, android/, ios/   # App Flutter (sem mudança)
-├── packages/
-│   └── critsense_api_client/     # Cliente Dart gerado do OpenAPI
+├── app/                          # App Flutter
+│   ├── lib/, test/, android/, ios/
+│   └── packages/critsense_api_client/   # Cliente Dart gerado do OpenAPI
 ├── api/                          # API Java (Spring Boot)
 │   ├── src/main/resources/prompts/
 │   └── src/main/resources/db/migration/   # Flyway
@@ -46,7 +46,7 @@ crit_sense/
 └── .github/workflows/            # CI separado por pasta (paths)
 ```
 
-O CI usa filtros de `paths`: o workflow do Flutter roda só quando `lib/` ou `test/` mudam, e o workflow da API roda só quando `api/` muda.
+O CI usa filtros de `paths`: o workflow do Flutter roda só quando `app/` muda, e o workflow da API roda só quando `api/` ou `contracts/` mudam.
 
 ### 1.4 Fluxo de uma chamada de IA
 
@@ -69,19 +69,19 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 
 #### Segurança e build
 - [x] **T0.1** Revogue o token do GitHub que está na URL do `origin` em `.git/config`. Crie outro token e use o Git Credential Manager. Não coloque o token na URL.
-- [x] **T0.2** Adicione `<uses-permission android:name="android.permission.INTERNET"/>` ao [AndroidManifest.xml](../android/app/src/main/AndroidManifest.xml) principal. Sem esta permissão, o compêndio não funciona no APK de release.
+- [x] **T0.2** Adicione `<uses-permission android:name="android.permission.INTERNET"/>` ao [AndroidManifest.xml](../app/android/app/src/main/AndroidManifest.xml) principal. Sem esta permissão, o compêndio não funciona no APK de release.
 - [x] **T0.3** Crie uma chave de assinatura de release e configure o `signingConfig` sem colocar a chave no repositório.
 - [x] **T0.4** Atualize a `description` do `pubspec.yaml`. Revise se os `dependency_overrides` ainda são necessários.
 
 #### Arquitetura
-- [x] **T0.5** Crie um `SessionNotesBloc` e mova para ele as chamadas de use case da [session_notes_screen.dart](../lib/features/character_sheet/presentation/pages/session_notes_screen.dart).
-- [x] **T0.6** Crie um `InventoryBloc` e mova para ele as chamadas de use case da [inventory_spells_tab.dart](../lib/features/character_sheet/presentation/pages/character_sheet_tabs/inventory_spells_tab.dart).
-- [x] **T0.7** Faça o shake passar pelo `ISensorDataSource` e pelo `DiceBloc`. Remova o uso direto do `HardwareBridge` na [dice_screen.dart](../lib/features/dice_roller/presentation/pages/dice_screen.dart).
+- [x] **T0.5** Crie um `SessionNotesBloc` e mova para ele as chamadas de use case da [session_notes_screen.dart](../app/lib/features/character_sheet/presentation/pages/session_notes_screen.dart).
+- [x] **T0.6** Crie um `InventoryBloc` e mova para ele as chamadas de use case da [inventory_spells_tab.dart](../app/lib/features/character_sheet/presentation/pages/character_sheet_tabs/inventory_spells_tab.dart).
+- [x] **T0.7** Faça o shake passar pelo `ISensorDataSource` e pelo `DiceBloc`. Remova o uso direto do `HardwareBridge` na [dice_screen.dart](../app/lib/features/dice_roller/presentation/pages/dice_screen.dart).
 - [x] **T0.8** Configure o `Dio` com `BaseOptions` (`baseUrl`, `connectTimeout`, `receiveTimeout`). Remova as URLs repetidas do datasource do compêndio.
 - [x] **T0.9** Salve o tema escolhido pelo usuário. Corrija o botão de tema, que para de funcionar depois do logout.
 
 #### Plataformas
-- [x] **T0.10** Implemente os canais `feedback` e `sensor` no [AppDelegate.swift](../ios/Runner/AppDelegate.swift), ou documente que o iOS não tem vibração nem shake.
+- [x] **T0.10** Implemente os canais `feedback` e `sensor` no [AppDelegate.swift](../app/ios/Runner/AppDelegate.swift), ou documente que o iOS não tem vibração nem shake.
   - [ ] **T0.10a** Compile e teste o app num iPhone (precisa de um Mac). O código Swift foi escrito sem compilar.
 
 #### Testes
@@ -122,7 +122,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [ ] **T1.14** Adicione no CI uma verificação de que o `contracts/openapi.yaml` está igual ao contrato gerado pela API.
 
 #### Lado Flutter
-- [ ] **T1.15** Gere o cliente Dart do OpenAPI em `packages/critsense_api_client`. Teste se ele funciona com os `dependency_overrides` atuais.
+- [ ] **T1.15** Gere o cliente Dart do OpenAPI em `app/packages/critsense_api_client`. Teste se ele funciona com os `dependency_overrides` atuais.
 - [ ] **T1.16** Ligue a tela de login à API. Guarde o token com `flutter_secure_storage`.
 - [ ] **T1.17** Crie a feature `ai_tools` com a tela do gerador de NPCs. Trate os estados de carregamento, erro, limite atingido (`429`) e sem conexão.
 

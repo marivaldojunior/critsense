@@ -14,7 +14,7 @@
 
 O projeto é estruturado sob os princípios de **Clean Architecture**, com cada feature isolada em três camadas — `domain`, `data` e `presentation` — garantindo baixo acoplamento, alta testabilidade e regras de negócio livres de dependências de framework ou infraestrutura.
 
-* **Injeção de Dependência (`get_it`):** todo o grafo de dependências (DataSources → Repositories → Use Cases → BLoCs) é registrado centralmente em [lib/di/injection_container.dart](lib/di/injection_container.dart), com `LazySingleton` para recursos compartilhados (conexão SQLite, cliente HTTP) e `Factory` para estado de UI isolado por tela.
+* **Injeção de Dependência (`get_it`):** todo o grafo de dependências (DataSources → Repositories → Use Cases → BLoCs) é registrado centralmente em [app/lib/di/injection_container.dart](app/lib/di/injection_container.dart), com `LazySingleton` para recursos compartilhados (conexão SQLite, cliente HTTP) e `Factory` para estado de UI isolado por tela.
 * **Gerenciamento de estado previsível (`flutter_bloc`):** cada feature expõe seu estado através de eventos e states imutáveis (atualizados via `copyWith`), eliminando mutação implícita e tornando toda transição de estado rastreável e testável. As telas não chamam use cases diretamente: todo acesso a dados passa por um BLoC/Cubit.
 * **Persistência local com Drift/SQLite:** camada de dados com migrações versionadas (`MigrationStrategy`), transações atômicas, UPSERTs e cascade delete via foreign keys. Os dados das fichas não dependem de conexão.
 * **Integração cruzada entre features:** o módulo `compendium` dispara eventos diretamente nos BLoCs de `character_sheet` (ex: `AddInventoryItemEvent`, `AddSpellToCharacterEvent`, `AddBossToCharacterEvent`), mantendo baixo acoplamento sem um mediador central — cada feature conhece apenas o contrato do evento que dispara.
@@ -65,7 +65,7 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 ```bash
 # 1. Clone o repositório
 git clone <url-do-repositorio>
-cd crit_sense
+cd crit_sense/app
 
 # 2. Instale as dependências
 flutter pub get
@@ -88,15 +88,15 @@ Os testes usam `mocktail` e cobrem os BLoCs de todas as features, as regras de r
 
 **Build de release (Android):**
 
-1. Crie uma chave de upload com o `keytool` (o comando está em [android/key.properties.example](android/key.properties.example)).
-2. Copie `android/key.properties.example` para `android/key.properties` e preencha os dados da chave.
+1. Crie uma chave de upload com o `keytool` (o comando está em [app/android/key.properties.example](app/android/key.properties.example)).
+2. Copie `app/android/key.properties.example` para `app/android/key.properties` e preencha os dados da chave.
 3. Gere o APK:
 
 ```bash
 flutter build apk --release
 ```
 
-Sem o `android/key.properties`, o release é assinado com a chave de debug. Esse APK serve para testes, mas não para publicação.
+Sem o `app/android/key.properties`, o release é assinado com a chave de debug. Esse APK serve para testes, mas não para publicação.
 
 ---
 
@@ -112,6 +112,6 @@ As próximas fases (API própria em Java com funcionalidades de IA) estão em [d
 
 **Dados do compêndio.** As magias, equipamentos e monstros vêm da [D&D 5e API](https://www.dnd5eapi.co) do projeto [5e-bits](https://github.com/5e-bits), que publica o conteúdo do SRD 5.1.
 
-**Ícones.** Os ícones em `assets/icons/` são o [Intrinsical's D&D 5e Icon Set](https://github.com/intrinsical/tw-dnd/tree/main/icons), de [David Kor Kian Wei](https://github.com/intrinsical), sob a licença [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). O texto da licença está em [assets/icons/LICENSE](assets/icons/LICENSE).
+**Ícones.** Os ícones em `app/assets/icons/` são o [Intrinsical's D&D 5e Icon Set](https://github.com/intrinsical/tw-dnd/tree/main/icons), de [David Kor Kian Wei](https://github.com/intrinsical), sob a licença [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). O texto da licença está em [app/assets/icons/LICENSE](app/assets/icons/LICENSE).
 
 O CritSense não tem vínculo com a Wizards of the Coast nem é endossado por ela.
