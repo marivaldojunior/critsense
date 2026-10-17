@@ -85,7 +85,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
   - [ ] **T0.10a** Compile e teste o app num iPhone (precisa de um Mac). O código Swift foi escrito sem compilar.
 
 #### Testes
-- [ ] **T0.11** Escreva testes para o `DiceBloc` (pool, modificador, vantagem e desvantagem).
+- [x] **T0.11** Escreva testes para o `DiceBloc` (pool, modificador, vantagem e desvantagem).
 - [ ] **T0.12** Escreva testes para o `PointBuyCubit` (custo, limite de 27 pontos).
 - [ ] **T0.13** Escreva testes para os BLoCs do compêndio (debounce, filtros, paginação do Bestiário).
 - [ ] **T0.14** Escreva testes para o `CharacterRepositoryImpl` e as migrações do Drift, com banco em memória.
