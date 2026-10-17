@@ -94,6 +94,9 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [ ] **T0.15** Corrija o README: o compêndio não é offline, o login não autentica e o iOS não tem os canais nativos.
 - [ ] **T0.16** Adicione ao README a atribuição dos ícones (CC-BY-SA 4.0) e do SRD (CC-BY-4.0).
 
+#### Bugs encontrados durante a Fase 0
+- [x] **T0.17** Salve as proficiências do personagem no banco. Antes, a tabela `characters` não tinha uma coluna para elas, e as perícias e os testes de resistência marcados se perdiam ao reabrir o app.
+
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
 #### Estrutura

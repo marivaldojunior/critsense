@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:crit_sense/core/database/app_database.dart';
 import 'package:crit_sense/features/character_sheet/data/repositories/character_repository_impl.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/attribute.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/attribute_type.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/proficiency.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/session_note.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/skill.dart';
 
 /// Testa o [CharacterRepositoryImpl] contra um banco Drift real em memória,
 /// com o mesmo schema e as mesmas foreign keys do app.
@@ -100,6 +103,42 @@ void main() {
       expect(loaded.spells, ['Shield']);
       expect(loaded.defeatedBosses, ['Goblin Boss']);
     });
+
+    test('saveCharacter grava as proficiências de perícia e de teste de '
+        'resistência', () async {
+      await repository.saveCharacter(
+        buildCharacter().copyWith(
+          proficiencies: const [
+            SkillProficiency(Skill.stealth),
+            SkillProficiency(Skill.perception),
+            SavingThrowProficiency(AttributeType.dexterity),
+          ],
+        ),
+      );
+
+      final loaded = (await repository.getAllCharacters()).single;
+
+      expect(loaded.proficiencies, const [
+        SkillProficiency(Skill.stealth),
+        SkillProficiency(Skill.perception),
+        SavingThrowProficiency(AttributeType.dexterity),
+      ]);
+    });
+
+    test(
+      'uma chave de proficiência desconhecida é ignorada na carga',
+      () async {
+        await repository.saveCharacter(buildCharacter());
+        await db.customStatement(
+          'UPDATE characters SET proficiencies = ? WHERE id = ?',
+          ['["skill:stealth","skill:removida","outro"]', 'char-1'],
+        );
+
+        final loaded = (await repository.getAllCharacters()).single;
+
+        expect(loaded.proficiencies, const [SkillProficiency(Skill.stealth)]);
+      },
+    );
 
     test('saveCharacter com o mesmo id atualiza em vez de duplicar', () async {
       await repository.saveCharacter(buildCharacter(currentHitPoints: 30));

@@ -2,9 +2,12 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/attribute.dart';
+import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/inventory_item.dart';
+import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/session_note.dart';
+import '../../domain/entities/skill.dart';
 import '../../domain/repositories/i_character_repository.dart';
 
 /// Implementação concreta de [ICharacterRepository] usando o banco SQLite via Drift.
@@ -164,11 +167,46 @@ extension _CharacterDataMapper on CharacterData {
       flaws: flaws ?? '',
       experiencePoints: experiencePoints,
       proficiencyBonus: proficiencyBonus,
+      proficiencies: proficiencies
+          .map(_proficiencyFromKey)
+          .whereType<Proficiency>()
+          .toList(),
       avatarPath: avatarPath,
       spells: spells,
       defeatedBosses: defeatedBosses,
     );
   }
+}
+
+// Chaves das proficiências na coluna `proficiencies` — usam o `name` dos
+// enums, então renomear um valor de [Skill] ou [AttributeType] exige uma
+// migração dos dados salvos.
+const _skillKeyPrefix = 'skill:';
+const _savingThrowKeyPrefix = 'save:';
+
+String _proficiencyToKey(Proficiency proficiency) => switch (proficiency) {
+  SkillProficiency(:final skill) => '$_skillKeyPrefix${skill.name}',
+  SavingThrowProficiency(:final attribute) =>
+    '$_savingThrowKeyPrefix${attribute.name}',
+};
+
+/// Converte a chave salva de volta para a [Proficiency]. Uma chave
+/// desconhecida (ex: valor de enum removido) vira `null` e é ignorada, em
+/// vez de impedir a carga do personagem.
+Proficiency? _proficiencyFromKey(String key) {
+  if (key.startsWith(_skillKeyPrefix)) {
+    final name = key.substring(_skillKeyPrefix.length);
+    final skill = Skill.values.where((s) => s.name == name).firstOrNull;
+    return skill == null ? null : SkillProficiency(skill);
+  }
+  if (key.startsWith(_savingThrowKeyPrefix)) {
+    final name = key.substring(_savingThrowKeyPrefix.length);
+    final attribute = AttributeType.values
+        .where((a) => a.name == name)
+        .firstOrNull;
+    return attribute == null ? null : SavingThrowProficiency(attribute);
+  }
+  return null;
 }
 
 extension _AttributeDataMapper on AttributeData {
@@ -211,6 +249,7 @@ extension _CharacterToCompanion on Character {
       avatarPath: Value(avatarPath),
       spells: Value(spells),
       defeatedBosses: Value(defeatedBosses),
+      proficiencies: Value(proficiencies.map(_proficiencyToKey).toList()),
     );
   }
 }

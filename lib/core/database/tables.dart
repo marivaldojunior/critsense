@@ -133,6 +133,15 @@ class Characters extends Table {
       .withDefault(const Constant('[]'))
       .map(const StringListConverter())();
 
+  // ── Proficiências ───────────────────────────────────────────────────────
+  // Perícias e Testes de Resistência marcados na ficha, como lista JSON de
+  // chaves (`skill:stealth`, `save:dexterity`). A conversão entre a chave e
+  // a entidade `Proficiency` fica no `CharacterRepositoryImpl`, para o
+  // schema não depender das entidades de domínio.
+  TextColumn get proficiencies => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
+
   @override
   Set<Column> get primaryKey => {id};
 }

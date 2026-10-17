@@ -48,6 +48,21 @@ void main() {
       '"flaws" TEXT NULL, "experience_points" INTEGER NOT NULL DEFAULT 0, '
       '"proficiency_bonus" INTEGER NOT NULL DEFAULT 2, PRIMARY KEY ("id"))';
 
+  // Versão 6: igual à atual, sem `proficiencies`.
+  const charactersV6 =
+      'CREATE TABLE "characters" ("id" TEXT NOT NULL, "nome" TEXT NOT NULL, '
+      '"raca" TEXT NOT NULL, "classe" TEXT NOT NULL, "nivel" INTEGER NOT NULL, '
+      '"armor_class" INTEGER NOT NULL DEFAULT 10, "initiative" INTEGER NOT '
+      'NULL DEFAULT 0, "speed" INTEGER NOT NULL DEFAULT 30, "max_hit_points" '
+      'INTEGER NOT NULL, "current_hit_points" INTEGER NOT NULL, '
+      '"temporary_hit_points" INTEGER NOT NULL DEFAULT 0, "avatar_path" TEXT '
+      'NULL, "alignment" TEXT NULL, "background" TEXT NULL, '
+      '"personality_traits" TEXT NULL, "ideals" TEXT NULL, "bonds" TEXT NULL, '
+      '"flaws" TEXT NULL, "experience_points" INTEGER NOT NULL DEFAULT 0, '
+      '"proficiency_bonus" INTEGER NOT NULL DEFAULT 2, "spells" TEXT NOT NULL '
+      "DEFAULT '[]', \"defeated_bosses\" TEXT NOT NULL DEFAULT '[]', "
+      'PRIMARY KEY ("id"))';
+
   /// Abre um [AppDatabase] sobre um banco em memória que começa na
   /// [version] informada, com as tabelas de [statements] e uma linha de
   /// personagem inserida por [insertCharacter].
@@ -141,6 +156,31 @@ void main() {
     expect(character.armorClass, 16);
     expect(character.spells, isEmpty);
     expect(character.defeatedBosses, isEmpty);
+  });
+
+  test('da versão 6 para a atual: cria as proficiências como lista vazia e '
+      'mantém as magias', () async {
+    final db = openLegacyDatabase(
+      version: 6,
+      statements: [
+        charactersV6,
+        attributesTable,
+        inventoryTable,
+        sessionNotesTable,
+      ],
+      insertCharacter:
+          "INSERT INTO characters (id, nome, raca, classe, nivel, "
+          "max_hit_points, current_hit_points, spells) VALUES ('c1', "
+          "'Thorin', 'Anão', 'Guerreiro', 3, 30, 12, '[\"Shield\"]')",
+    );
+    addTearDown(db.close);
+
+    final character = (await CharacterRepositoryImpl(
+      db,
+    ).getAllCharacters()).single;
+
+    expect(character.proficiencies, isEmpty);
+    expect(character.spells, ['Shield']);
   });
 
   test('a migração mantém as notas de sessão já salvas', () async {
