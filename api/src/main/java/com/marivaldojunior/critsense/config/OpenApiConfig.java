@@ -33,27 +33,24 @@ public class OpenApiConfig {
     @Bean
     OpenAPI critsenseOpenApi() {
         return new OpenAPI()
-                .info(
-                        new Info()
-                                .title("CritSense API")
-                                .version("v1")
-                                .description(
-                                        "API do CritSense: autenticação e ferramentas de IA para"
-                                                + " mestres de D&D 5e. Conteúdo de regras restrito"
-                                                + " ao SRD 5.1 (CC-BY-4.0). Todo erro segue o"
-                                                + " formato application/problem+json (RFC 9457),"
-                                                + " com o campo code.")
-                                .license(new License().name("SRD 5.1 — CC-BY-4.0")))
+                .info(new Info()
+                        .title("CritSense API")
+                        .version("v1")
+                        .description("API do CritSense: autenticação e ferramentas de IA para"
+                                + " mestres de D&D 5e. Conteúdo de regras restrito"
+                                + " ao SRD 5.1 (CC-BY-4.0). Todo erro segue o"
+                                + " formato application/problem+json (RFC 9457),"
+                                + " com o campo code.")
+                        .license(new License().name("SRD 5.1 — CC-BY-4.0")))
                 // Fixo para o contrato não depender do host de quem gerou o arquivo.
                 .servers(List.of(new Server().url("http://localhost:8080").description("Local")))
-                .components(
-                        new Components()
-                                .addSecuritySchemes(
-                                        BEARER_SCHEME,
-                                        new SecurityScheme()
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("bearer")
-                                                .bearerFormat("JWT")))
+                .components(new Components()
+                        .addSecuritySchemes(
+                                BEARER_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
     }
 
@@ -68,41 +65,26 @@ public class OpenApiConfig {
             // controllers depois e descartaria um schema adicionado antes.
             openApi.getComponents().addSchemas(PROBLEM_SCHEMA, problemSchema());
             openApi.getPaths()
-                        .values()
-                        .forEach(
-                                path ->
-                                        path.readOperations()
-                                                .forEach(
-                                                        operation ->
-                                                                operation
-                                                                        .getResponses()
-                                                                        .addApiResponse(
-                                                                                "default",
-                                                                                problemResponse())));
+                    .values()
+                    .forEach(path -> path.readOperations()
+                            .forEach(operation ->
+                                    operation.getResponses().addApiResponse("default", problemResponse())));
         };
     }
 
     private static ApiResponse problemResponse() {
         return new ApiResponse()
                 .description("Erro no formato RFC 9457. Veja o campo code.")
-                .content(
-                        new Content()
-                                .addMediaType(
-                                        "application/problem+json",
-                                        new MediaType()
-                                                .schema(
-                                                        new Schema<>()
-                                                                .$ref(
-                                                                        "#/components/schemas/"
-                                                                                + PROBLEM_SCHEMA))));
+                .content(new Content()
+                        .addMediaType(
+                                "application/problem+json",
+                                new MediaType().schema(new Schema<>().$ref("#/components/schemas/" + PROBLEM_SCHEMA))));
     }
 
     @SuppressWarnings("rawtypes")
     private static Schema problemSchema() {
         Schema<?> fieldError =
-                new ObjectSchema()
-                        .addProperty("field", new StringSchema())
-                        .addProperty("message", new StringSchema());
+                new ObjectSchema().addProperty("field", new StringSchema()).addProperty("message", new StringSchema());
         return new ObjectSchema()
                 .description("Erro no formato application/problem+json (RFC 9457).")
                 .addProperty("type", new StringSchema().example("urn:critsense:problem:rate-limited"))
@@ -117,9 +99,7 @@ public class OpenApiConfig {
                                 .example("RATE_LIMITED"))
                 .addProperty(
                         "errors",
-                        new ArraySchema()
-                                .items(fieldError)
-                                .description("Campos inválidos, só em VALIDATION_FAILED."))
+                        new ArraySchema().items(fieldError).description("Campos inválidos, só em VALIDATION_FAILED."))
                 .required(List.of("code", "status", "title"));
     }
 }

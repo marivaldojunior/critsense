@@ -27,10 +27,9 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc =
-                MockMvcBuilders.standaloneSetup(new FailingController())
-                        .setControllerAdvice(new GlobalExceptionHandler())
-                        .build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new FailingController())
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
@@ -47,10 +46,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void erroDeValidacaoListaOsCampos() throws Exception {
-        mockMvc.perform(
-                        post("/test/validated")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\": \"\"}"))
+        mockMvc.perform(post("/test/validated")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.errors[0].field").value("name"));
@@ -58,10 +56,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void jsonMalformadoViraMalformedRequest() throws Exception {
-        mockMvc.perform(
-                        post("/test/validated")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{nao e json"))
+        mockMvc.perform(post("/test/validated")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{nao e json"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
     }
@@ -88,8 +85,7 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/test/rate-limited")
         void rateLimited() {
-            throw new ApiException(
-                    ErrorCode.RATE_LIMITED, "Aguarde.", Map.of("Retry-After", "30"), null);
+            throw new ApiException(ErrorCode.RATE_LIMITED, "Aguarde.", Map.of("Retry-After", "30"), null);
         }
 
         @PostMapping("/test/validated")

@@ -64,10 +64,8 @@ public class AiRateLimiter {
 
     private Bucket newBucket() {
         return Bucket.builder()
-                .addLimit(
-                        limit ->
-                                limit.capacity(requestsPerMinute)
-                                        .refillGreedy(requestsPerMinute, Duration.ofMinutes(1)))
+                .addLimit(limit ->
+                        limit.capacity(requestsPerMinute).refillGreedy(requestsPerMinute, Duration.ofMinutes(1)))
                 .withCustomTimePrecision(timeMeter)
                 .build();
     }

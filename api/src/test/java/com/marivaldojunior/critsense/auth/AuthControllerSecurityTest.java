@@ -37,25 +37,30 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableConfigurationProperties(CritsenseProperties.class)
 class AuthControllerSecurityTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private JwtTokenService tokens;
-    @Autowired private JwtEncoder jwtEncoder;
-    @Autowired private CritsenseProperties properties;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private AuthService authService;
+    @Autowired
+    private JwtTokenService tokens;
+
+    @Autowired
+    private JwtEncoder jwtEncoder;
+
+    @Autowired
+    private CritsenseProperties properties;
+
+    @MockitoBean
+    private AuthService authService;
 
     private final User user = new User("thorin", "{noop}x", Instant.now());
 
     @Test
     void cadastroEPublicoEDevolve201ComOToken() throws Exception {
-        when(authService.register("thorin", "uma-senha-longa"))
-                .thenReturn(new IssuedToken("abc", 86400));
+        when(authService.register("thorin", "uma-senha-longa")).thenReturn(new IssuedToken("abc", 86400));
 
-        mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {"username": "thorin", "password": "uma-senha-longa"}
                                         """))
                 .andExpect(status().isCreated())
@@ -66,11 +71,9 @@ class AuthControllerSecurityTest {
 
     @Test
     void cadastroComDadosInvalidosDevolveValidationFailed() throws Exception {
-        mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {"username": "a b", "password": "curta"}
                                         """))
                 .andExpect(status().isBadRequest())
@@ -83,11 +86,9 @@ class AuthControllerSecurityTest {
         when(authService.login(anyString(), anyString()))
                 .thenThrow(new ApiException(ErrorCode.INVALID_CREDENTIALS, "Usuário ou senha incorretos."));
 
-        mockMvc.perform(
-                        post("/api/v1/auth/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {"username": "thorin", "password": "errada"}
                                         """))
                 .andExpect(status().isUnauthorized())
@@ -115,11 +116,10 @@ class AuthControllerSecurityTest {
 
     @Test
     void meComTokenVencidoDevolve401() throws Exception {
-        Clock past =
-                Clock.fixed(
-                        Instant.now().minus(properties.security().jwt().ttl()).minus(Duration.ofHours(1)),
-                        ZoneOffset.UTC);
-        String expired = new JwtTokenService(jwtEncoder, properties, past).issue(user).value();
+        Clock past = Clock.fixed(
+                Instant.now().minus(properties.security().jwt().ttl()).minus(Duration.ofHours(1)), ZoneOffset.UTC);
+        String expired =
+                new JwtTokenService(jwtEncoder, properties, past).issue(user).value();
 
         mockMvc.perform(get("/api/v1/me").header("Authorization", "Bearer " + expired))
                 .andExpect(status().isUnauthorized())

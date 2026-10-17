@@ -24,12 +24,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    private static final Map<HttpStatus, ErrorCode> CODES_BY_STATUS =
-            Map.of(
-                    HttpStatus.BAD_REQUEST, ErrorCode.MALFORMED_REQUEST,
-                    HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND,
-                    HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.METHOD_NOT_ALLOWED,
-                    HttpStatus.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE);
+    private static final Map<HttpStatus, ErrorCode> CODES_BY_STATUS = Map.of(
+            HttpStatus.BAD_REQUEST, ErrorCode.MALFORMED_REQUEST,
+            HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND,
+            HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.METHOD_NOT_ALLOWED,
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE, ErrorCode.UNSUPPORTED_MEDIA_TYPE);
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ProblemDetail> handleApiException(ApiException ex) {
@@ -53,22 +52,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /** Erros de Bean Validation no corpo: lista cada campo inválido em {@code errors}. */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
-        List<Map<String, String>> errors =
-                ex.getBindingResult().getFieldErrors().stream()
-                        .map(
-                                error ->
-                                        Map.of(
-                                                "field", error.getField(),
-                                                "message",
-                                                        String.valueOf(
-                                                                error.getDefaultMessage())))
-                        .toList();
-        ProblemDetail problem =
-                ProblemDetails.of(ErrorCode.VALIDATION_FAILED, "Um ou mais campos são inválidos.");
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", String.valueOf(error.getDefaultMessage())))
+                .toList();
+        ProblemDetail problem = ProblemDetails.of(ErrorCode.VALIDATION_FAILED, "Um ou mais campos são inválidos.");
         problem.setProperty("errors", errors);
         return ResponseEntity.badRequest().headers(headers).body(problem);
     }
@@ -76,22 +66,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /** Completa com {@code code} os erros que o próprio Spring MVC trata (400, 404, 405, 415...). */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex,
-            Object body,
-            HttpHeaders headers,
-            HttpStatusCode statusCode,
-            WebRequest request) {
-        ResponseEntity<Object> response =
-                super.handleExceptionInternal(ex, body, headers, statusCode, request);
+            Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+        ResponseEntity<Object> response = super.handleExceptionInternal(ex, body, headers, statusCode, request);
         if (response != null && response.getBody() instanceof ProblemDetail problem) {
-            if (problem.getProperties() == null
-                    || !problem.getProperties().containsKey(ProblemDetails.CODE_PROPERTY)) {
-                ErrorCode code =
-                        CODES_BY_STATUS.getOrDefault(
-                                HttpStatus.resolve(statusCode.value()),
-                                statusCode.is5xxServerError()
-                                        ? ErrorCode.INTERNAL_ERROR
-                                        : ErrorCode.MALFORMED_REQUEST);
+            if (problem.getProperties() == null || !problem.getProperties().containsKey(ProblemDetails.CODE_PROPERTY)) {
+                ErrorCode code = CODES_BY_STATUS.getOrDefault(
+                        HttpStatus.resolve(statusCode.value()),
+                        statusCode.is5xxServerError() ? ErrorCode.INTERNAL_ERROR : ErrorCode.MALFORMED_REQUEST);
                 ProblemDetails.withCode(problem, code);
             }
         }

@@ -27,10 +27,9 @@ public class NpcController {
     @Operation(
             operationId = "generateNpc",
             summary = "Gera um NPC com a IA",
-            description =
-                    "Conta no limite de chamadas de IA do usuário (cabeçalho X-RateLimit-Remaining)."
-                            + " Erros: 429 RATE_LIMITED, 422 AI_REFUSED, 502 AI_INVALID_OUTPUT ou"
-                            + " AI_PROVIDER_ERROR, 503 AI_UNAVAILABLE, 504 AI_TIMEOUT.")
+            description = "Conta no limite de chamadas de IA do usuário (cabeçalho X-RateLimit-Remaining)."
+                    + " Erros: 429 RATE_LIMITED, 422 AI_REFUSED, 502 AI_INVALID_OUTPUT ou"
+                    + " AI_PROVIDER_ERROR, 503 AI_UNAVAILABLE, 504 AI_TIMEOUT.")
     public NpcResponse generate(@Valid @RequestBody NpcRequest request) {
         return npcService.generate(request);
     }

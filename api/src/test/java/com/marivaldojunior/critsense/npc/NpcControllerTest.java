@@ -28,31 +28,30 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /** Camada web do gerador de NPCs: autenticação, validação, rate limit e erros da IA. */
-@WebMvcTest(
-        controllers = NpcController.class,
-        properties = "critsense.ai.rate-limit.requests-per-minute=2")
+@WebMvcTest(controllers = NpcController.class, properties = "critsense.ai.rate-limit.requests-per-minute=2")
 @Import({SecurityConfig.class, JwtTokenService.class, AiRateLimiter.class})
 @EnableConfigurationProperties(CritsenseProperties.class)
 class NpcControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private NpcService npcService;
+    @MockitoBean
+    private NpcService npcService;
 
-    private final NpcResponse response =
-            new NpcResponse(
-                    new Npc(
-                            "Brunna",
-                            SrdRace.DWARF,
-                            "ferreira",
-                            Alignment.LAWFUL_GOOD,
-                            "Anã forte.",
-                            List.of("teimosa", "generosa"),
-                            "Reabrir a mina.",
-                            "Vendeu a chave.",
-                            "Bate o martelo.",
-                            List.of("Recuperar a chave.")),
-                    "npc-generator@v1");
+    private final NpcResponse response = new NpcResponse(
+            new Npc(
+                    "Brunna",
+                    SrdRace.DWARF,
+                    "ferreira",
+                    Alignment.LAWFUL_GOOD,
+                    "Anã forte.",
+                    List.of("teimosa", "generosa"),
+                    "Reabrir a mina.",
+                    "Vendeu a chave.",
+                    "Bate o martelo.",
+                    List.of("Recuperar a chave.")),
+            "npc-generator@v1");
 
     @Test
     void semTokenDevolve401() throws Exception {
@@ -88,9 +87,7 @@ class NpcControllerTest {
 
     @Test
     void racaForaDoSrdDevolve400() throws Exception {
-        mockMvc.perform(
-                        generate("{\"race\": \"WARFORGED\"}")
-                                .with(jwt().jwt(j -> j.subject("user-race"))))
+        mockMvc.perform(generate("{\"race\": \"WARFORGED\"}").with(jwt().jwt(j -> j.subject("user-race"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
     }
@@ -99,9 +96,7 @@ class NpcControllerTest {
     void contextoLongoDemaisDevolveValidationFailed() throws Exception {
         String context = "a".repeat(1001);
 
-        mockMvc.perform(
-                        generate("{\"context\": \"" + context + "\"}")
-                                .with(jwt().jwt(j -> j.subject("user-context"))))
+        mockMvc.perform(generate("{\"context\": \"" + context + "\"}").with(jwt().jwt(j -> j.subject("user-context"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.errors[0].field").value("context"));
@@ -109,8 +104,7 @@ class NpcControllerTest {
 
     @Test
     void erroDaIaVemNoFormatoProblemDetail() throws Exception {
-        when(npcService.generate(any()))
-                .thenThrow(new ApiException(ErrorCode.AI_TIMEOUT, "A IA demorou demais."));
+        when(npcService.generate(any())).thenThrow(new ApiException(ErrorCode.AI_TIMEOUT, "A IA demorou demais."));
 
         mockMvc.perform(generate("{}").with(jwt().jwt(j -> j.subject("user-timeout"))))
                 .andExpect(status().isGatewayTimeout())
@@ -118,6 +112,8 @@ class NpcControllerTest {
     }
 
     private static MockHttpServletRequestBuilder generate(String body) {
-        return post("/api/v1/npcs/generate").contentType(MediaType.APPLICATION_JSON).content(body);
+        return post("/api/v1/npcs/generate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body);
     }
 }

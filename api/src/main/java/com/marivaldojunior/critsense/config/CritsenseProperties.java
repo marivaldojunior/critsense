@@ -12,13 +12,15 @@ import org.springframework.validation.annotation.Validated;
 /** Configurações próprias da API, no prefixo {@code critsense} do {@code application.yml}. */
 @Validated
 @ConfigurationProperties("critsense")
-public record CritsenseProperties(@Valid @NotNull Ai ai, @Valid @NotNull Security security) {
+public record CritsenseProperties(
+        @Valid @NotNull Ai ai, @Valid @NotNull Security security) {
 
     /**
      * @param timeout tempo máximo de uma chamada de IA antes de a API devolver 504.
      * @param rateLimit limite de chamadas de IA por usuário.
      */
-    public record Ai(@NotNull Duration timeout, @Valid @NotNull RateLimit rateLimit) {}
+    public record Ai(
+            @NotNull Duration timeout, @Valid @NotNull RateLimit rateLimit) {}
 
     /** @param requestsPerMinute chamadas de IA permitidas por usuário a cada minuto. */
     public record RateLimit(@Min(1) int requestsPerMinute) {}
@@ -32,5 +34,7 @@ public record CritsenseProperties(@Valid @NotNull Ai ai, @Valid @NotNull Securit
      * @param issuer valor da claim {@code iss}.
      */
     public record Jwt(
-            @NotBlank @Size(min = 32) String secret, @NotNull Duration ttl, @NotBlank String issuer) {}
+            @NotBlank @Size(min = 32) String secret,
+            @NotNull Duration ttl,
+            @NotBlank String issuer) {}
 }

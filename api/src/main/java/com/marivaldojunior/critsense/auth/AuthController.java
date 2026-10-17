@@ -34,9 +34,7 @@ public class AuthController {
     @PostMapping("/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     @SecurityRequirements
-    @Operation(
-            operationId = "register",
-            summary = "Cria uma conta e devolve um token de acesso")
+    @Operation(operationId = "register", summary = "Cria uma conta e devolve um token de acesso")
     public TokenResponse register(@Valid @RequestBody RegisterRequest request) {
         return toResponse(authService.register(request.username(), request.password()));
     }
@@ -51,9 +49,7 @@ public class AuthController {
     @GetMapping("/me")
     @Operation(operationId = "getMe", summary = "Devolve o usuário do token")
     public MeResponse me(@AuthenticationPrincipal Jwt jwt) {
-        return new MeResponse(
-                UUID.fromString(jwt.getSubject()),
-                jwt.getClaimAsString(JwtTokenService.USERNAME_CLAIM));
+        return new MeResponse(UUID.fromString(jwt.getSubject()), jwt.getClaimAsString(JwtTokenService.USERNAME_CLAIM));
     }
 
     private static TokenResponse toResponse(IssuedToken token) {

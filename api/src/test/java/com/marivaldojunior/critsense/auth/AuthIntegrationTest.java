@@ -28,8 +28,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 class AuthIntegrationTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private UserRepository users;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository users;
 
     @BeforeEach
     void cleanDatabase() {
@@ -38,27 +41,23 @@ class AuthIntegrationTest {
 
     @Test
     void cadastroLoginEMe() throws Exception {
-        String registerBody =
-                mockMvc.perform(
-                                post("/api/v1/auth/register")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(credentials("Thorin", "uma-senha-longa")))
-                        .andExpect(status().isCreated())
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
+        String registerBody = mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("Thorin", "uma-senha-longa")))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         assertThat((String) JsonPath.read(registerBody, "$.accessToken")).isNotBlank();
         assertThat(users.findByUsername("thorin")).isPresent();
 
-        String loginBody =
-                mockMvc.perform(
-                                post("/api/v1/auth/login")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(credentials("THORIN", "uma-senha-longa")))
-                        .andExpect(status().isOk())
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
+        String loginBody = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("THORIN", "uma-senha-longa")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         String token = JsonPath.read(loginBody, "$.accessToken");
 
         mockMvc.perform(get("/api/v1/me").header("Authorization", "Bearer " + token))
@@ -68,32 +67,28 @@ class AuthIntegrationTest {
 
     @Test
     void cadastroDuplicadoDevolve409() throws Exception {
-        mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(credentials("thorin", "uma-senha-longa")))
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("thorin", "uma-senha-longa")))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(credentials("Thorin", "outra-senha-longa")))
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("Thorin", "outra-senha-longa")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("USERNAME_TAKEN"));
     }
 
     @Test
     void loginComSenhaErradaDevolve401() throws Exception {
-        mockMvc.perform(
-                        post("/api/v1/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(credentials("thorin", "uma-senha-longa")))
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("thorin", "uma-senha-longa")))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(
-                        post("/api/v1/auth/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(credentials("thorin", "senha-errada")))
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials("thorin", "senha-errada")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
     }
@@ -101,7 +96,6 @@ class AuthIntegrationTest {
     private static String credentials(String username, String password) {
         return """
                 {"username": "%s", "password": "%s"}
-                """
-                .formatted(username, password);
+                """.formatted(username, password);
     }
 }

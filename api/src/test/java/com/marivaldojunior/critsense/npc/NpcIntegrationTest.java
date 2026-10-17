@@ -31,9 +31,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 class NpcIntegrationTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private FakeChatModel model;
-    @Autowired private UserRepository users;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private FakeChatModel model;
+
+    @Autowired
+    private UserRepository users;
 
     @BeforeEach
     void setUp() {
@@ -45,11 +50,10 @@ class NpcIntegrationTest {
     void usuarioCadastradoGeraUmNpc() throws Exception {
         model.reply("resposta sem JSON").reply(NpcFixtures.validNpcJson("DWARF", "LAWFUL_GOOD"));
 
-        mockMvc.perform(
-                        post("/api/v1/npcs/generate")
-                                .header("Authorization", "Bearer " + registerAndGetToken())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"race\": \"DWARF\", \"role\": \"ferreira\"}"))
+        mockMvc.perform(post("/api/v1/npcs/generate")
+                        .header("Authorization", "Bearer " + registerAndGetToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"race\": \"DWARF\", \"role\": \"ferreira\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.npc.race").value("DWARF"))
                 .andExpect(jsonPath("$.npc.storyHooks.length()").value(1))
@@ -63,18 +67,15 @@ class NpcIntegrationTest {
     }
 
     private String registerAndGetToken() throws Exception {
-        String body =
-                mockMvc.perform(
-                                post("/api/v1/auth/register")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(
-                                                """
+        String body = mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                                 {"username": "mestre", "password": "uma-senha-longa"}
                                                 """))
-                        .andExpect(status().isCreated())
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         return JsonPath.read(body, "$.accessToken");
     }
 

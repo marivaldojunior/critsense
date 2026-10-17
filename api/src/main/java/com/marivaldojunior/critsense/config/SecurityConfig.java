@@ -48,42 +48,25 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper) {
         http.csrf(csrf -> csrf.disable())
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        auth ->
-                                auth.requestMatchers(PUBLIC_PATHS)
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
-                .oauth2ResourceServer(
-                        oauth2 ->
-                                oauth2.jwt(jwt -> {})
-                                        .authenticationEntryPoint(
-                                                (request, response, ex) ->
-                                                        writeProblem(
-                                                                response,
-                                                                jsonMapper,
-                                                                ErrorCode.UNAUTHORIZED,
-                                                                "Envie um token válido no cabeçalho"
-                                                                        + " Authorization."))
-                                        .accessDeniedHandler(
-                                                (request, response, ex) ->
-                                                        writeProblem(
-                                                                response,
-                                                                jsonMapper,
-                                                                ErrorCode.FORBIDDEN,
-                                                                "Sem permissão para este recurso.")))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.requestMatchers(PUBLIC_PATHS)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})
+                        .authenticationEntryPoint((request, response, ex) -> writeProblem(
+                                response,
+                                jsonMapper,
+                                ErrorCode.UNAUTHORIZED,
+                                "Envie um token válido no cabeçalho" + " Authorization."))
+                        .accessDeniedHandler((request, response, ex) -> writeProblem(
+                                response, jsonMapper, ErrorCode.FORBIDDEN, "Sem permissão para este recurso.")))
                 .exceptionHandling(
-                        exceptions ->
-                                exceptions.authenticationEntryPoint(
-                                        (request, response, ex) ->
-                                                writeProblem(
-                                                        response,
-                                                        jsonMapper,
-                                                        ErrorCode.UNAUTHORIZED,
-                                                        "Envie um token válido no cabeçalho"
-                                                                + " Authorization.")));
+                        exceptions -> exceptions.authenticationEntryPoint((request, response, ex) -> writeProblem(
+                                response,
+                                jsonMapper,
+                                ErrorCode.UNAUTHORIZED,
+                                "Envie um token válido no cabeçalho" + " Authorization.")));
         return http.build();
     }
 
@@ -100,13 +83,13 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder(SecretKey jwtSecretKey, CritsenseProperties properties) {
-        NimbusJwtDecoder decoder =
-                NimbusJwtDecoder.withSecretKey(jwtSecretKey).macAlgorithm(MacAlgorithm.HS256).build();
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
         // Valida expiração (com a folga padrão) e o emissor.
-        decoder.setJwtValidator(
-                new DelegatingOAuth2TokenValidator<>(
-                        JwtValidators.createDefault(),
-                        new JwtIssuerValidator(properties.security().jwt().issuer())));
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefault(),
+                new JwtIssuerValidator(properties.security().jwt().issuer())));
         return decoder;
     }
 
@@ -120,8 +103,7 @@ public class SecurityConfig {
         return Clock.systemUTC();
     }
 
-    private static void writeProblem(
-            HttpServletResponse response, JsonMapper jsonMapper, ErrorCode code, String detail)
+    private static void writeProblem(HttpServletResponse response, JsonMapper jsonMapper, ErrorCode code, String detail)
             throws IOException {
         ProblemDetail problem = ProblemDetails.of(code, detail);
         response.setStatus(code.status().value());

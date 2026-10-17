@@ -26,31 +26,31 @@ import org.springframework.test.web.servlet.MockMvc;
  * <p>O teste sobe a API sem banco (o contrato não depende dele), então roda sem Docker.
  */
 @SpringBootTest(
-        properties =
-                "spring.autoconfigure.exclude="
-                        + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
-                        + "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration,"
-                        + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
-                        + "org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration")
+        properties = "spring.autoconfigure.exclude="
+                + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
+                + "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration,"
+                + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
+                + "org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration")
 @AutoConfigureMockMvc
 class OpenApiContractTest {
 
     /** Caminho a partir de {@code api/}, onde o Maven roda os testes. */
     private static final Path CONTRACT = Path.of("..", "contracts", "openapi.yaml");
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private UserRepository users;
+    @MockitoBean
+    private UserRepository users;
 
     @Test
     void contratoVersionadoEstaAtualizado() throws Exception {
-        String generated =
-                mockMvc.perform(get("/v3/api-docs.yaml"))
-                        .andExpect(status().isOk())
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString(StandardCharsets.UTF_8)
-                        .replace("\r\n", "\n");
+        String generated = mockMvc.perform(get("/v3/api-docs.yaml"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8)
+                .replace("\r\n", "\n");
 
         if (Boolean.getBoolean("openapi.update")) {
             Files.createDirectories(CONTRACT.getParent());
@@ -62,9 +62,8 @@ class OpenApiContractTest {
                 .exists();
         String committed = Files.readString(CONTRACT, StandardCharsets.UTF_8).replace("\r\n", "\n");
         assertThat(committed)
-                .as(
-                        "contracts/openapi.yaml está desatualizado. Rode: ./mvnw test"
-                                + " -Dtest=OpenApiContractTest -Dopenapi.update=true")
+                .as("contracts/openapi.yaml está desatualizado. Rode: ./mvnw test"
+                        + " -Dtest=OpenApiContractTest -Dopenapi.update=true")
                 .isEqualTo(generated);
     }
 }

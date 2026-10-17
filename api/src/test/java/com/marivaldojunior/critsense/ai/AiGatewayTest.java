@@ -28,61 +28,42 @@ class AiGatewayTest {
 
     @Test
     void chamadaLentaDevolveAiTimeout() {
-        assertThatThrownBy(
-                        () ->
-                                gateway.call(
-                                        "teste",
-                                        () -> {
-                                            sleep(Duration.ofSeconds(5));
-                                            return "tarde demais";
-                                        }))
+        assertThatThrownBy(() -> gateway.call("teste", () -> {
+                    sleep(Duration.ofSeconds(5));
+                    return "tarde demais";
+                }))
                 .isInstanceOfSatisfying(
                         ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_TIMEOUT));
     }
 
     @Test
     void timeoutDoClienteHttpDoProvedorTambemViraAiTimeout() {
-        assertThatThrownBy(
-                        () ->
-                                gateway.call(
-                                        "teste",
-                                        () -> {
-                                            throw new UncheckedIOException(
-                                                    new SocketTimeoutException("read timed out"));
-                                        }))
+        assertThatThrownBy(() -> gateway.call("teste", () -> {
+                    throw new UncheckedIOException(new SocketTimeoutException("read timed out"));
+                }))
                 .isInstanceOfSatisfying(
                         ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_TIMEOUT));
     }
 
     @Test
     void outraFalhaDoProvedorViraAiProviderError() {
-        assertThatThrownBy(
-                        () ->
-                                gateway.call(
-                                        "teste",
-                                        () -> {
-                                            throw new IllegalStateException("401 invalid x-api-key");
-                                        }))
-                .isInstanceOfSatisfying(
-                        ApiException.class,
-                        e -> {
-                            assertThat(e.code()).isEqualTo(ErrorCode.AI_PROVIDER_ERROR);
-                            // O detalhe do provedor não vai para o cliente.
-                            assertThat(e.getMessage()).doesNotContain("x-api-key");
-                        });
+        assertThatThrownBy(() -> gateway.call("teste", () -> {
+                    throw new IllegalStateException("401 invalid x-api-key");
+                }))
+                .isInstanceOfSatisfying(ApiException.class, e -> {
+                    assertThat(e.code()).isEqualTo(ErrorCode.AI_PROVIDER_ERROR);
+                    // O detalhe do provedor não vai para o cliente.
+                    assertThat(e.getMessage()).doesNotContain("x-api-key");
+                });
     }
 
     @Test
     void apiExceptionLancadaNaChamadaPassaSemMudanca() {
         ApiException refused = new ApiException(ErrorCode.AI_REFUSED, "recusado");
 
-        assertThatThrownBy(
-                        () ->
-                                gateway.call(
-                                        "teste",
-                                        () -> {
-                                            throw refused;
-                                        }))
+        assertThatThrownBy(() -> gateway.call("teste", () -> {
+                    throw refused;
+                }))
                 .isSameAs(refused);
     }
 

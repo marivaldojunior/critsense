@@ -14,13 +14,13 @@ public final class AuthDtos {
     @Schema(description = "Dados para criar uma conta.")
     public record RegisterRequest(
             @Schema(example = "thorin", description = "Letras, números, ponto, hífen ou sublinhado.")
-                    @NotBlank
-                    @Size(min = 3, max = 30)
-                    @Pattern(regexp = "[A-Za-z0-9._-]+")
-                    String username,
+            @NotBlank
+            @Size(min = 3, max = 30)
+            @Pattern(regexp = "[A-Za-z0-9._-]+")
+            String username,
             // O BCrypt só usa os primeiros 72 bytes da senha.
             @Schema(example = "uma-senha-longa") @NotBlank @Size(min = 8, max = 72)
-                    String password) {}
+            String password) {}
 
     @Schema(description = "Credenciais de uma conta existente.")
     public record LoginRequest(

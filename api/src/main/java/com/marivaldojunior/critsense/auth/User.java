@@ -12,7 +12,8 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
 
-    @Id private UUID id;
+    @Id
+    private UUID id;
 
     @Column(nullable = false, length = 30)
     private String username;

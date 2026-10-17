@@ -22,15 +22,14 @@ class PromptCatalogTest {
 
     @Test
     void npcGeneratorV1RenderizaTodasAsVariaveis() {
-        String user =
-                catalog.user(
-                        PromptId.NPC_GENERATOR,
-                        Map.of(
-                                "race", "dwarf",
-                                "role", "ferreiro",
-                                "alignment", "livre",
-                                "context", "Uma vila mineira nas montanhas.",
-                                "format", "<formato>"));
+        String user = catalog.user(
+                PromptId.NPC_GENERATOR,
+                Map.of(
+                        "race", "dwarf",
+                        "role", "ferreiro",
+                        "alignment", "livre",
+                        "context", "Uma vila mineira nas montanhas.",
+                        "format", "<formato>"));
 
         assertThat(user)
                 .contains("Raça: dwarf")

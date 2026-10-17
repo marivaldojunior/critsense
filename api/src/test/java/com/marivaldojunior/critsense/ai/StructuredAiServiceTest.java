@@ -29,7 +29,8 @@ class StructuredAiServiceTest {
     private static final Map<String, Object> VARIABLES =
             Map.of("race", "livre", "role", "livre", "alignment", "livre", "context", "livre");
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator =
+            Validation.buildDefaultValidatorFactory().getValidator();
     private final AiGateway gateway = new AiGateway(Duration.ofSeconds(5));
     private FakeChatModel model;
     private StructuredAiService service;
@@ -73,8 +74,7 @@ class StructuredAiServiceTest {
 
     @Test
     void jsonInvalidoGanhaUmaNovaTentativaComOsErros() {
-        model.reply("Claro! Aqui está o NPC: Brunna, uma anã ferreira.")
-                .reply(NpcFixtures.validNpcJson());
+        model.reply("Claro! Aqui está o NPC: Brunna, uma anã ferreira.").reply(NpcFixtures.validNpcJson());
 
         Npc npc = generate();
 
@@ -92,8 +92,7 @@ class StructuredAiServiceTest {
         Npc npc = generate();
 
         assertThat(npc.personalityTraits()).hasSize(2);
-        assertThat(model.prompts().get(1).getInstructions().getLast().getText())
-                .contains("personalityTraits");
+        assertThat(model.prompts().get(1).getInstructions().getLast().getText()).contains("personalityTraits");
     }
 
     @Test
@@ -101,12 +100,11 @@ class StructuredAiServiceTest {
         model.reply(NpcFixtures.validNpcJson("ELF", "LAWFUL_GOOD"))
                 .reply(NpcFixtures.validNpcJson("DWARF", "LAWFUL_GOOD"));
 
-        Npc npc =
-                service.generate(
-                        PromptId.NPC_GENERATOR,
-                        VARIABLES,
-                        Npc.class,
-                        n -> n.race() == SrdRace.DWARF ? List.of() : List.of("race: precisa ser DWARF"));
+        Npc npc = service.generate(
+                PromptId.NPC_GENERATOR,
+                VARIABLES,
+                Npc.class,
+                n -> n.race() == SrdRace.DWARF ? List.of() : List.of("race: precisa ser DWARF"));
 
         assertThat(npc.race()).isEqualTo(SrdRace.DWARF);
         assertThat(model.prompts()).hasSize(2);
@@ -118,8 +116,7 @@ class StructuredAiServiceTest {
 
         assertThatThrownBy(this::generate)
                 .isInstanceOfSatisfying(
-                        ApiException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_INVALID_OUTPUT));
+                        ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_INVALID_OUTPUT));
         assertThat(model.prompts()).hasSize(StructuredAiService.MAX_ATTEMPTS);
     }
 
@@ -137,13 +134,9 @@ class StructuredAiServiceTest {
     void semProvedorConfiguradoDevolveAiUnavailable() {
         StructuredAiService withoutModel = serviceWith(null);
 
-        assertThatThrownBy(
-                        () ->
-                                withoutModel.generate(
-                                        PromptId.NPC_GENERATOR, VARIABLES, Npc.class, n -> List.of()))
+        assertThatThrownBy(() -> withoutModel.generate(PromptId.NPC_GENERATOR, VARIABLES, Npc.class, n -> List.of()))
                 .isInstanceOfSatisfying(
-                        ApiException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_UNAVAILABLE));
+                        ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.AI_UNAVAILABLE));
     }
 
     private Npc generate() {
@@ -155,7 +148,6 @@ class StructuredAiServiceTest {
         if (chatModel != null) {
             beans.addBean("chatModel", chatModel);
         }
-        return new StructuredAiService(
-                beans.getBeanProvider(ChatModel.class), new PromptCatalog(), gateway, validator);
+        return new StructuredAiService(beans.getBeanProvider(ChatModel.class), new PromptCatalog(), gateway, validator);
     }
 }

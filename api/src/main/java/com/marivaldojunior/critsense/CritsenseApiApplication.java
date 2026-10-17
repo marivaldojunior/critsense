@@ -8,8 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationPropertiesScan
 public class CritsenseApiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CritsenseApiApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(CritsenseApiApplication.class, args);
+    }
 }

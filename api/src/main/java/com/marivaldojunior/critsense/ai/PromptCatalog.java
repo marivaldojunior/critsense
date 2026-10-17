@@ -55,14 +55,12 @@ public class PromptCatalog {
     }
 
     private String load(String path) {
-        return cache.computeIfAbsent(
-                path,
-                p -> {
-                    try {
-                        return new ClassPathResource(p).getContentAsString(StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException("Prompt não encontrado: " + p, e);
-                    }
-                });
+        return cache.computeIfAbsent(path, p -> {
+            try {
+                return new ClassPathResource(p).getContentAsString(StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Prompt não encontrado: " + p, e);
+            }
+        });
     }
 }

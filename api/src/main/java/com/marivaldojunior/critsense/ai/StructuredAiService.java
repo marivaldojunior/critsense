@@ -54,10 +54,7 @@ public class StructuredAiService {
     private final Validator validator;
 
     public StructuredAiService(
-            ObjectProvider<ChatModel> chatModel,
-            PromptCatalog prompts,
-            AiGateway gateway,
-            Validator validator) {
+            ObjectProvider<ChatModel> chatModel, PromptCatalog prompts, AiGateway gateway, Validator validator) {
         this.chatModel = chatModel;
         this.prompts = prompts;
         this.gateway = gateway;
@@ -72,14 +69,10 @@ public class StructuredAiService {
      *     quando a resposta é válida).
      */
     public <T> T generate(
-            PromptId promptId,
-            Map<String, Object> variables,
-            Class<T> type,
-            Function<T, List<String>> extraChecks) {
+            PromptId promptId, Map<String, Object> variables, Class<T> type, Function<T, List<String>> extraChecks) {
         ChatModel model = chatModel.getIfAvailable();
         if (model == null) {
-            throw new ApiException(
-                    ErrorCode.AI_UNAVAILABLE, "Nenhum provedor de IA está configurado na API.");
+            throw new ApiException(ErrorCode.AI_UNAVAILABLE, "Nenhum provedor de IA está configurado na API.");
         }
 
         BeanOutputConverter<T> converter = new BeanOutputConverter<>(type);
@@ -110,8 +103,7 @@ public class StructuredAiService {
 
         throw new ApiException(
                 ErrorCode.AI_INVALID_OUTPUT,
-                "A IA não devolveu uma resposta válida depois de %d tentativas."
-                        .formatted(MAX_ATTEMPTS));
+                "A IA não devolveu uma resposta válida depois de %d tentativas.".formatted(MAX_ATTEMPTS));
     }
 
     private static String textOf(ChatResponse response, PromptId promptId) {
@@ -119,20 +111,20 @@ public class StructuredAiService {
         if (generation == null) {
             return "";
         }
-        String finishReason =
-                generation.getMetadata() == null ? null : generation.getMetadata().getFinishReason();
+        String finishReason = generation.getMetadata() == null
+                ? null
+                : generation.getMetadata().getFinishReason();
         if (finishReason != null && finishReason.equalsIgnoreCase("refusal")) {
             log.info("{}: pedido recusado pelo modelo", promptId.label());
             throw new ApiException(
-                    ErrorCode.AI_REFUSED,
-                    "A IA recusou este pedido. Mude o texto do pedido e tente de novo.");
+                    ErrorCode.AI_REFUSED, "A IA recusou este pedido. Mude o texto do pedido e tente de novo.");
         }
-        String text = generation.getOutput() == null ? null : generation.getOutput().getText();
+        String text =
+                generation.getOutput() == null ? null : generation.getOutput().getText();
         return text == null ? "" : text;
     }
 
-    private <T> Parsed<T> parse(
-            BeanOutputConverter<T> converter, String text, Function<T, List<String>> extraChecks) {
+    private <T> Parsed<T> parse(BeanOutputConverter<T> converter, String text, Function<T, List<String>> extraChecks) {
         if (text.isBlank()) {
             return Parsed.invalid(List.of("a resposta veio vazia"));
         }

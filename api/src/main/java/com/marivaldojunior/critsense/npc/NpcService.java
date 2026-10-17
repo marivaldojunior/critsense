@@ -23,22 +23,18 @@ public class NpcService {
     }
 
     public NpcResponse generate(NpcRequest request) {
-        Map<String, Object> variables =
-                Map.of(
-                        "race", request.race() == null ? FREE_CHOICE : request.race().name(),
-                        "role", orFree(request.role()),
-                        "alignment",
-                                request.alignment() == null
-                                        ? FREE_CHOICE
-                                        : request.alignment().name(),
-                        "context", orFree(request.context()));
+        Map<String, Object> variables = Map.of(
+                "race",
+                request.race() == null ? FREE_CHOICE : request.race().name(),
+                "role",
+                orFree(request.role()),
+                "alignment",
+                request.alignment() == null ? FREE_CHOICE : request.alignment().name(),
+                "context",
+                orFree(request.context()));
 
-        Npc npc =
-                ai.generate(
-                        PromptId.NPC_GENERATOR,
-                        variables,
-                        Npc.class,
-                        generated -> matchesRequest(request, generated));
+        Npc npc = ai.generate(
+                PromptId.NPC_GENERATOR, variables, Npc.class, generated -> matchesRequest(request, generated));
         return new NpcResponse(npc, PromptId.NPC_GENERATOR.label());
     }
 

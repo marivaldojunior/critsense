@@ -19,8 +19,7 @@ public final class NpcFixtures {
                   "mannerism": "Bate o martelo na bigorna antes de responder.",
                   "storyHooks": ["Pede ao grupo que recupere a chave da mina."]
                 }
-                """
-                .formatted(race, alignment);
+                """.formatted(race, alignment);
     }
 
     public static String validNpcJson() {

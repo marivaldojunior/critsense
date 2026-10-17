@@ -32,14 +32,13 @@ public class JwtTokenService {
 
     public IssuedToken issue(User user) {
         Instant now = clock.instant();
-        JwtClaimsSet claims =
-                JwtClaimsSet.builder()
-                        .issuer(properties.issuer())
-                        .subject(user.getId().toString())
-                        .claim(USERNAME_CLAIM, user.getUsername())
-                        .issuedAt(now)
-                        .expiresAt(now.plus(properties.ttl()))
-                        .build();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer(properties.issuer())
+                .subject(user.getId().toString())
+                .claim(USERNAME_CLAIM, user.getUsername())
+                .issuedAt(now)
+                .expiresAt(now.plus(properties.ttl()))
+                .build();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         String token = encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
         return new IssuedToken(token, properties.ttl().toSeconds());

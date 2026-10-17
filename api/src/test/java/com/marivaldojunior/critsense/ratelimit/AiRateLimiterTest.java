@@ -33,14 +33,11 @@ class AiRateLimiterTest {
     void acimaDoLimiteDevolveRateLimitedComRetryAfter() {
         consumeAll("u1");
 
-        assertThatThrownBy(() -> limiter.consume("u1"))
-                .isInstanceOfSatisfying(
-                        ApiException.class,
-                        e -> {
-                            assertThat(e.code()).isEqualTo(ErrorCode.RATE_LIMITED);
-                            // 3 fichas por minuto: uma ficha volta a cada 20 s.
-                            assertThat(e.headers()).containsEntry("Retry-After", "20");
-                        });
+        assertThatThrownBy(() -> limiter.consume("u1")).isInstanceOfSatisfying(ApiException.class, e -> {
+            assertThat(e.code()).isEqualTo(ErrorCode.RATE_LIMITED);
+            // 3 fichas por minuto: uma ficha volta a cada 20 s.
+            assertThat(e.headers()).containsEntry("Retry-After", "20");
+        });
     }
 
     @Test

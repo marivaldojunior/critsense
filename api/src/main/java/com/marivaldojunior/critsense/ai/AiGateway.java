@@ -73,9 +73,7 @@ public class AiGateway implements DisposableBean {
         }
         log.warn("Falha do provedor de IA em {}", operation, failure);
         return new ApiException(
-                ErrorCode.AI_PROVIDER_ERROR,
-                "O provedor de IA falhou. Tente de novo em alguns instantes.",
-                failure);
+                ErrorCode.AI_PROVIDER_ERROR, "O provedor de IA falhou. Tente de novo em alguns instantes.", failure);
     }
 
     private ApiException timeoutError(String operation, Throwable cause) {

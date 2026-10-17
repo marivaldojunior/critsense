@@ -26,11 +26,7 @@ public class AuthService {
      */
     private final String dummyHash;
 
-    public AuthService(
-            UserRepository users,
-            PasswordEncoder passwordEncoder,
-            JwtTokenService tokens,
-            Clock clock) {
+    public AuthService(UserRepository users, PasswordEncoder passwordEncoder, JwtTokenService tokens, Clock clock) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.tokens = tokens;
