@@ -104,7 +104,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [x] **T1.2** Crie o `docker-compose.yml` na raiz com a API e o PostgreSQL.
 - [x] **T1.3** Configure o provedor do LLM por variável de ambiente. Crie um `.env.example` sem valores reais e adicione `.env` ao `.gitignore`.
 - [ ] **T1.4** Configure o springdoc-openapi e exporte o contrato para `contracts/openapi.yaml`.
-- [ ] **T1.5** Crie um formato único de erro (`ProblemDetail`, RFC 9457) para todos os endpoints.
+- [x] **T1.5** Crie um formato único de erro (`ProblemDetail`, RFC 9457) para todos os endpoints.
 
 #### Autenticação e limites
 - [ ] **T1.6** Crie o cadastro e o login com JWT (Spring Security). Crie a tabela de usuários com Flyway.
