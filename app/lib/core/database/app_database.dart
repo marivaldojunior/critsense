@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'tables.dart';
 
@@ -15,13 +16,21 @@ part 'app_database.g.dart';
 ///
 /// O Drift gera, a partir das anotações e das [Tables], toda a infraestrutura
 /// de queries type-safe em [app_database.g.dart]. Nunca edite o arquivo `.g.dart`.
-@DriftDatabase(tables: [Characters, Attributes, InventoryItems, SessionNotes])
+@DriftDatabase(
+  tables: [
+    Characters,
+    Attributes,
+    InventoryItems,
+    SessionNotes,
+    CharacterSpells,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   /// Cria a instância recebendo o executor de queries.
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -49,7 +58,11 @@ class AppDatabase extends _$AppDatabase {
         // alinhar com a nomenclatura em inglês do restante do bloco de
         // Status de Combate — mesmo dado, só o nome da coluna muda.
         await m.renameColumn(characters, 'hp_maximo', characters.maxHitPoints);
-        await m.renameColumn(characters, 'hp_atual', characters.currentHitPoints);
+        await m.renameColumn(
+          characters,
+          'hp_atual',
+          characters.currentHitPoints,
+        );
         await m.addColumn(characters, characters.armorClass);
         await m.addColumn(characters, characters.initiative);
         await m.addColumn(characters, characters.speed);
@@ -85,8 +98,48 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(characters, characters.exhaustionLevel);
         await m.addColumn(characters, characters.inspiration);
       }
+      if (from < 9) {
+        // Grimório: as magias saem da lista de nomes em `characters.spells`
+        // e vão para a tabela `character_spells`, com índice e nível.
+        await m.addColumn(characters, characters.spellSlotsUsed);
+        await m.addColumn(characters, characters.pactSlotsUsed);
+        await m.createTable(characterSpells);
+        await _migrateSpellNames();
+      }
     },
   );
+
+  /// Copia cada nome de `characters.spells` para uma linha de
+  /// `character_spells`. O índice vem do nome no formato da API 5e-bits
+  /// (ex: "Magic Missile" -> `magic-missile`); o nível fica `null` até a
+  /// ficha buscar a magia no compêndio.
+  Future<void> _migrateSpellNames() async {
+    final rows = await customSelect('SELECT id, spells FROM characters').get();
+    for (final row in rows) {
+      final characterId = row.read<String>('id');
+      final names = const StringListConverter().fromSql(
+        row.read<String>('spells'),
+      );
+      for (final name in names) {
+        await into(characterSpells).insert(
+          CharacterSpellsCompanion.insert(
+            id: const Uuid().v4(),
+            characterId: characterId,
+            spellIndex: spellIndexFromName(name),
+            name: name,
+          ),
+        );
+      }
+    }
+    await customStatement("UPDATE characters SET spells = '[]'");
+  }
+
+  /// Converte o nome de uma magia no índice da API 5e-bits.
+  static String spellIndexFromName(String name) => name
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r"[^a-z0-9]+"), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
 
   /// Cria a conexão lazy com o arquivo `critsense.sqlite` no diretório de documentos.
   ///

@@ -69,6 +69,18 @@ void main() {
     "\"proficiencies\" TEXT NOT NULL DEFAULT '[]', PRIMARY KEY (\"id\"))",
   );
 
+  // Versão 8: igual à 7, com as colunas de combate e descanso.
+  final charactersV8 = charactersV7.replaceFirst(
+    'PRIMARY KEY ("id"))',
+    '"armor_class_bonus" INTEGER NOT NULL DEFAULT 0, '
+        '"hit_dice_used" INTEGER NOT NULL DEFAULT 0, '
+        '"death_save_successes" INTEGER NOT NULL DEFAULT 0, '
+        '"death_save_failures" INTEGER NOT NULL DEFAULT 0, '
+        "\"conditions\" TEXT NOT NULL DEFAULT '[]', "
+        '"exhaustion_level" INTEGER NOT NULL DEFAULT 0, '
+        '"inspiration" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("id"))',
+  );
+
   /// Abre um [AppDatabase] sobre um banco em memória que começa na
   /// [version] informada, com as tabelas de [statements] e uma linha de
   /// personagem inserida por [insertCharacter].
@@ -134,7 +146,6 @@ void main() {
     expect(character.experiencePoints, 0);
     expect(character.proficiencyBonus, 2); // nível 3
     expect(character.personalityTraits, '');
-    expect(character.spells, isEmpty);
     expect(character.defeatedBosses, isEmpty);
     expect(character.attributes.strength, 15);
   });
@@ -162,7 +173,6 @@ void main() {
 
     // A CA antiga (16, digitada) não vale mais: a CA é calculada.
     expect(character.armorClassBonus, 0);
-    expect(character.spells, isEmpty);
     expect(character.defeatedBosses, isEmpty);
   });
 
@@ -188,7 +198,6 @@ void main() {
     ).getAllCharacters()).single;
 
     expect(character.proficiencies, isEmpty);
-    expect(character.spells, ['Shield']);
   });
 
   test('da versão 7 para a atual: cria dados de vida, salvaguardas, '
@@ -222,6 +231,48 @@ void main() {
     expect(character.exhaustionLevel, 0);
     expect(character.inspiration, isFalse);
     expect(character.armorClassBonus, 0);
+  });
+
+  test('da versão 8 para a atual: move as magias para o grimório', () async {
+    final db = openLegacyDatabase(
+      version: 8,
+      statements: [
+        charactersV8,
+        attributesTable,
+        inventoryTable,
+        sessionNotesTable,
+      ],
+      insertCharacter:
+          "INSERT INTO characters (id, nome, raca, classe, nivel, "
+          "max_hit_points, current_hit_points, spells) VALUES ('c1', "
+          "'Elminster', 'Human', 'Wizard', 3, 14, 14, "
+          "'[\"Magic Missile\",\"Mage Armor\"]')",
+    );
+    addTearDown(db.close);
+
+    final spells = await CharacterRepositoryImpl(db).getCharacterSpells('c1');
+    final character = (await CharacterRepositoryImpl(
+      db,
+    ).getAllCharacters()).single;
+    final oldColumn = await db
+        .customSelect('SELECT spells FROM characters')
+        .map((row) => row.read<String>('spells'))
+        .getSingle();
+
+    expect(spells.map((s) => s.spellIndex), ['mage-armor', 'magic-missile']);
+    expect(spells.map((s) => s.name), ['Mage Armor', 'Magic Missile']);
+    expect(spells.every((s) => s.level == null), isTrue);
+    expect(character.spellSlotsUsed, everyElement(0));
+    expect(oldColumn, '[]');
+  });
+
+  test('índice da API a partir do nome da magia', () {
+    expect(AppDatabase.spellIndexFromName('Magic Missile'), 'magic-missile');
+    expect(
+      AppDatabase.spellIndexFromName("Tasha's Hideous Laughter"),
+      'tasha-s-hideous-laughter',
+    );
+    expect(AppDatabase.spellIndexFromName('  Cure Wounds '), 'cure-wounds');
   });
 
   test('a migração mantém as notas de sessão já salvas', () async {

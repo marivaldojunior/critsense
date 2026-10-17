@@ -56,17 +56,12 @@ final class AddInventoryItemEvent extends CharacterEvent {
   const AddInventoryItemEvent(this.item);
 }
 
-/// Solicita ao BLoC que vincule [spell] (índice/nome da magia) ao
-/// personagem [characterId], persistindo o resultado. Idempotente: se a
-/// magia já está registrada, não faz nada.
+/// Adiciona [spell] ao grimório do personagem dele (disparado pelo
+/// compêndio). Se o personagem já tem a magia, ela só é atualizada.
 final class AddSpellToCharacterEvent extends CharacterEvent {
-  /// Personagem que passa a conhecer a magia.
-  final String characterId;
+  final CharacterSpell spell;
 
-  /// Índice ou nome da magia no compêndio.
-  final String spell;
-
-  const AddSpellToCharacterEvent(this.characterId, this.spell);
+  const AddSpellToCharacterEvent(this.spell);
 }
 
 /// Solicita ao BLoC que registre [boss] (índice/nome do monstro) como
@@ -80,15 +75,6 @@ final class AddBossToCharacterEvent extends CharacterEvent {
   final String boss;
 
   const AddBossToCharacterEvent(this.characterId, this.boss);
-}
-
-/// Solicita ao BLoC que desvincule [spell] do personagem [characterId],
-/// persistindo o resultado — para desfazer um vínculo criado por engano.
-final class RemoveSpellFromCharacterEvent extends CharacterEvent {
-  final String characterId;
-  final String spell;
-
-  const RemoveSpellFromCharacterEvent(this.characterId, this.spell);
 }
 
 /// Solicita ao BLoC que remova [boss] do registro de abates do personagem
@@ -220,4 +206,38 @@ final class SetSpeedEvent extends CharacterEvent {
   final int speed;
 
   const SetSpeedEvent(this.characterId, this.speed);
+}
+
+// ---------------------------------------------------------------------------
+// Espaços de magia — ver `SpellRules`.
+// ---------------------------------------------------------------------------
+
+/// Gasta um espaço de magia do nível [spellLevel] (1 a 9).
+final class UseSpellSlotEvent extends CharacterEvent {
+  final String characterId;
+  final int spellLevel;
+
+  const UseSpellSlotEvent(this.characterId, this.spellLevel);
+}
+
+/// Devolve um espaço gasto do nível [spellLevel] (correção manual).
+final class RestoreSpellSlotEvent extends CharacterEvent {
+  final String characterId;
+  final int spellLevel;
+
+  const RestoreSpellSlotEvent(this.characterId, this.spellLevel);
+}
+
+/// Gasta um espaço da Magia de Pacto (Bruxo).
+final class UsePactSlotEvent extends CharacterEvent {
+  final String characterId;
+
+  const UsePactSlotEvent(this.characterId);
+}
+
+/// Devolve um espaço gasto da Magia de Pacto.
+final class RestorePactSlotEvent extends CharacterEvent {
+  final String characterId;
+
+  const RestorePactSlotEvent(this.characterId);
 }

@@ -1,4 +1,5 @@
 import '../entities/character.dart';
+import '../entities/character_spell.dart';
 import '../entities/inventory_item.dart';
 import '../entities/session_note.dart';
 
@@ -31,4 +32,14 @@ abstract interface class ICharacterRepository {
 
   /// Remove a nota identificada por [noteId] do repositório.
   Future<void> deleteSessionNote(String noteId);
+
+  /// Magias do grimório do personagem [characterId], por nível e nome.
+  Future<List<CharacterSpell>> getCharacterSpells(String characterId);
+
+  /// Salva [spell] (insere ou atualiza). Se o personagem já tem uma magia
+  /// com o mesmo `spellIndex`, a existente é atualizada em vez de duplicar.
+  Future<void> saveCharacterSpell(CharacterSpell spell);
+
+  /// Remove a magia [spellId] do grimório.
+  Future<void> deleteCharacterSpell(String spellId);
 }

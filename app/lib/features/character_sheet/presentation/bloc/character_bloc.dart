@@ -3,14 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/entities/character_spell.dart';
 import '../../domain/entities/condition.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/skill.dart';
 import '../../domain/rules/hit_point_rules.dart';
+import '../../domain/rules/spell_rules.dart';
 import '../../domain/usecases/add_inventory_item_usecase.dart';
 import '../../domain/usecases/delete_character_usecase.dart';
 import '../../domain/usecases/get_all_characters_usecase.dart';
+import '../../domain/usecases/save_character_spell_usecase.dart';
 import '../../domain/usecases/save_character_use_case.dart';
 
 part 'character_event.dart';
@@ -25,6 +28,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final SaveCharacterUseCase _saveCharacter;
   final DeleteCharacterUseCase _deleteCharacter;
   final AddInventoryItemUseCase _addInventoryItem;
+  final SaveCharacterSpellUseCase _saveCharacterSpell;
 
   /// Injeta os use cases e registra os handlers de eventos.
   CharacterBloc(
@@ -32,10 +36,12 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     SaveCharacterUseCase saveCharacter,
     DeleteCharacterUseCase deleteCharacter,
     AddInventoryItemUseCase addInventoryItem,
+    SaveCharacterSpellUseCase saveCharacterSpell,
   ) : _getAllCharacters = getAllCharacters,
       _saveCharacter = saveCharacter,
       _deleteCharacter = deleteCharacter,
       _addInventoryItem = addInventoryItem,
+      _saveCharacterSpell = saveCharacterSpell,
       super(const CharacterInitial()) {
     on<LoadCharactersEvent>(_onLoadCharacters);
     on<SaveCharacterEvent>(_onSaveCharacter);
@@ -44,7 +50,6 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<ToggleProficiencyEvent>(_onToggleProficiency);
     on<AddSpellToCharacterEvent>(_onAddSpellToCharacter);
     on<AddBossToCharacterEvent>(_onAddBossToCharacter);
-    on<RemoveSpellFromCharacterEvent>(_onRemoveSpellFromCharacter);
     on<RemoveBossFromCharacterEvent>(_onRemoveBossFromCharacter);
     on<ApplyDamageEvent>(_onApplyDamage);
     on<HealHpEvent>(_onHealHp);
@@ -101,6 +106,34 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         emit,
         event.characterId,
         (c) => c.copyWith(armorClassBonus: event.bonus),
+      ),
+    );
+    on<UseSpellSlotEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withSpellSlotUsed(event.spellLevel),
+      ),
+    );
+    on<RestoreSpellSlotEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withSpellSlotRestored(event.spellLevel),
+      ),
+    );
+    on<UsePactSlotEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withPactSlotUsed(),
+      ),
+    );
+    on<RestorePactSlotEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withPactSlotRestored(),
       ),
     );
     on<SetSpeedEvent>(
@@ -221,30 +254,17 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     });
   }
 
-  /// Vincula [AddSpellToCharacterEvent.spell] ao personagem
-  /// [AddSpellToCharacterEvent.characterId].
+  /// Salva a magia no grimório. O grimório tem a própria tabela, então a
+  /// lista de personagens não muda e não é recarregada.
   Future<void> _onAddSpellToCharacter(
     AddSpellToCharacterEvent event,
     Emitter<CharacterState> emit,
-  ) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      if (character.spells.contains(event.spell)) return null;
-      return character.copyWith(spells: [...character.spells, event.spell]);
-    });
-  }
-
-  /// Desvincula [RemoveSpellFromCharacterEvent.spell] do personagem
-  /// [RemoveSpellFromCharacterEvent.characterId].
-  Future<void> _onRemoveSpellFromCharacter(
-    RemoveSpellFromCharacterEvent event,
-    Emitter<CharacterState> emit,
-  ) {
-    return _updateCharacter(emit, event.characterId, (character) {
-      if (!character.spells.contains(event.spell)) return null;
-      return character.copyWith(
-        spells: character.spells.toList()..remove(event.spell),
-      );
-    });
+  ) async {
+    try {
+      await _saveCharacterSpell(event.spell);
+    } catch (e) {
+      emit(CharacterError(e.toString()));
+    }
   }
 
   /// Registra [AddBossToCharacterEvent.boss] como derrotado pelo
@@ -312,12 +332,12 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   }
 
   /// O Descanso Curto cura pelos dados de vida gastos ([SpendHitDieEvent]);
-  /// concluir o descanso, por enquanto, não muda mais nada.
+  /// ao concluir, a Magia de Pacto do Bruxo volta inteira.
   Future<void> _onTakeShortRest(
     TakeShortRestEvent event,
     Emitter<CharacterState> emit,
   ) {
-    return _updateCharacter(emit, event.characterId, (character) => null);
+    return _updateCharacter(emit, event.characterId, (c) => c.afterShortRest());
   }
 
   Future<void> _onTakeLongRest(

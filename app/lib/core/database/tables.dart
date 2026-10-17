@@ -28,6 +28,23 @@ class StringListConverter extends TypeConverter<List<String>, String> {
 ///
 /// Usa texto como chave primária para compatibilidade com UUIDs gerados
 /// na camada de domínio, evitando dependência de auto-incremento do SQLite.
+/// Converte uma lista de inteiros em JSON (ex: espaços de magia gastos por
+/// nível). Mesmo motivo de [StringListConverter].
+class IntListConverter extends TypeConverter<List<int>, String> {
+  const IntListConverter();
+
+  @override
+  List<int> fromSql(String fromDb) {
+    return (jsonDecode(fromDb) as List<dynamic>)
+        .cast<num>()
+        .map((n) => n.toInt())
+        .toList();
+  }
+
+  @override
+  String toSql(List<int> value) => jsonEncode(value);
+}
+
 @DataClassName('CharacterData')
 class Characters extends Table {
   /// Identificador único do personagem (UUID proveniente do domínio).
@@ -107,13 +124,11 @@ class Characters extends Table {
   // derivado do nível.
 
   /// Pontos de experiência acumulados. Default 0: início de aventura.
-  IntColumn get experiencePoints =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get experiencePoints => integer().withDefault(const Constant(0))();
 
   /// Bônus de proficiência aplicado a testes, ataques e resistências.
   /// Default 2: valor do SRD do D&D 5e para personagens de nível 1 a 4.
-  IntColumn get proficiencyBonus =>
-      integer().withDefault(const Constant(2))();
+  IntColumn get proficiencyBonus => integer().withDefault(const Constant(2))();
 
   // ── Magias e Monstros Derrotados ────────────────────────────────────────
   // Listas simples de identificadores vinculadas ao personagem — ver
@@ -156,6 +171,14 @@ class Characters extends Table {
       .map(const StringListConverter())();
   IntColumn get exhaustionLevel => integer().withDefault(const Constant(0))();
   BoolColumn get inspiration => boolean().withDefault(const Constant(false))();
+
+  // ── Magia (versão 9) ──────────────────────────────────────────────────
+  // As magias do grimório ficam na tabela [CharacterSpells]; a coluna
+  // antiga `spells` (só nomes) não é mais lida.
+  TextColumn get spellSlotsUsed => text()
+      .withDefault(const Constant('[0,0,0,0,0,0,0,0,0]'))
+      .map(const IntListConverter())();
+  IntColumn get pactSlotsUsed => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -260,6 +283,26 @@ class SessionNotes extends Table {
 
   /// Momento de criação da nota; armazenado como epoch ms pelo Drift.
   DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Magias do grimório de um personagem (versão 9). Antes, as magias eram só
+/// uma lista de nomes em `characters.spells`.
+@DataClassName('CharacterSpellData')
+class CharacterSpells extends Table {
+  TextColumn get id => text()();
+  TextColumn get characterId =>
+      text().references(Characters, #id, onDelete: KeyAction.cascade)();
+
+  /// Índice da magia na API 5e-bits (ex: `magic-missile`).
+  TextColumn get spellIndex => text()();
+  TextColumn get name => text()();
+
+  /// 0 = truque; `null` = nível ainda desconhecido (magias migradas).
+  IntColumn get level => integer().nullable()();
+  BoolColumn get prepared => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -6,7 +6,8 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
 import '../widgets/character_avatar.dart';
-import 'character_sheet_tabs/inventory_spells_tab.dart';
+import 'character_sheet_tabs/inventory_tab.dart';
+import 'character_sheet_tabs/spells_tab.dart';
 import 'character_sheet_tabs/status_combat_tab.dart';
 import 'character_sheet_tabs/traits_lore_tab.dart';
 import 'session_notes_screen.dart';
@@ -68,7 +69,7 @@ class CharacterSheetScreen extends StatelessWidget {
 
   Widget _buildSheet(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -108,7 +109,8 @@ class CharacterSheetScreen extends StatelessWidget {
             tabs: [
               Tab(text: 'Status & Combate'),
               Tab(text: 'Características & Lore'),
-              Tab(text: 'Inventário & Magias'),
+              Tab(text: 'Inventário'),
+              Tab(text: 'Magias'),
             ],
           ),
         ),
@@ -116,7 +118,8 @@ class CharacterSheetScreen extends StatelessWidget {
           children: [
             StatusCombatTab(character: character),
             TraitsLoreTab(character: character),
-            InventorySpellsTab(characterId: character.id),
+            InventoryTab(characterId: character.id),
+            SpellsTab(character: character),
           ],
         ),
       ),

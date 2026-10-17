@@ -1,4 +1,5 @@
 import '../rules/srd_rules.dart';
+import '../srd/spell_slots.dart';
 import '../srd/srd_class.dart';
 import 'attribute.dart';
 import 'attribute_type.dart';
@@ -108,20 +109,16 @@ class Character {
   /// Caminho local para a imagem de avatar; nulo quando nenhum avatar foi definido.
   final String? avatarPath;
 
-  /// Magias conhecidas/vinculadas ao personagem (índice ou nome da magia no
-  /// compêndio). Vazia por padrão: nenhum personagem existente antes deste
-  /// campo tinha magias registradas.
-  ///
-  /// Diferente do inventário (ver [InventoryItem], persistido em sua própria
-  /// tabela relacional `InventoryItems` por ter atributos próprios como
-  /// categoria), uma magia registrada aqui não carrega dado adicional além
-  /// do identificador — uma lista simples já é suficiente, sem precisar de
-  /// uma tabela dedicada.
-  final List<String> spells;
+  /// Espaços de magia gastos em cada nível (posição 0 = 1º nível, até o
+  /// 9º). O máximo vem da classe e do nível ([maxSpellSlots]).
+  final List<int> spellSlotsUsed;
+
+  /// Espaços da Magia de Pacto (Bruxo) já gastos.
+  final int pactSlotsUsed;
 
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
-  /// compêndio). Mesma justificativa de [spells] para ser uma lista simples
-  /// em vez de uma tabela relacional.
+  /// compêndio). Uma lista simples basta: o registro não carrega mais dados
+  /// além do nome.
   final List<String> defeatedBosses;
 
   /// Cria um [Character] com todos os campos obrigatórios.
@@ -152,7 +149,8 @@ class Character {
     required this.experiencePoints,
     this.proficiencies = const [],
     this.avatarPath,
-    this.spells = const [],
+    this.spellSlotsUsed = const [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    this.pactSlotsUsed = 0,
     this.defeatedBosses = const [],
   });
 
@@ -187,7 +185,8 @@ class Character {
     int? experiencePoints,
     List<Proficiency>? proficiencies,
     String? avatarPath,
-    List<String>? spells,
+    List<int>? spellSlotsUsed,
+    int? pactSlotsUsed,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -217,7 +216,8 @@ class Character {
       experiencePoints: experiencePoints ?? this.experiencePoints,
       proficiencies: proficiencies ?? this.proficiencies,
       avatarPath: avatarPath ?? this.avatarPath,
-      spells: spells ?? this.spells,
+      spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
+      pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }
@@ -271,6 +271,50 @@ class Character {
   /// Estável: 3 sucessos com PV 0. Não rola mais salvaguardas.
   bool get isStable =>
       currentHitPoints == 0 && deathSaveSuccesses >= deathSavesToResolve;
+
+  // ── Magia ──────────────────────────────────────────────────────────────
+
+  /// Atributo de conjuração da classe, ou `null` sem magia.
+  AttributeType? get spellcastingAbility => srdClass?.spellcastingAbility;
+
+  /// CD de resistência das magias: 8 + proficiência + mod. de conjuração.
+  int? get spellSaveDc {
+    final ability = spellcastingAbility;
+    if (ability == null) return null;
+    return 8 + proficiencyBonus + modifierOf(ability);
+  }
+
+  /// Bônus de ataque mágico: proficiência + mod. de conjuração.
+  int? get spellAttackBonus {
+    final ability = spellcastingAbility;
+    if (ability == null) return null;
+    return proficiencyBonus + modifierOf(ability);
+  }
+
+  /// Espaços de magia comuns por nível de magia (9 posições).
+  List<int> get maxSpellSlots => spellSlotsFor(srdClass, level);
+
+  /// Espaços ainda disponíveis no nível de magia [spellLevel] (1 a 9).
+  int availableSpellSlots(int spellLevel) {
+    final index = spellLevel - 1;
+    final used = index < spellSlotsUsed.length ? spellSlotsUsed[index] : 0;
+    return (maxSpellSlots[index] - used).clamp(0, maxSpellSlots[index]);
+  }
+
+  /// Magia de Pacto do Bruxo, ou `null` para as outras classes.
+  PactMagic? get pactMagic => pactMagicFor(srdClass, level);
+
+  /// Quantas magias o personagem pode preparar por dia, ou `null` nas
+  /// classes que não preparam magias. Clérigo, Druida e Mago: mod. de
+  /// conjuração + nível. Paladino: mod. + metade do nível. Mínimo 1.
+  int? get preparedSpellLimit {
+    final srd = srdClass;
+    final ability = spellcastingAbility;
+    if (srd == null || ability == null || !srd.preparesSpells) return null;
+    final levels = srd == SrdClass.paladin ? level ~/ 2 : level;
+    final limit = modifierOf(ability) + levels;
+    return limit < 1 ? 1 : limit;
+  }
 
   /// Morto: 3 falhas nas salvaguardas, dano massivo ou exaustão 6.
   bool get isDead =>

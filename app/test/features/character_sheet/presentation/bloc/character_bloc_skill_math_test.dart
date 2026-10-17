@@ -9,6 +9,7 @@ import 'package:crit_sense/features/character_sheet/domain/entities/skill.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
@@ -23,6 +24,9 @@ class _MockDeleteCharacterUseCase extends Mock
 class _MockAddInventoryItemUseCase extends Mock
     implements AddInventoryItemUseCase {}
 
+class _MockSaveCharacterSpellUseCase extends Mock
+    implements SaveCharacterSpellUseCase {}
+
 /// Testa apenas os métodos puros de cálculo da ficha (perícias, testes de
 /// resistência e sabedoria passiva) do [CharacterBloc]. Os use cases são
 /// mockados só para satisfazer o construtor — nenhum deles é chamado ou
@@ -36,6 +40,7 @@ void main() {
       _MockSaveCharacterUseCase(),
       _MockDeleteCharacterUseCase(),
       _MockAddInventoryItemUseCase(),
+      _MockSaveCharacterSpellUseCase(),
     );
   });
 
@@ -82,13 +87,16 @@ void main() {
       expect(bloc.skillModifier(character, Skill.stealth), 2); // DEX +2
     });
 
-    test('com proficiência soma o bônus de proficiência (exemplo do enunciado)', () {
-      final character = buildCharacter(
-        proficiencies: const [SkillProficiency(Skill.stealth)],
-      );
-      // Furtividade (DEX +2) + Bônus de Proficiência (+2) = +4.
-      expect(bloc.skillModifier(character, Skill.stealth), 4);
-    });
+    test(
+      'com proficiência soma o bônus de proficiência (exemplo do enunciado)',
+      () {
+        final character = buildCharacter(
+          proficiencies: const [SkillProficiency(Skill.stealth)],
+        );
+        // Furtividade (DEX +2) + Bônus de Proficiência (+2) = +4.
+        expect(bloc.skillModifier(character, Skill.stealth), 4);
+      },
+    );
 
     test('proficiência em outra perícia não afeta a perícia consultada', () {
       final character = buildCharacter(
@@ -139,18 +147,15 @@ void main() {
       ); // 1 + 2
     });
 
-    test(
-      'proficiência em perícia não confere proficiência no teste de '
-      'resistência do mesmo atributo',
-      () {
-        // Percepção é regida por Sabedoria, mas é uma proficiência distinta
-        // do Teste de Resistência de Sabedoria.
-        final character = buildCharacter(
-          proficiencies: const [SkillProficiency(Skill.perception)],
-        );
-        expect(bloc.savingThrowModifier(character, AttributeType.wisdom), 1);
-      },
-    );
+    test('proficiência em perícia não confere proficiência no teste de '
+        'resistência do mesmo atributo', () {
+      // Percepção é regida por Sabedoria, mas é uma proficiência distinta
+      // do Teste de Resistência de Sabedoria.
+      final character = buildCharacter(
+        proficiencies: const [SkillProficiency(Skill.perception)],
+      );
+      expect(bloc.savingThrowModifier(character, AttributeType.wisdom), 1);
+    });
   });
 
   group('passiveWisdom', () {
@@ -159,11 +164,14 @@ void main() {
       expect(bloc.passiveWisdom(character), 11); // 10 + 1
     });
 
-    test('com proficiência em Percepção soma também o bônus de proficiência', () {
-      final character = buildCharacter(
-        proficiencies: const [SkillProficiency(Skill.perception)],
-      );
-      expect(bloc.passiveWisdom(character), 13); // 10 + 1 + 2
-    });
+    test(
+      'com proficiência em Percepção soma também o bônus de proficiência',
+      () {
+        final character = buildCharacter(
+          proficiencies: const [SkillProficiency(Skill.perception)],
+        );
+        expect(bloc.passiveWisdom(character), 13); // 10 + 1 + 2
+      },
+    );
   });
 }

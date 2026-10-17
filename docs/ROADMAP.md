@@ -109,9 +109,9 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TA.5** Adicione o marcador de inspiração.
 
 #### Fase B — Magias
-- [ ] **TB.1** Guarde os espaços de magia por nível (tabelas do SRD, incluindo a Magia de Pacto do Bruxo) e recupere os espaços nos descansos.
-- [ ] **TB.2** Calcule a CD de resistência e o bônus de ataque mágico pelo atributo de conjuração da classe.
-- [ ] **TB.3** Guarde as magias com índice, nível e estado de preparada, e mostre os truques separados.
+- [x] **TB.1** Guarde os espaços de magia por nível (tabelas do SRD, incluindo a Magia de Pacto do Bruxo) e recupere os espaços nos descansos.
+- [x] **TB.2** Calcule a CD de resistência e o bônus de ataque mágico pelo atributo de conjuração da classe.
+- [x] **TB.3** Guarde as magias com índice, nível e estado de preparada, e mostre os truques separados.
 
 #### Fase C — Inventário e equipamento
 - [ ] **TC.1** Adicione quantidade e peso aos itens, com o total carregado e o limite de carga.

@@ -7,18 +7,22 @@ import 'package:crit_sense/features/character_sheet/data/repositories/character_
 import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_session_note_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_session_note_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_character_inventory_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/get_character_spells_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_session_notes_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/inventory_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/point_buy_cubit.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/session_notes_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/spellbook_bloc.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
@@ -91,6 +95,17 @@ Future<void> init() async {
       sl<SaveCharacterUseCase>(),
       sl<DeleteCharacterUseCase>(),
       sl<AddInventoryItemUseCase>(),
+      sl<SaveCharacterSpellUseCase>(),
+    ),
+  );
+
+  // Factory: cada abertura da aba de magias recebe um BLoC próprio.
+  sl.registerFactory<SpellbookBloc>(
+    () => SpellbookBloc(
+      sl<GetCharacterSpellsUseCase>(),
+      sl<SaveCharacterSpellUseCase>(),
+      sl<DeleteCharacterSpellUseCase>(),
+      sl<GetSpellDetailUseCase>(),
     ),
   );
 
@@ -134,6 +149,15 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<AddInventoryItemUseCase>(
     () => AddInventoryItemUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<GetCharacterSpellsUseCase>(
+    () => GetCharacterSpellsUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<SaveCharacterSpellUseCase>(
+    () => SaveCharacterSpellUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<DeleteCharacterSpellUseCase>(
+    () => DeleteCharacterSpellUseCase(sl<ICharacterRepository>()),
   );
   sl.registerLazySingleton<GetCharacterInventoryUseCase>(
     () => GetCharacterInventoryUseCase(sl<ICharacterRepository>()),

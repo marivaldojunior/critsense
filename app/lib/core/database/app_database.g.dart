@@ -332,6 +332,28 @@ class $CharactersTable extends Characters
     defaultValue: const Constant(false),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<List<int>, String>
+  spellSlotsUsed = GeneratedColumn<String>(
+    'spell_slots_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[0,0,0,0,0,0,0,0,0]'),
+  ).withConverter<List<int>>($CharactersTable.$converterspellSlotsUsed);
+  static const VerificationMeta _pactSlotsUsedMeta = const VerificationMeta(
+    'pactSlotsUsed',
+  );
+  @override
+  late final GeneratedColumn<int> pactSlotsUsed = GeneratedColumn<int>(
+    'pact_slots_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     nome,
@@ -363,6 +385,8 @@ class $CharactersTable extends Characters
     conditions,
     exhaustionLevel,
     inspiration,
+    spellSlotsUsed,
+    pactSlotsUsed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -579,6 +603,15 @@ class $CharactersTable extends Characters
         ),
       );
     }
+    if (data.containsKey('pact_slots_used')) {
+      context.handle(
+        _pactSlotsUsedMeta,
+        pactSlotsUsed.isAcceptableOrUnknown(
+          data['pact_slots_used']!,
+          _pactSlotsUsedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -716,6 +749,16 @@ class $CharactersTable extends Characters
         DriftSqlType.bool,
         data['${effectivePrefix}inspiration'],
       )!,
+      spellSlotsUsed: $CharactersTable.$converterspellSlotsUsed.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}spell_slots_used'],
+        )!,
+      ),
+      pactSlotsUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pact_slots_used'],
+      )!,
     );
   }
 
@@ -732,6 +775,8 @@ class $CharactersTable extends Characters
       const StringListConverter();
   static TypeConverter<List<String>, String> $converterconditions =
       const StringListConverter();
+  static TypeConverter<List<int>, String> $converterspellSlotsUsed =
+      const IntListConverter();
 }
 
 class CharacterData extends DataClass implements Insertable<CharacterData> {
@@ -819,6 +864,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   final List<String> conditions;
   final int exhaustionLevel;
   final bool inspiration;
+  final List<int> spellSlotsUsed;
+  final int pactSlotsUsed;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -850,6 +897,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.conditions,
     required this.exhaustionLevel,
     required this.inspiration,
+    required this.spellSlotsUsed,
+    required this.pactSlotsUsed,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -914,6 +963,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     }
     map['exhaustion_level'] = Variable<int>(exhaustionLevel);
     map['inspiration'] = Variable<bool>(inspiration);
+    {
+      map['spell_slots_used'] = Variable<String>(
+        $CharactersTable.$converterspellSlotsUsed.toSql(spellSlotsUsed),
+      );
+    }
+    map['pact_slots_used'] = Variable<int>(pactSlotsUsed);
     return map;
   }
 
@@ -963,6 +1018,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       conditions: Value(conditions),
       exhaustionLevel: Value(exhaustionLevel),
       inspiration: Value(inspiration),
+      spellSlotsUsed: Value(spellSlotsUsed),
+      pactSlotsUsed: Value(pactSlotsUsed),
     );
   }
 
@@ -1004,6 +1061,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       conditions: serializer.fromJson<List<String>>(json['conditions']),
       exhaustionLevel: serializer.fromJson<int>(json['exhaustionLevel']),
       inspiration: serializer.fromJson<bool>(json['inspiration']),
+      spellSlotsUsed: serializer.fromJson<List<int>>(json['spellSlotsUsed']),
+      pactSlotsUsed: serializer.fromJson<int>(json['pactSlotsUsed']),
     );
   }
   @override
@@ -1040,6 +1099,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'conditions': serializer.toJson<List<String>>(conditions),
       'exhaustionLevel': serializer.toJson<int>(exhaustionLevel),
       'inspiration': serializer.toJson<bool>(inspiration),
+      'spellSlotsUsed': serializer.toJson<List<int>>(spellSlotsUsed),
+      'pactSlotsUsed': serializer.toJson<int>(pactSlotsUsed),
     };
   }
 
@@ -1074,6 +1135,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     List<String>? conditions,
     int? exhaustionLevel,
     bool? inspiration,
+    List<int>? spellSlotsUsed,
+    int? pactSlotsUsed,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -1107,6 +1170,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     conditions: conditions ?? this.conditions,
     exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
     inspiration: inspiration ?? this.inspiration,
+    spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
+    pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -1178,6 +1243,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       inspiration: data.inspiration.present
           ? data.inspiration.value
           : this.inspiration,
+      spellSlotsUsed: data.spellSlotsUsed.present
+          ? data.spellSlotsUsed.value
+          : this.spellSlotsUsed,
+      pactSlotsUsed: data.pactSlotsUsed.present
+          ? data.pactSlotsUsed.value
+          : this.pactSlotsUsed,
     );
   }
 
@@ -1213,7 +1284,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('deathSaveFailures: $deathSaveFailures, ')
           ..write('conditions: $conditions, ')
           ..write('exhaustionLevel: $exhaustionLevel, ')
-          ..write('inspiration: $inspiration')
+          ..write('inspiration: $inspiration, ')
+          ..write('spellSlotsUsed: $spellSlotsUsed, ')
+          ..write('pactSlotsUsed: $pactSlotsUsed')
           ..write(')'))
         .toString();
   }
@@ -1250,6 +1323,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     conditions,
     exhaustionLevel,
     inspiration,
+    spellSlotsUsed,
+    pactSlotsUsed,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1284,7 +1359,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.deathSaveFailures == this.deathSaveFailures &&
           other.conditions == this.conditions &&
           other.exhaustionLevel == this.exhaustionLevel &&
-          other.inspiration == this.inspiration);
+          other.inspiration == this.inspiration &&
+          other.spellSlotsUsed == this.spellSlotsUsed &&
+          other.pactSlotsUsed == this.pactSlotsUsed);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1318,6 +1395,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<List<String>> conditions;
   final Value<int> exhaustionLevel;
   final Value<bool> inspiration;
+  final Value<List<int>> spellSlotsUsed;
+  final Value<int> pactSlotsUsed;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1350,6 +1429,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.conditions = const Value.absent(),
     this.exhaustionLevel = const Value.absent(),
     this.inspiration = const Value.absent(),
+    this.spellSlotsUsed = const Value.absent(),
+    this.pactSlotsUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1383,6 +1464,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.conditions = const Value.absent(),
     this.exhaustionLevel = const Value.absent(),
     this.inspiration = const Value.absent(),
+    this.spellSlotsUsed = const Value.absent(),
+    this.pactSlotsUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1422,6 +1505,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<String>? conditions,
     Expression<int>? exhaustionLevel,
     Expression<bool>? inspiration,
+    Expression<String>? spellSlotsUsed,
+    Expression<int>? pactSlotsUsed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1457,6 +1542,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (conditions != null) 'conditions': conditions,
       if (exhaustionLevel != null) 'exhaustion_level': exhaustionLevel,
       if (inspiration != null) 'inspiration': inspiration,
+      if (spellSlotsUsed != null) 'spell_slots_used': spellSlotsUsed,
+      if (pactSlotsUsed != null) 'pact_slots_used': pactSlotsUsed,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1492,6 +1579,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<List<String>>? conditions,
     Value<int>? exhaustionLevel,
     Value<bool>? inspiration,
+    Value<List<int>>? spellSlotsUsed,
+    Value<int>? pactSlotsUsed,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1525,6 +1614,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       conditions: conditions ?? this.conditions,
       exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
       inspiration: inspiration ?? this.inspiration,
+      spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
+      pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1630,6 +1721,14 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (inspiration.present) {
       map['inspiration'] = Variable<bool>(inspiration.value);
     }
+    if (spellSlotsUsed.present) {
+      map['spell_slots_used'] = Variable<String>(
+        $CharactersTable.$converterspellSlotsUsed.toSql(spellSlotsUsed.value),
+      );
+    }
+    if (pactSlotsUsed.present) {
+      map['pact_slots_used'] = Variable<int>(pactSlotsUsed.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1669,6 +1768,8 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('conditions: $conditions, ')
           ..write('exhaustionLevel: $exhaustionLevel, ')
           ..write('inspiration: $inspiration, ')
+          ..write('spellSlotsUsed: $spellSlotsUsed, ')
+          ..write('pactSlotsUsed: $pactSlotsUsed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2923,6 +3024,429 @@ class SessionNotesCompanion extends UpdateCompanion<SessionNoteData> {
   }
 }
 
+class $CharacterSpellsTable extends CharacterSpells
+    with TableInfo<$CharacterSpellsTable, CharacterSpellData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CharacterSpellsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _characterIdMeta = const VerificationMeta(
+    'characterId',
+  );
+  @override
+  late final GeneratedColumn<String> characterId = GeneratedColumn<String>(
+    'character_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES characters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _spellIndexMeta = const VerificationMeta(
+    'spellIndex',
+  );
+  @override
+  late final GeneratedColumn<String> spellIndex = GeneratedColumn<String>(
+    'spell_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _preparedMeta = const VerificationMeta(
+    'prepared',
+  );
+  @override
+  late final GeneratedColumn<bool> prepared = GeneratedColumn<bool>(
+    'prepared',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("prepared" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    characterId,
+    spellIndex,
+    name,
+    level,
+    prepared,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'character_spells';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CharacterSpellData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('character_id')) {
+      context.handle(
+        _characterIdMeta,
+        characterId.isAcceptableOrUnknown(
+          data['character_id']!,
+          _characterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_characterIdMeta);
+    }
+    if (data.containsKey('spell_index')) {
+      context.handle(
+        _spellIndexMeta,
+        spellIndex.isAcceptableOrUnknown(data['spell_index']!, _spellIndexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_spellIndexMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    }
+    if (data.containsKey('prepared')) {
+      context.handle(
+        _preparedMeta,
+        prepared.isAcceptableOrUnknown(data['prepared']!, _preparedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CharacterSpellData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CharacterSpellData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      characterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}character_id'],
+      )!,
+      spellIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spell_index'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      ),
+      prepared: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prepared'],
+      )!,
+    );
+  }
+
+  @override
+  $CharacterSpellsTable createAlias(String alias) {
+    return $CharacterSpellsTable(attachedDatabase, alias);
+  }
+}
+
+class CharacterSpellData extends DataClass
+    implements Insertable<CharacterSpellData> {
+  final String id;
+  final String characterId;
+
+  /// Índice da magia na API 5e-bits (ex: `magic-missile`).
+  final String spellIndex;
+  final String name;
+
+  /// 0 = truque; `null` = nível ainda desconhecido (magias migradas).
+  final int? level;
+  final bool prepared;
+  const CharacterSpellData({
+    required this.id,
+    required this.characterId,
+    required this.spellIndex,
+    required this.name,
+    this.level,
+    required this.prepared,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['character_id'] = Variable<String>(characterId);
+    map['spell_index'] = Variable<String>(spellIndex);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || level != null) {
+      map['level'] = Variable<int>(level);
+    }
+    map['prepared'] = Variable<bool>(prepared);
+    return map;
+  }
+
+  CharacterSpellsCompanion toCompanion(bool nullToAbsent) {
+    return CharacterSpellsCompanion(
+      id: Value(id),
+      characterId: Value(characterId),
+      spellIndex: Value(spellIndex),
+      name: Value(name),
+      level: level == null && nullToAbsent
+          ? const Value.absent()
+          : Value(level),
+      prepared: Value(prepared),
+    );
+  }
+
+  factory CharacterSpellData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CharacterSpellData(
+      id: serializer.fromJson<String>(json['id']),
+      characterId: serializer.fromJson<String>(json['characterId']),
+      spellIndex: serializer.fromJson<String>(json['spellIndex']),
+      name: serializer.fromJson<String>(json['name']),
+      level: serializer.fromJson<int?>(json['level']),
+      prepared: serializer.fromJson<bool>(json['prepared']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'characterId': serializer.toJson<String>(characterId),
+      'spellIndex': serializer.toJson<String>(spellIndex),
+      'name': serializer.toJson<String>(name),
+      'level': serializer.toJson<int?>(level),
+      'prepared': serializer.toJson<bool>(prepared),
+    };
+  }
+
+  CharacterSpellData copyWith({
+    String? id,
+    String? characterId,
+    String? spellIndex,
+    String? name,
+    Value<int?> level = const Value.absent(),
+    bool? prepared,
+  }) => CharacterSpellData(
+    id: id ?? this.id,
+    characterId: characterId ?? this.characterId,
+    spellIndex: spellIndex ?? this.spellIndex,
+    name: name ?? this.name,
+    level: level.present ? level.value : this.level,
+    prepared: prepared ?? this.prepared,
+  );
+  CharacterSpellData copyWithCompanion(CharacterSpellsCompanion data) {
+    return CharacterSpellData(
+      id: data.id.present ? data.id.value : this.id,
+      characterId: data.characterId.present
+          ? data.characterId.value
+          : this.characterId,
+      spellIndex: data.spellIndex.present
+          ? data.spellIndex.value
+          : this.spellIndex,
+      name: data.name.present ? data.name.value : this.name,
+      level: data.level.present ? data.level.value : this.level,
+      prepared: data.prepared.present ? data.prepared.value : this.prepared,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CharacterSpellData(')
+          ..write('id: $id, ')
+          ..write('characterId: $characterId, ')
+          ..write('spellIndex: $spellIndex, ')
+          ..write('name: $name, ')
+          ..write('level: $level, ')
+          ..write('prepared: $prepared')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, characterId, spellIndex, name, level, prepared);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CharacterSpellData &&
+          other.id == this.id &&
+          other.characterId == this.characterId &&
+          other.spellIndex == this.spellIndex &&
+          other.name == this.name &&
+          other.level == this.level &&
+          other.prepared == this.prepared);
+}
+
+class CharacterSpellsCompanion extends UpdateCompanion<CharacterSpellData> {
+  final Value<String> id;
+  final Value<String> characterId;
+  final Value<String> spellIndex;
+  final Value<String> name;
+  final Value<int?> level;
+  final Value<bool> prepared;
+  final Value<int> rowid;
+  const CharacterSpellsCompanion({
+    this.id = const Value.absent(),
+    this.characterId = const Value.absent(),
+    this.spellIndex = const Value.absent(),
+    this.name = const Value.absent(),
+    this.level = const Value.absent(),
+    this.prepared = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CharacterSpellsCompanion.insert({
+    required String id,
+    required String characterId,
+    required String spellIndex,
+    required String name,
+    this.level = const Value.absent(),
+    this.prepared = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       characterId = Value(characterId),
+       spellIndex = Value(spellIndex),
+       name = Value(name);
+  static Insertable<CharacterSpellData> custom({
+    Expression<String>? id,
+    Expression<String>? characterId,
+    Expression<String>? spellIndex,
+    Expression<String>? name,
+    Expression<int>? level,
+    Expression<bool>? prepared,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (characterId != null) 'character_id': characterId,
+      if (spellIndex != null) 'spell_index': spellIndex,
+      if (name != null) 'name': name,
+      if (level != null) 'level': level,
+      if (prepared != null) 'prepared': prepared,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CharacterSpellsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? characterId,
+    Value<String>? spellIndex,
+    Value<String>? name,
+    Value<int?>? level,
+    Value<bool>? prepared,
+    Value<int>? rowid,
+  }) {
+    return CharacterSpellsCompanion(
+      id: id ?? this.id,
+      characterId: characterId ?? this.characterId,
+      spellIndex: spellIndex ?? this.spellIndex,
+      name: name ?? this.name,
+      level: level ?? this.level,
+      prepared: prepared ?? this.prepared,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (characterId.present) {
+      map['character_id'] = Variable<String>(characterId.value);
+    }
+    if (spellIndex.present) {
+      map['spell_index'] = Variable<String>(spellIndex.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
+    if (prepared.present) {
+      map['prepared'] = Variable<bool>(prepared.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CharacterSpellsCompanion(')
+          ..write('id: $id, ')
+          ..write('characterId: $characterId, ')
+          ..write('spellIndex: $spellIndex, ')
+          ..write('name: $name, ')
+          ..write('level: $level, ')
+          ..write('prepared: $prepared, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2930,6 +3454,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AttributesTable attributes = $AttributesTable(this);
   late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
   late final $SessionNotesTable sessionNotes = $SessionNotesTable(this);
+  late final $CharacterSpellsTable characterSpells = $CharacterSpellsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2939,6 +3466,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     attributes,
     inventoryItems,
     sessionNotes,
+    characterSpells,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2962,6 +3490,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('session_notes', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'characters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('character_spells', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2998,6 +3533,8 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<List<String>> conditions,
       Value<int> exhaustionLevel,
       Value<bool> inspiration,
+      Value<List<int>> spellSlotsUsed,
+      Value<int> pactSlotsUsed,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -3032,6 +3569,8 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<List<String>> conditions,
       Value<int> exhaustionLevel,
       Value<bool> inspiration,
+      Value<List<int>> spellSlotsUsed,
+      Value<int> pactSlotsUsed,
       Value<int> rowid,
     });
 
@@ -3088,6 +3627,26 @@ final class $$CharactersTableReferences
     ).filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_sessionNotesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$CharacterSpellsTable, List<CharacterSpellData>>
+  _characterSpellsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.characterSpells,
+    aliasName: 'characters__id__character_spells__character_id',
+  );
+
+  $$CharacterSpellsTableProcessedTableManager get characterSpellsRefs {
+    final manager = $$CharacterSpellsTableTableManager(
+      $_db,
+      $_db.characterSpells,
+    ).filter((f) => f.characterId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _characterSpellsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3257,6 +3816,17 @@ class $$CharactersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<List<int>, List<int>, String>
+  get spellSlotsUsed => $composableBuilder(
+    column: $table.spellSlotsUsed,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get pactSlotsUsed => $composableBuilder(
+    column: $table.pactSlotsUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> attributesRefs(
     Expression<bool> Function($$AttributesTableFilterComposer f) f,
   ) {
@@ -3323,6 +3893,31 @@ class $$CharactersTableFilterComposer
           }) => $$SessionNotesTableFilterComposer(
             $db: $db,
             $table: $db.sessionNotes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> characterSpellsRefs(
+    Expression<bool> Function($$CharacterSpellsTableFilterComposer f) f,
+  ) {
+    final $$CharacterSpellsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.characterSpells,
+      getReferencedColumn: (t) => t.characterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharacterSpellsTableFilterComposer(
+            $db: $db,
+            $table: $db.characterSpells,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3491,6 +4086,16 @@ class $$CharactersTableOrderingComposer
     column: $table.inspiration,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get spellSlotsUsed => $composableBuilder(
+    column: $table.spellSlotsUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pactSlotsUsed => $composableBuilder(
+    column: $table.pactSlotsUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -3633,6 +4238,17 @@ class $$CharactersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<List<int>, String> get spellSlotsUsed =>
+      $composableBuilder(
+        column: $table.spellSlotsUsed,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<int> get pactSlotsUsed => $composableBuilder(
+    column: $table.pactSlotsUsed,
+    builder: (column) => column,
+  );
+
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
   ) {
@@ -3707,6 +4323,31 @@ class $$CharactersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> characterSpellsRefs<T extends Object>(
+    Expression<T> Function($$CharacterSpellsTableAnnotationComposer a) f,
+  ) {
+    final $$CharacterSpellsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.characterSpells,
+      getReferencedColumn: (t) => t.characterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharacterSpellsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.characterSpells,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CharactersTableTableManager
@@ -3726,6 +4367,7 @@ class $$CharactersTableTableManager
             bool attributesRefs,
             bool inventoryItemsRefs,
             bool sessionNotesRefs,
+            bool characterSpellsRefs,
           })
         > {
   $$CharactersTableTableManager(_$AppDatabase db, $CharactersTable table)
@@ -3771,6 +4413,8 @@ class $$CharactersTableTableManager
                 Value<List<String>> conditions = const Value.absent(),
                 Value<int> exhaustionLevel = const Value.absent(),
                 Value<bool> inspiration = const Value.absent(),
+                Value<List<int>> spellSlotsUsed = const Value.absent(),
+                Value<int> pactSlotsUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -3803,6 +4447,8 @@ class $$CharactersTableTableManager
                 conditions: conditions,
                 exhaustionLevel: exhaustionLevel,
                 inspiration: inspiration,
+                spellSlotsUsed: spellSlotsUsed,
+                pactSlotsUsed: pactSlotsUsed,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3837,6 +4483,8 @@ class $$CharactersTableTableManager
                 Value<List<String>> conditions = const Value.absent(),
                 Value<int> exhaustionLevel = const Value.absent(),
                 Value<bool> inspiration = const Value.absent(),
+                Value<List<int>> spellSlotsUsed = const Value.absent(),
+                Value<int> pactSlotsUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -3869,6 +4517,8 @@ class $$CharactersTableTableManager
                 conditions: conditions,
                 exhaustionLevel: exhaustionLevel,
                 inspiration: inspiration,
+                spellSlotsUsed: spellSlotsUsed,
+                pactSlotsUsed: pactSlotsUsed,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3884,6 +4534,7 @@ class $$CharactersTableTableManager
                 attributesRefs = false,
                 inventoryItemsRefs = false,
                 sessionNotesRefs = false,
+                characterSpellsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -3891,6 +4542,7 @@ class $$CharactersTableTableManager
                     if (attributesRefs) db.attributes,
                     if (inventoryItemsRefs) db.inventoryItems,
                     if (sessionNotesRefs) db.sessionNotes,
+                    if (characterSpellsRefs) db.characterSpells,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3958,6 +4610,27 @@ class $$CharactersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (characterSpellsRefs)
+                        await $_getPrefetchedData<
+                          CharacterData,
+                          $CharactersTable,
+                          CharacterSpellData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CharactersTableReferences
+                              ._characterSpellsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CharactersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).characterSpellsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.characterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3982,6 +4655,7 @@ typedef $$CharactersTableProcessedTableManager =
         bool attributesRefs,
         bool inventoryItemsRefs,
         bool sessionNotesRefs,
+        bool characterSpellsRefs,
       })
     >;
 typedef $$AttributesTableCreateCompanionBuilder =
@@ -4987,6 +5661,357 @@ typedef $$SessionNotesTableProcessedTableManager =
       SessionNoteData,
       PrefetchHooks Function({bool characterId})
     >;
+typedef $$CharacterSpellsTableCreateCompanionBuilder =
+    CharacterSpellsCompanion Function({
+      required String id,
+      required String characterId,
+      required String spellIndex,
+      required String name,
+      Value<int?> level,
+      Value<bool> prepared,
+      Value<int> rowid,
+    });
+typedef $$CharacterSpellsTableUpdateCompanionBuilder =
+    CharacterSpellsCompanion Function({
+      Value<String> id,
+      Value<String> characterId,
+      Value<String> spellIndex,
+      Value<String> name,
+      Value<int?> level,
+      Value<bool> prepared,
+      Value<int> rowid,
+    });
+
+final class $$CharacterSpellsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CharacterSpellsTable,
+          CharacterSpellData
+        > {
+  $$CharacterSpellsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CharactersTable _characterIdTable(_$AppDatabase db) => db.characters
+      .createAlias('character_spells__character_id__characters__id');
+
+  $$CharactersTableProcessedTableManager get characterId {
+    final $_column = $_itemColumn<String>('character_id')!;
+
+    final manager = $$CharactersTableTableManager(
+      $_db,
+      $_db.characters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_characterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CharacterSpellsTableFilterComposer
+    extends Composer<_$AppDatabase, $CharacterSpellsTable> {
+  $$CharacterSpellsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spellIndex => $composableBuilder(
+    column: $table.spellIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get prepared => $composableBuilder(
+    column: $table.prepared,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CharactersTableFilterComposer get characterId {
+    final $$CharactersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableFilterComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CharacterSpellsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CharacterSpellsTable> {
+  $$CharacterSpellsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get spellIndex => $composableBuilder(
+    column: $table.spellIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get prepared => $composableBuilder(
+    column: $table.prepared,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CharactersTableOrderingComposer get characterId {
+    final $$CharactersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableOrderingComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CharacterSpellsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CharacterSpellsTable> {
+  $$CharacterSpellsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get spellIndex => $composableBuilder(
+    column: $table.spellIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<bool> get prepared =>
+      $composableBuilder(column: $table.prepared, builder: (column) => column);
+
+  $$CharactersTableAnnotationComposer get characterId {
+    final $$CharactersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.characterId,
+      referencedTable: $db.characters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CharactersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.characters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CharacterSpellsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CharacterSpellsTable,
+          CharacterSpellData,
+          $$CharacterSpellsTableFilterComposer,
+          $$CharacterSpellsTableOrderingComposer,
+          $$CharacterSpellsTableAnnotationComposer,
+          $$CharacterSpellsTableCreateCompanionBuilder,
+          $$CharacterSpellsTableUpdateCompanionBuilder,
+          (CharacterSpellData, $$CharacterSpellsTableReferences),
+          CharacterSpellData,
+          PrefetchHooks Function({bool characterId})
+        > {
+  $$CharacterSpellsTableTableManager(
+    _$AppDatabase db,
+    $CharacterSpellsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CharacterSpellsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CharacterSpellsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CharacterSpellsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> characterId = const Value.absent(),
+                Value<String> spellIndex = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int?> level = const Value.absent(),
+                Value<bool> prepared = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CharacterSpellsCompanion(
+                id: id,
+                characterId: characterId,
+                spellIndex: spellIndex,
+                name: name,
+                level: level,
+                prepared: prepared,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String characterId,
+                required String spellIndex,
+                required String name,
+                Value<int?> level = const Value.absent(),
+                Value<bool> prepared = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CharacterSpellsCompanion.insert(
+                id: id,
+                characterId: characterId,
+                spellIndex: spellIndex,
+                name: name,
+                level: level,
+                prepared: prepared,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CharacterSpellsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({characterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (characterId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.characterId,
+                                referencedTable:
+                                    $$CharacterSpellsTableReferences
+                                        ._characterIdTable(db),
+                                referencedColumn:
+                                    $$CharacterSpellsTableReferences
+                                        ._characterIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CharacterSpellsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CharacterSpellsTable,
+      CharacterSpellData,
+      $$CharacterSpellsTableFilterComposer,
+      $$CharacterSpellsTableOrderingComposer,
+      $$CharacterSpellsTableAnnotationComposer,
+      $$CharacterSpellsTableCreateCompanionBuilder,
+      $$CharacterSpellsTableUpdateCompanionBuilder,
+      (CharacterSpellData, $$CharacterSpellsTableReferences),
+      CharacterSpellData,
+      PrefetchHooks Function({bool characterId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4999,4 +6024,6 @@ class $AppDatabaseManager {
       $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
   $$SessionNotesTableTableManager get sessionNotes =>
       $$SessionNotesTableTableManager(_db, _db.sessionNotes);
+  $$CharacterSpellsTableTableManager get characterSpells =>
+      $$CharacterSpellsTableTableManager(_db, _db.characterSpells);
 }

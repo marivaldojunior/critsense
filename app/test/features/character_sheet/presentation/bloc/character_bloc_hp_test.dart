@@ -6,6 +6,7 @@ import 'package:crit_sense/features/character_sheet/domain/entities/character.da
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
@@ -19,6 +20,9 @@ class _MockDeleteCharacterUseCase extends Mock
 
 class _MockAddInventoryItemUseCase extends Mock
     implements AddInventoryItemUseCase {}
+
+class _MockSaveCharacterSpellUseCase extends Mock
+    implements SaveCharacterSpellUseCase {}
 
 /// Testa as regras de Gerenciamento de Vida (dano/cura/PV temporário/
 /// descanso) do [CharacterBloc], conforme o SRD do D&D 5e.
@@ -81,6 +85,7 @@ void main() {
       saveCharacter,
       _MockDeleteCharacterUseCase(),
       _MockAddInventoryItemUseCase(),
+      _MockSaveCharacterSpellUseCase(),
     );
   });
 
@@ -123,31 +128,26 @@ void main() {
       expect(character.temporaryHitPoints, 2);
     });
 
-    test(
-      'dano maior que o PV temporário zera o temporário e desconta o '
-      'restante do PV atual',
-      () async {
-        await seedLoaded(
-          buildCharacter(
-            maxHitPoints: 20,
-            currentHitPoints: 20,
-            temporaryHitPoints: 5,
-          ),
-        );
+    test('dano maior que o PV temporário zera o temporário e desconta o '
+        'restante do PV atual', () async {
+      await seedLoaded(
+        buildCharacter(
+          maxHitPoints: 20,
+          currentHitPoints: 20,
+          temporaryHitPoints: 5,
+        ),
+      );
 
-        final character = await actAndGetCharacter(
-          const ApplyDamageEvent(characterId, 8),
-        );
+      final character = await actAndGetCharacter(
+        const ApplyDamageEvent(characterId, 8),
+      );
 
-        expect(character.currentHitPoints, 17);
-        expect(character.temporaryHitPoints, 0);
-      },
-    );
+      expect(character.currentHitPoints, 17);
+      expect(character.temporaryHitPoints, 0);
+    });
 
     test('PV atual nunca fica abaixo de zero', () async {
-      await seedLoaded(
-        buildCharacter(maxHitPoints: 20, currentHitPoints: 5),
-      );
+      await seedLoaded(buildCharacter(maxHitPoints: 20, currentHitPoints: 5));
 
       final character = await actAndGetCharacter(
         const ApplyDamageEvent(characterId, 999),
@@ -159,9 +159,7 @@ void main() {
 
   group('HealHpEvent', () {
     test('cura aumenta o PV atual sem ultrapassar o máximo', () async {
-      await seedLoaded(
-        buildCharacter(maxHitPoints: 20, currentHitPoints: 15),
-      );
+      await seedLoaded(buildCharacter(maxHitPoints: 20, currentHitPoints: 15));
 
       final character = await actAndGetCharacter(
         const HealHpEvent(characterId, 100),
@@ -188,26 +186,23 @@ void main() {
       expect(character.temporaryHitPoints, 10);
     });
 
-    test(
-      'um valor menor ou igual ao PV temporário atual é ignorado (não '
-      'acumula)',
-      () async {
-        await seedLoaded(
-          buildCharacter(
-            maxHitPoints: 20,
-            currentHitPoints: 20,
-            temporaryHitPoints: 10,
-          ),
-        );
-        final stateBefore = bloc.state;
+    test('um valor menor ou igual ao PV temporário atual é ignorado (não '
+        'acumula)', () async {
+      await seedLoaded(
+        buildCharacter(
+          maxHitPoints: 20,
+          currentHitPoints: 20,
+          temporaryHitPoints: 10,
+        ),
+      );
+      final stateBefore = bloc.state;
 
-        bloc.add(const AddTempHpEvent(characterId, 10));
-        await Future<void>.delayed(Duration.zero);
+      bloc.add(const AddTempHpEvent(characterId, 10));
+      await Future<void>.delayed(Duration.zero);
 
-        expect(bloc.state, same(stateBefore));
-        verifyNever(() => saveCharacter(any()));
-      },
-    );
+      expect(bloc.state, same(stateBefore));
+      verifyNever(() => saveCharacter(any()));
+    });
   });
 
   group('TakeLongRestEvent', () {
@@ -233,9 +228,7 @@ void main() {
     test(
       'não altera PV automaticamente (sem sistema de Dados de Vida)',
       () async {
-        await seedLoaded(
-          buildCharacter(maxHitPoints: 20, currentHitPoints: 1),
-        );
+        await seedLoaded(buildCharacter(maxHitPoints: 20, currentHitPoints: 1));
         final stateBefore = bloc.state;
 
         bloc.add(const TakeShortRestEvent(characterId));

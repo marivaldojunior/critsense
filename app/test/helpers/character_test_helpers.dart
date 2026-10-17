@@ -6,6 +6,7 @@ import 'package:crit_sense/features/character_sheet/domain/entities/condition.da
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
@@ -19,6 +20,9 @@ class MockDeleteCharacterUseCase extends Mock
 
 class MockAddInventoryItemUseCase extends Mock
     implements AddInventoryItemUseCase {}
+
+class MockSaveCharacterSpellUseCase extends Mock
+    implements SaveCharacterSpellUseCase {}
 
 /// Personagem de teste: Guerreiro nível 4, CON 14 e DES 14, 30 PV máximos.
 Character buildTestCharacter({
@@ -69,6 +73,7 @@ loadedCharacterBloc(List<Character> characters) async {
     save,
     MockDeleteCharacterUseCase(),
     MockAddInventoryItemUseCase(),
+    MockSaveCharacterSpellUseCase(),
   );
   final loaded = bloc.stream.firstWhere((s) => s is CharacterLoaded);
   bloc.add(const LoadCharactersEvent());

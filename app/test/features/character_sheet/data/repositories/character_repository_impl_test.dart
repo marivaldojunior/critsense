@@ -6,6 +6,7 @@ import 'package:crit_sense/features/character_sheet/data/repositories/character_
 import 'package:crit_sense/features/character_sheet/domain/entities/attribute.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/attribute_type.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/character_spell.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/proficiency.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/session_note.dart';
@@ -48,7 +49,6 @@ void main() {
     flaws: 'Orgulho',
     experiencePoints: 900,
     avatarPath: '/tmp/thorin.png',
-    spells: const ['Shield'],
     defeatedBosses: const ['Goblin Boss'],
   );
 
@@ -97,7 +97,6 @@ void main() {
       expect(loaded.experiencePoints, 900);
       expect(loaded.proficiencyBonus, 2);
       expect(loaded.avatarPath, '/tmp/thorin.png');
-      expect(loaded.spells, ['Shield']);
       expect(loaded.defeatedBosses, ['Goblin Boss']);
     });
 
@@ -212,6 +211,76 @@ void main() {
         () => repository.addInventoryItem(buildItem('x', characterId: 'nope')),
         throwsA(isA<SqliteException>()),
       );
+    });
+  });
+
+  group('grimório', () {
+    setUp(() => repository.saveCharacter(buildCharacter()));
+
+    CharacterSpell spell(String id, String index, int? level) => CharacterSpell(
+      id: id,
+      characterId: 'char-1',
+      spellIndex: index,
+      name: index,
+      level: level,
+    );
+
+    test('lista as magias por nível, com as sem nível no fim', () async {
+      await repository.saveCharacterSpell(spell('s1', 'fireball', 3));
+      await repository.saveCharacterSpell(spell('s2', 'light', 0));
+      await repository.saveCharacterSpell(spell('s3', 'mystery', null));
+      await repository.saveCharacterSpell(spell('s4', 'shield', 1));
+
+      final spells = await repository.getCharacterSpells('char-1');
+
+      expect(spells.map((s) => s.spellIndex), [
+        'light',
+        'shield',
+        'fireball',
+        'mystery',
+      ]);
+    });
+
+    test('a mesma magia duas vezes atualiza em vez de duplicar', () async {
+      await repository.saveCharacterSpell(spell('s1', 'shield', 1));
+      await repository.saveCharacterSpell(
+        spell('s2', 'shield', null).copyWith(prepared: true),
+      );
+
+      final spells = await repository.getCharacterSpells('char-1');
+
+      expect(spells, hasLength(1));
+      expect(spells.single.id, 's1');
+      expect(spells.single.prepared, isTrue);
+      // O nível conhecido não se perde quando a atualização não o traz.
+      expect(spells.single.level, 1);
+    });
+
+    test('remove a magia e apaga o grimório junto com o personagem', () async {
+      await repository.saveCharacterSpell(spell('s1', 'shield', 1));
+      await repository.saveCharacterSpell(spell('s2', 'light', 0));
+
+      await repository.deleteCharacterSpell('s1');
+      expect((await repository.getCharacterSpells('char-1')).map((s) => s.id), [
+        's2',
+      ]);
+
+      await repository.deleteCharacter('char-1');
+      expect(await db.select(db.characterSpells).get(), isEmpty);
+    });
+
+    test('guarda os espaços de magia gastos', () async {
+      await repository.saveCharacter(
+        buildCharacter().copyWith(
+          spellSlotsUsed: [2, 1, 0, 0, 0, 0, 0, 0, 0],
+          pactSlotsUsed: 1,
+        ),
+      );
+
+      final loaded = (await repository.getAllCharacters()).single;
+
+      expect(loaded.spellSlotsUsed, [2, 1, 0, 0, 0, 0, 0, 0, 0]);
+      expect(loaded.pactSlotsUsed, 1);
     });
   });
 

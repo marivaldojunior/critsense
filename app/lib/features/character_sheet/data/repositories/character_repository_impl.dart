@@ -5,6 +5,7 @@ import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/condition.dart';
 import '../../domain/entities/character.dart';
+import '../../domain/entities/character_spell.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/session_note.dart';
@@ -132,6 +133,53 @@ class CharacterRepositoryImpl implements ICharacterRepository {
       _db.sessionNotes,
     )..where((t) => t.id.equals(noteId))).go();
   }
+
+  @override
+  Future<List<CharacterSpell>> getCharacterSpells(String characterId) async {
+    final rows =
+        await (_db.select(_db.characterSpells)
+              ..where((t) => t.characterId.equals(characterId))
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.level, nulls: NullsOrder.last),
+                (t) => OrderingTerm.asc(t.name),
+              ]))
+            .get();
+    return rows.map((row) => row._toDomain()).toList();
+  }
+
+  @override
+  Future<void> saveCharacterSpell(CharacterSpell spell) async {
+    await _db.transaction(() async {
+      final existing =
+          await (_db.select(_db.characterSpells)..where(
+                (t) =>
+                    t.characterId.equals(spell.characterId) &
+                    t.spellIndex.equals(spell.spellIndex) &
+                    t.id.equals(spell.id).not(),
+              ))
+              .getSingleOrNull();
+      final id = existing?.id ?? spell.id;
+      await _db
+          .into(_db.characterSpells)
+          .insertOnConflictUpdate(
+            CharacterSpellsCompanion(
+              id: Value(id),
+              characterId: Value(spell.characterId),
+              spellIndex: Value(spell.spellIndex),
+              name: Value(spell.name),
+              level: Value(spell.level ?? existing?.level),
+              prepared: Value(spell.prepared),
+            ),
+          );
+    });
+  }
+
+  @override
+  Future<void> deleteCharacterSpell(String spellId) async {
+    await (_db.delete(
+      _db.characterSpells,
+    )..where((t) => t.id.equals(spellId))).go();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +228,8 @@ extension _CharacterDataMapper on CharacterData {
           .whereType<Proficiency>()
           .toList(),
       avatarPath: avatarPath,
-      spells: spells,
+      spellSlotsUsed: spellSlotsUsed,
+      pactSlotsUsed: pactSlotsUsed,
       defeatedBosses: defeatedBosses,
     );
   }
@@ -263,7 +312,10 @@ extension _CharacterToCompanion on Character {
       experiencePoints: Value(experiencePoints),
       proficiencyBonus: Value(proficiencyBonus),
       avatarPath: Value(avatarPath),
-      spells: Value(spells),
+      // Coluna antiga, substituída por `character_spells` (versão 9).
+      spells: const Value([]),
+      spellSlotsUsed: Value(spellSlotsUsed),
+      pactSlotsUsed: Value(pactSlotsUsed),
       defeatedBosses: Value(defeatedBosses),
       proficiencies: Value(proficiencies.map(_proficiencyToKey).toList()),
     );
@@ -333,6 +385,19 @@ extension _SessionNoteToCompanion on SessionNote {
       title: Value(title),
       content: Value(content),
       createdAt: Value(createdAt),
+    );
+  }
+}
+
+extension _CharacterSpellDataMapper on CharacterSpellData {
+  CharacterSpell _toDomain() {
+    return CharacterSpell(
+      id: id,
+      characterId: characterId,
+      spellIndex: spellIndex,
+      name: name,
+      level: level,
+      prepared: prepared,
     );
   }
 }

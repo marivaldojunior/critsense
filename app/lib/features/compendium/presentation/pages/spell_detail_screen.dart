@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:crit_sense/core/presentation/widgets/character_picker_bottom_sheet.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/character_spell.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 
 import '../../../../di/injection_container.dart';
@@ -77,7 +79,7 @@ class SpellDetailScreen extends StatelessWidget {
 }
 
 /// Abre o [CharacterPickerBottomSheet] e, se um personagem for escolhido,
-/// vincula [spell] a ele via [AddSpellToCharacterEvent].
+/// adiciona [spell] ao grimório dele via [AddSpellToCharacterEvent].
 Future<void> _addSpellToCharacter(
   BuildContext context,
   SpellDetail spell,
@@ -87,7 +89,15 @@ Future<void> _addSpellToCharacter(
   if (!context.mounted) return;
 
   context.read<CharacterBloc>().add(
-    AddSpellToCharacterEvent(character.id, spell.name),
+    AddSpellToCharacterEvent(
+      CharacterSpell(
+        id: const Uuid().v4(),
+        characterId: character.id,
+        spellIndex: spell.index,
+        name: spell.name,
+        level: spell.level,
+      ),
+    ),
   );
 
   ScaffoldMessenger.of(context).showSnackBar(

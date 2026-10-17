@@ -1,5 +1,21 @@
 import '../entities/attribute_type.dart';
 
+/// Progressão de espaços de magia de uma classe (tabelas do SRD 5.1).
+enum Spellcasting {
+  /// Sem espaços de magia.
+  none,
+
+  /// Conjurador completo: Bardo, Clérigo, Druida, Feiticeiro e Mago.
+  full,
+
+  /// Meio-conjurador: Paladino e Patrulheiro (magia a partir do 2º nível).
+  half,
+
+  /// Magia de Pacto do Bruxo: poucos espaços, todos do mesmo nível, que
+  /// voltam no Descanso Curto.
+  pact,
+}
+
 /// As 12 classes do SRD 5.1 com os dados de regra que a ficha calcula
 /// sozinha (dado de vida, testes de resistência...).
 ///
@@ -16,16 +32,24 @@ enum SrdClass {
     'bard',
     hitDie: 8,
     savingThrows: {AttributeType.dexterity, AttributeType.charisma},
+    spellcasting: Spellcasting.full,
+    spellcastingAbility: AttributeType.charisma,
   ),
   cleric(
     'cleric',
     hitDie: 8,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    spellcasting: Spellcasting.full,
+    spellcastingAbility: AttributeType.wisdom,
+    preparesSpells: true,
   ),
   druid(
     'druid',
     hitDie: 8,
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
+    spellcasting: Spellcasting.full,
+    spellcastingAbility: AttributeType.wisdom,
+    preparesSpells: true,
   ),
   fighter(
     'fighter',
@@ -41,11 +65,16 @@ enum SrdClass {
     'paladin',
     hitDie: 10,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    spellcasting: Spellcasting.half,
+    spellcastingAbility: AttributeType.charisma,
+    preparesSpells: true,
   ),
   ranger(
     'ranger',
     hitDie: 10,
     savingThrows: {AttributeType.strength, AttributeType.dexterity},
+    spellcasting: Spellcasting.half,
+    spellcastingAbility: AttributeType.wisdom,
   ),
   rogue(
     'rogue',
@@ -56,16 +85,23 @@ enum SrdClass {
     'sorcerer',
     hitDie: 6,
     savingThrows: {AttributeType.constitution, AttributeType.charisma},
+    spellcasting: Spellcasting.full,
+    spellcastingAbility: AttributeType.charisma,
   ),
   warlock(
     'warlock',
     hitDie: 8,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    spellcasting: Spellcasting.pact,
+    spellcastingAbility: AttributeType.charisma,
   ),
   wizard(
     'wizard',
     hitDie: 6,
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
+    spellcasting: Spellcasting.full,
+    spellcastingAbility: AttributeType.intelligence,
+    preparesSpells: true,
   );
 
   /// Índice da classe na API 5e-bits (`/api/classes/{index}`).
@@ -77,10 +113,23 @@ enum SrdClass {
   /// Testes de resistência em que a classe é proficiente.
   final Set<AttributeType> savingThrows;
 
+  /// Como a classe ganha espaços de magia.
+  final Spellcasting spellcasting;
+
+  /// Atributo de conjuração, ou `null` em classes sem magia.
+  final AttributeType? spellcastingAbility;
+
+  /// `true` nas classes que preparam magias a cada dia (Clérigo, Druida,
+  /// Mago e Paladino); as outras só conhecem uma lista fixa.
+  final bool preparesSpells;
+
   const SrdClass(
     this.apiIndex, {
     required this.hitDie,
     required this.savingThrows,
+    this.spellcasting = Spellcasting.none,
+    this.spellcastingAbility,
+    this.preparesSpells = false,
   });
 
   /// Dado de vida usado quando a classe não é do SRD.
