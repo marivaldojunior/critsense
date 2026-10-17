@@ -346,6 +346,7 @@ class _Spellbook extends StatelessWidget {
                   _SpellTile(
                     spell: spell,
                     showPrepared: preparesSpells && !spell.isCantrip,
+                    concentrating: character.concentrationSpell == spell.name,
                   ),
               ],
             ],
@@ -373,10 +374,17 @@ class _Spellbook extends StatelessWidget {
 }
 
 class _SpellTile extends StatelessWidget {
-  const _SpellTile({required this.spell, required this.showPrepared});
+  const _SpellTile({
+    required this.spell,
+    required this.showPrepared,
+    required this.concentrating,
+  });
 
   final CharacterSpell spell;
   final bool showPrepared;
+
+  /// O personagem mantém a concentração nesta magia.
+  final bool concentrating;
 
   @override
   Widget build(BuildContext context) {
@@ -403,10 +411,32 @@ class _SpellTile extends StatelessWidget {
             builder: (_) => SpellDetailScreen(spellIndex: spell.spellIndex),
           ),
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          tooltip: 'Remover magia',
-          onPressed: () => bloc.add(DeleteSpellEvent(spell)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              isSelected: concentrating,
+              icon: DnDIcon(
+                assetPath: 'assets/icons/game/concentration.svg',
+                size: 22,
+                color: concentrating
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+              tooltip: concentrating ? 'Encerrar concentração' : 'Concentrar',
+              onPressed: () => context.read<CharacterBloc>().add(
+                SetConcentrationEvent(
+                  spell.characterId,
+                  concentrating ? null : spell.name,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Remover magia',
+              onPressed: () => bloc.add(DeleteSpellEvent(spell)),
+            ),
+          ],
         ),
       ),
     );

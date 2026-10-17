@@ -235,6 +235,15 @@ final class SetClassResourceRemainingEvent extends CharacterEvent {
   );
 }
 
+/// Começa a concentração em [spell], ou termina a concentração quando
+/// [spell] é `null` — ver `ConcentrationRules`.
+final class SetConcentrationEvent extends CharacterEvent {
+  final String characterId;
+  final String? spell;
+
+  const SetConcentrationEvent(this.characterId, this.spell);
+}
+
 /// Troca o PV máximo de [characterId] — ver `HitPointRules.withMaxHitPoints`.
 final class SetMaxHitPointsEvent extends CharacterEvent {
   final String characterId;

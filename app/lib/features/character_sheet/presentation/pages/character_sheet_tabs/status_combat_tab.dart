@@ -9,13 +9,16 @@ import '../../../domain/entities/character.dart';
 import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
 import '../../../domain/rules/class_resource_rules.dart';
+import '../../../domain/rules/concentration_rules.dart';
 import '../../../domain/rules/equipment_rules.dart';
+import '../../../domain/rules/hit_point_rules.dart';
 import '../../../domain/rules/roll_rules.dart';
 import '../../bloc/character_bloc.dart';
 import '../../bloc/inventory_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
 import '../../widgets/attacks_card.dart';
 import '../../widgets/class_resources_card.dart';
+import '../../widgets/concentration_card.dart';
 import '../../widgets/conditions_card.dart';
 import '../../widgets/death_saves_card.dart';
 import '../../widgets/hp_management_sheet.dart';
@@ -54,6 +57,8 @@ class StatusCombatTab extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _HpCard(character: live),
+          const SizedBox(height: 10),
+          ConcentrationCard(character: live),
           // Com 0 PV, as salvaguardas vêm logo abaixo do PV: é o que o
           // jogador precisa ver primeiro.
           if (live.currentHitPoints == 0 && live.maxHitPoints > 0) ...[
@@ -313,6 +318,33 @@ class _HpCard extends StatelessWidget {
 
   final Character character;
 
+  /// Abre o sheet de vida. Depois de dano com concentração ativa, abre o
+  /// teste de concentração.
+  Future<void> _manageHp(BuildContext context) async {
+    final bloc = context.read<CharacterBloc>();
+    final damage = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: HpManagementSheet(characterId: character.id),
+      ),
+    );
+    if (damage == null || !context.mounted) return;
+    // O resultado do dano é conhecido sem esperar o BLoC: as regras são
+    // puras.
+    final after = character.withDamage(damage).withConcentrationChecked();
+    await showConcentrationCheck(
+      context,
+      after: after,
+      damage: damage,
+      constitutionSave: bloc.savingThrowModifier(
+        character,
+        AttributeType.constitution,
+      ),
+    );
+  }
+
   Future<void> _editMaxHitPoints(BuildContext context) async {
     final bloc = context.read<CharacterBloc>();
     final value = await showNumberEditDialog(
@@ -389,12 +421,7 @@ class _HpCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: FilledButton.tonalIcon(
-                    onPressed: () => showModalBottomSheet<void>(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (_) =>
-                          HpManagementSheet(characterId: character.id),
-                    ),
+                    onPressed: () => _manageHp(context),
                     icon: const Icon(Icons.favorite_border),
                     label: const Text('Gerenciar Vida'),
                   ),

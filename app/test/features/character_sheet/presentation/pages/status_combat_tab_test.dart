@@ -230,6 +230,42 @@ void main() {
     expect(find.text('0/1'), findsOneWidget);
   });
 
+  testWidgets('dano com concentração abre o teste de CON com a CD', (
+    tester,
+  ) async {
+    final bloc = await pumpTab(tester, buildTestCharacter());
+
+    await tester.tap(find.text('Marcar'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Bless');
+    await tester.tap(find.widgetWithText(FilledButton, 'Marcar'));
+    await tester.runAsync(
+      () => bloc.stream
+          .firstWhere((s) => s.findCharacter('c1')?.concentrationSpell != null)
+          .timeout(const Duration(seconds: 5)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Bless'), findsOneWidget);
+
+    await tester.tap(find.text('Gerenciar Vida'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '24');
+    await tester.tap(find.text('Dano'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Teste de concentração'), findsOneWidget);
+    expect(find.textContaining('CD 12'), findsOneWidget);
+
+    await tester.tap(find.text('Perdeu'));
+    await tester.runAsync(
+      () => bloc.stream
+          .firstWhere((s) => s.findCharacter('c1')?.concentrationSpell == null)
+          .timeout(const Duration(seconds: 5)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhuma magia.'), findsOneWidget);
+  });
+
   testWidgets('tocar na inspiração liga o marcador', (tester) async {
     final bloc = await pumpTab(tester, buildTestCharacter());
 

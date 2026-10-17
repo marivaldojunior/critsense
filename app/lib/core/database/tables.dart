@@ -215,6 +215,9 @@ class Characters extends Table {
   TextColumn get resourcesUsed =>
       text().withDefault(const Constant('{}')).map(const IntMapConverter())();
 
+  // ── Concentração (versão 14) ──────────────────────────────────────────
+  TextColumn get concentrationSpell => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

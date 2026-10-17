@@ -84,6 +84,7 @@ class CharacterBackupCodec {
         'pactSlotsUsed': c.pactSlotsUsed,
         'coins': {for (final coin in Coin.values) coin.name: c.coins.of(coin)},
         'resourcesUsed': c.resourcesUsed,
+        'concentrationSpell': c.concentrationSpell,
         'defeatedBosses': c.defeatedBosses,
       },
       'inventory': [
@@ -214,6 +215,9 @@ class CharacterBackupCodec {
                 .entries)
           if (entry.value is num) entry.key: (entry.value as num).toInt(),
       },
+      concentrationSpell: c['concentrationSpell'] is String
+          ? c['concentrationSpell'] as String
+          : null,
       defeatedBosses: _strings(c['defeatedBosses']),
     );
 

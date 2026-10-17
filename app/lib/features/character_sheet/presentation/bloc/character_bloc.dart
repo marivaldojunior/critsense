@@ -10,6 +10,7 @@ import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/skill.dart';
 import '../../domain/rules/class_resource_rules.dart';
+import '../../domain/rules/concentration_rules.dart';
 import '../../domain/rules/hit_point_rules.dart';
 import '../../domain/rules/level_rules.dart';
 import '../../domain/rules/spell_rules.dart';
@@ -87,7 +88,8 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       (event, emit) => _updateCharacter(
         emit,
         event.characterId,
-        (c) => c.withConditionToggled(event.condition),
+        (c) =>
+            c.withConditionToggled(event.condition).withConcentrationChecked(),
       ),
     );
     on<SetExhaustionEvent>(
@@ -217,6 +219,15 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         emit,
         event.characterId,
         (c) => c.withResourceRemaining(event.resourceKey, event.remaining),
+      ),
+    );
+    on<SetConcentrationEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => event.spell == null
+            ? c.withConcentrationEnded()
+            : c.withConcentration(event.spell!),
       ),
     );
     on<SetMaxHitPointsEvent>(
@@ -398,7 +409,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     return _updateCharacter(
       emit,
       event.characterId,
-      (c) => c.withDamage(event.amount),
+      (c) => c.withDamage(event.amount).withConcentrationChecked(),
     );
   }
 

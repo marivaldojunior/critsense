@@ -32,7 +32,13 @@ class _HpManagementSheetState extends State<HpManagementSheet> {
 
   /// Lê o valor do campo, dispara [buildEvent] no [CharacterBloc] e fecha o
   /// sheet — ou apenas mostra um aviso se o campo não tiver um número > 0.
-  void _dispatch(CharacterEvent Function(int amount) buildEvent) {
+  ///
+  /// Com [isDamage], o sheet fecha devolvendo o dano: quem abriu o sheet
+  /// usa o valor no teste de concentração.
+  void _dispatch(
+    CharacterEvent Function(int amount) buildEvent, {
+    bool isDamage = false,
+  }) {
     final amount = int.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(
@@ -42,7 +48,7 @@ class _HpManagementSheetState extends State<HpManagementSheet> {
     }
 
     context.read<CharacterBloc>().add(buildEvent(amount));
-    Navigator.pop(context);
+    Navigator.pop(context, isDamage ? amount : null);
   }
 
   @override
@@ -94,6 +100,7 @@ class _HpManagementSheetState extends State<HpManagementSheet> {
             child: FilledButton.tonalIcon(
               onPressed: () => _dispatch(
                 (amount) => ApplyDamageEvent(widget.characterId, amount),
+                isDamage: true,
               ),
               icon: const Icon(Icons.local_fire_department),
               label: const Text('Dano'),

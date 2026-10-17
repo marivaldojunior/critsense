@@ -283,6 +283,7 @@ extension _CharacterDataMapper on CharacterData {
         Coin.platinum: platinum,
       }),
       resourcesUsed: resourcesUsed,
+      concentrationSpell: concentrationSpell,
       defeatedBosses: defeatedBosses,
     );
   }
@@ -346,6 +347,7 @@ extension _CharacterToCompanion on Character {
       gold: Value(coins.of(Coin.gold)),
       platinum: Value(coins.of(Coin.platinum)),
       resourcesUsed: Value(resourcesUsed),
+      concentrationSpell: Value(concentrationSpell),
       defeatedBosses: Value(defeatedBosses),
       proficiencies: Value(proficiencies.map(proficiencyToKey).toList()),
     );

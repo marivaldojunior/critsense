@@ -77,6 +77,15 @@ enum Condition {
       this == stunned ||
       this == unconscious;
 
+  /// Condições que deixam o personagem incapacitado e, por isso, terminam a
+  /// concentração.
+  bool get incapacitates =>
+      this == incapacitated ||
+      this == paralyzed ||
+      this == petrified ||
+      this == stunned ||
+      this == unconscious;
+
   /// Lê o nome salvo no banco; nomes desconhecidos viram `null`.
   static Condition? fromName(String name) {
     for (final condition in values) {

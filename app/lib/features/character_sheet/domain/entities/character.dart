@@ -132,6 +132,10 @@ class Character {
   /// classe e do nível ([ClassResourceRules]).
   final Map<String, int> resourcesUsed;
 
+  /// Magia em que o personagem mantém a concentração, ou `null` se ele não
+  /// está concentrado. Ver `ConcentrationRules`.
+  final String? concentrationSpell;
+
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
   /// compêndio). Uma lista simples basta: o registro não carrega mais dados
   /// além do nome.
@@ -171,6 +175,7 @@ class Character {
     this.otherProficiencies = const [],
     this.languages = const [],
     this.resourcesUsed = const {},
+    this.concentrationSpell,
     this.defeatedBosses = const [],
   });
 
@@ -211,6 +216,8 @@ class Character {
     List<String>? otherProficiencies,
     List<String>? languages,
     Map<String, int>? resourcesUsed,
+    String? concentrationSpell,
+    bool clearConcentration = false,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -246,6 +253,9 @@ class Character {
       otherProficiencies: otherProficiencies ?? this.otherProficiencies,
       languages: languages ?? this.languages,
       resourcesUsed: resourcesUsed ?? this.resourcesUsed,
+      concentrationSpell: clearConcentration
+          ? null
+          : concentrationSpell ?? this.concentrationSpell,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }
