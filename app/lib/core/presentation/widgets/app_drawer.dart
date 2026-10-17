@@ -7,6 +7,7 @@ import 'package:crit_sense/features/compendium/presentation/pages/bestiary_scree
 import 'package:crit_sense/features/compendium/presentation/pages/equipments_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/spells_screen.dart';
 import 'package:crit_sense/features/dice_roller/presentation/pages/dice_screen.dart';
+import 'package:crit_sense/features/initiative_tracker/presentation/pages/initiative_tracker_screen.dart';
 
 /// Menu lateral global do CritSense.
 ///
@@ -28,6 +29,11 @@ class AppDrawer extends StatelessWidget {
       title: 'Personagens',
       iconAsset: 'assets/icons/game/character.svg',
       builder: CharacterListScreen.new,
+    ),
+    _DrawerItem(
+      title: 'Iniciativa',
+      iconAsset: 'assets/icons/game/combat.svg',
+      builder: InitiativeTrackerScreen.new,
     ),
     _DrawerItem(
       title: 'Bestiário',

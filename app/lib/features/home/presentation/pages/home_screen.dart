@@ -8,6 +8,7 @@ import 'package:crit_sense/features/compendium/presentation/pages/bestiary_scree
 import 'package:crit_sense/features/compendium/presentation/pages/equipments_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/spells_screen.dart';
 import 'package:crit_sense/features/dice_roller/presentation/pages/dice_screen.dart';
+import 'package:crit_sense/features/initiative_tracker/presentation/pages/initiative_tracker_screen.dart';
 
 /// Tela inicial (hub) do CritSense.
 ///
@@ -32,6 +33,12 @@ class HomeScreen extends StatelessWidget {
       subtitle: 'Fichas, inventário e notas de sessão',
       iconAsset: 'assets/icons/game/character.svg',
       builder: (_) => const CharacterListScreen(),
+    ),
+    _FeatureItem(
+      title: 'Iniciativa',
+      subtitle: 'Ordem de combate, turnos e rodadas',
+      iconAsset: 'assets/icons/game/combat.svg',
+      builder: (_) => const InitiativeTrackerScreen(),
     ),
     _FeatureItem(
       title: 'Bestiário',

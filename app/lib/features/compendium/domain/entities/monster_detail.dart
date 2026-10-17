@@ -43,6 +43,9 @@ class MonsterDetail {
   /// Ações de combate disponíveis (ataques e habilidades ativas).
   final List<MonsterAction> actions;
 
+  /// Valor de Destreza, usado na iniciativa.
+  final int dexterity;
+
   const MonsterDetail({
     required this.index,
     required this.name,
@@ -53,5 +56,6 @@ class MonsterDetail {
     required this.hitPoints,
     required this.speed,
     required this.actions,
+    this.dexterity = 10,
   });
 }

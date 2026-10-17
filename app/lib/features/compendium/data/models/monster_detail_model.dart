@@ -29,6 +29,7 @@ class MonsterDetailModel extends MonsterDetail {
     required super.hitPoints,
     required super.speed,
     required super.actions,
+    super.dexterity,
   });
 
   /// Constrói um [MonsterDetailModel] a partir do payload JSON da API.
@@ -63,6 +64,7 @@ class MonsterDetailModel extends MonsterDetail {
       hitPoints: json['hit_points'] as int,
       speed: speed,
       actions: actions,
+      dexterity: (json['dexterity'] as num?)?.toInt() ?? 10,
     );
   }
 }
