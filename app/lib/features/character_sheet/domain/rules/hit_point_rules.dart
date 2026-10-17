@@ -1,6 +1,7 @@
 import '../entities/attribute_type.dart';
 import '../entities/character.dart';
 import '../entities/condition.dart';
+import 'class_resource_rules.dart';
 import 'spell_rules.dart';
 import 'srd_rules.dart';
 
@@ -108,11 +109,11 @@ extension HitPointRules on Character {
 
   /// Descanso Longo: PV no máximo, PV temporário zerado, metade dos dados de
   /// vida de volta, salvaguardas zeradas, um nível de exaustão a menos e
-  /// todos os espaços de magia de volta.
+  /// todos os espaços de magia e recursos de classe de volta.
   Character? afterLongRest() {
     if (isDead) return null;
     final recovered = hitDiceRecoveredOnLongRest(level);
-    return withAllSpellSlotsRestored().copyWith(
+    return withAllSpellSlotsRestored().withAllResourcesRestored().copyWith(
       currentHitPoints: maxHitPoints,
       temporaryHitPoints: 0,
       hitDiceUsed: (hitDiceUsed - recovered).clamp(0, level),

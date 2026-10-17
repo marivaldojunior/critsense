@@ -208,6 +208,28 @@ void main() {
     expect(state!.findCharacter('c1')!.currentHitPoints, 28);
   });
 
+  testWidgets('o cartão de recursos gasta um uso do Surto de Ação', (
+    tester,
+  ) async {
+    final bloc = await pumpTab(tester, buildTestCharacter());
+
+    await scrollTo(tester, find.text('Surto de Ação'));
+    expect(find.text('Retomar o Fôlego'), findsOneWidget);
+    await tester.ensureVisible(find.byTooltip('Gastar Surto de Ação'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Gastar Surto de Ação'));
+    await tester.runAsync(
+      () => bloc.stream
+          .firstWhere(
+            (s) => s.findCharacter('c1')?.resourcesUsed['action-surge'] == 1,
+          )
+          .timeout(const Duration(seconds: 5)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('0/1'), findsOneWidget);
+  });
+
   testWidgets('tocar na inspiração liga o marcador', (tester) async {
     final bloc = await pumpTab(tester, buildTestCharacter());
 

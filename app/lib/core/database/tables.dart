@@ -45,6 +45,22 @@ class IntListConverter extends TypeConverter<List<int>, String> {
   String toSql(List<int> value) => jsonEncode(value);
 }
 
+/// Converte um mapa de texto para inteiro em JSON (ex: usos gastos de cada
+/// recurso de classe). Mesmo motivo de [StringListConverter].
+class IntMapConverter extends TypeConverter<Map<String, int>, String> {
+  const IntMapConverter();
+
+  @override
+  Map<String, int> fromSql(String fromDb) {
+    return (jsonDecode(fromDb) as Map<String, dynamic>).map(
+      (key, value) => MapEntry(key, (value as num).toInt()),
+    );
+  }
+
+  @override
+  String toSql(Map<String, int> value) => jsonEncode(value);
+}
+
 @DataClassName('CharacterData')
 class Characters extends Table {
   /// Identificador único do personagem (UUID proveniente do domínio).
@@ -194,6 +210,10 @@ class Characters extends Table {
   TextColumn get languages => text()
       .withDefault(const Constant('[]'))
       .map(const StringListConverter())();
+
+  // ── Recursos de classe (versão 13) ────────────────────────────────────
+  TextColumn get resourcesUsed =>
+      text().withDefault(const Constant('{}')).map(const IntMapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

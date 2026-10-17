@@ -8,12 +8,14 @@ import '../../../domain/entities/attribute_type.dart';
 import '../../../domain/entities/character.dart';
 import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
+import '../../../domain/rules/class_resource_rules.dart';
 import '../../../domain/rules/equipment_rules.dart';
 import '../../../domain/rules/roll_rules.dart';
 import '../../bloc/character_bloc.dart';
 import '../../bloc/inventory_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
 import '../../widgets/attacks_card.dart';
+import '../../widgets/class_resources_card.dart';
 import '../../widgets/conditions_card.dart';
 import '../../widgets/death_saves_card.dart';
 import '../../widgets/hp_management_sheet.dart';
@@ -71,6 +73,10 @@ class StatusCombatTab extends StatelessWidget {
               versatileDamage: attack.versatileDamage,
             ),
           ),
+          if (live.classResources.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            ClassResourcesCard(character: live),
+          ],
           const SizedBox(height: 10),
           ConditionsCard(character: live),
           const SizedBox(height: 10),
@@ -328,7 +334,8 @@ class _HpCard extends StatelessWidget {
         title: const Text('Descanso Longo'),
         content: const Text(
           'PV voltam ao máximo, o PV temporário zera, metade dos dados de '
-          'vida volta e a exaustão diminui 1 nível.',
+          'vida volta, os espaços de magia e os recursos de classe voltam e '
+          'a exaustão diminui 1 nível.',
         ),
         actions: [
           TextButton(

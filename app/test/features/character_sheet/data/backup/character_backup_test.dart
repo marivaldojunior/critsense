@@ -69,6 +69,7 @@ void main() {
     otherProficiencies: const ['Armaduras pesadas'],
     languages: const ['Comum', 'Anão'],
     spellSlotsUsed: const [1, 0, 0, 0, 0, 0, 0, 0, 0],
+    resourcesUsed: const {'action-surge': 1},
     coins: const Coins().withAmount(Coin.gold, 42),
     avatarPath: '/storage/thorin.png',
     defeatedBosses: const ['Goblin Boss'],
@@ -154,6 +155,7 @@ void main() {
         expect(copy.otherProficiencies, ['Armaduras pesadas']);
         expect(copy.languages, ['Comum', 'Anão']);
         expect(copy.spellSlotsUsed.first, 1);
+        expect(copy.resourcesUsed, {'action-surge': 1});
         expect(copy.coins.of(Coin.gold), 42);
         expect(copy.armorClassBonus, 1);
         expect(copy.defeatedBosses, ['Goblin Boss']);

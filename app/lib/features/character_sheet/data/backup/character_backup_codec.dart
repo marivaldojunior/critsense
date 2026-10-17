@@ -83,6 +83,7 @@ class CharacterBackupCodec {
         'spellSlotsUsed': c.spellSlotsUsed,
         'pactSlotsUsed': c.pactSlotsUsed,
         'coins': {for (final coin in Coin.values) coin.name: c.coins.of(coin)},
+        'resourcesUsed': c.resourcesUsed,
         'defeatedBosses': c.defeatedBosses,
       },
       'inventory': [
@@ -207,6 +208,12 @@ class CharacterBackupCodec {
       coins: Coins({
         for (final coin in Coin.values) coin: _int(coins[coin.name], 0),
       }),
+      resourcesUsed: {
+        for (final entry
+            in ((c['resourcesUsed'] as Map<String, dynamic>?) ?? const {})
+                .entries)
+          if (entry.value is num) entry.key: (entry.value as num).toInt(),
+      },
       defeatedBosses: _strings(c['defeatedBosses']),
     );
 

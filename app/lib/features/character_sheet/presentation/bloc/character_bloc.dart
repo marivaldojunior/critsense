@@ -9,6 +9,7 @@ import '../../domain/entities/condition.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/skill.dart';
+import '../../domain/rules/class_resource_rules.dart';
 import '../../domain/rules/hit_point_rules.dart';
 import '../../domain/rules/level_rules.dart';
 import '../../domain/rules/spell_rules.dart';
@@ -195,6 +196,27 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
           otherProficiencies: event.otherProficiencies,
           languages: event.languages,
         ),
+      ),
+    );
+    on<UseClassResourceEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withResourceUsed(event.resourceKey),
+      ),
+    );
+    on<RestoreClassResourceEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withResourceRestored(event.resourceKey),
+      ),
+    );
+    on<SetClassResourceRemainingEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withResourceRemaining(event.resourceKey, event.remaining),
       ),
     );
     on<SetMaxHitPointsEvent>(
@@ -400,12 +422,17 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   }
 
   /// O Descanso Curto cura pelos dados de vida gastos ([SpendHitDieEvent]);
-  /// ao concluir, a Magia de Pacto do Bruxo volta inteira.
+  /// ao concluir, a Magia de Pacto do Bruxo e os recursos de classe de
+  /// Descanso Curto voltam inteiros.
   Future<void> _onTakeShortRest(
     TakeShortRestEvent event,
     Emitter<CharacterState> emit,
   ) {
-    return _updateCharacter(emit, event.characterId, (c) => c.afterShortRest());
+    return _updateCharacter(emit, event.characterId, (c) {
+      final withPact = c.afterShortRest() ?? c;
+      final rested = withPact.withShortRestResourcesRestored() ?? withPact;
+      return identical(rested, c) ? null : rested;
+    });
   }
 
   Future<void> _onTakeLongRest(

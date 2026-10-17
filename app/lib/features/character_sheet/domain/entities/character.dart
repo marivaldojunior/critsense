@@ -127,6 +127,11 @@ class Character {
   /// Idiomas que o personagem fala.
   final List<String> languages;
 
+  /// Usos gastos de cada recurso de classe, pela chave do recurso (ex:
+  /// `rage`: 2). Um recurso sem chave não tem usos gastos. O máximo vem da
+  /// classe e do nível ([ClassResourceRules]).
+  final Map<String, int> resourcesUsed;
+
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
   /// compêndio). Uma lista simples basta: o registro não carrega mais dados
   /// além do nome.
@@ -165,6 +170,7 @@ class Character {
     this.coins = const Coins(),
     this.otherProficiencies = const [],
     this.languages = const [],
+    this.resourcesUsed = const {},
     this.defeatedBosses = const [],
   });
 
@@ -204,6 +210,7 @@ class Character {
     Coins? coins,
     List<String>? otherProficiencies,
     List<String>? languages,
+    Map<String, int>? resourcesUsed,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -238,6 +245,7 @@ class Character {
       coins: coins ?? this.coins,
       otherProficiencies: otherProficiencies ?? this.otherProficiencies,
       languages: languages ?? this.languages,
+      resourcesUsed: resourcesUsed ?? this.resourcesUsed,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }

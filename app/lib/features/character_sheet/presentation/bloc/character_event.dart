@@ -201,6 +201,40 @@ final class SetArmorClassBonusEvent extends CharacterEvent {
 }
 
 /// Define o deslocamento base do personagem [characterId], em pés.
+// ---------------------------------------------------------------------------
+// Recursos de classe — ver `ClassResourceRules`.
+// ---------------------------------------------------------------------------
+
+/// Gasta um uso do recurso de classe [resourceKey] (ex: `rage`).
+final class UseClassResourceEvent extends CharacterEvent {
+  final String characterId;
+  final String resourceKey;
+
+  const UseClassResourceEvent(this.characterId, this.resourceKey);
+}
+
+/// Devolve um uso do recurso de classe [resourceKey].
+final class RestoreClassResourceEvent extends CharacterEvent {
+  final String characterId;
+  final String resourceKey;
+
+  const RestoreClassResourceEvent(this.characterId, this.resourceKey);
+}
+
+/// Define quantos usos restam do recurso [resourceKey] (ex: os PV da Cura
+/// pelas Mãos).
+final class SetClassResourceRemainingEvent extends CharacterEvent {
+  final String characterId;
+  final String resourceKey;
+  final int remaining;
+
+  const SetClassResourceRemainingEvent(
+    this.characterId,
+    this.resourceKey,
+    this.remaining,
+  );
+}
+
 /// Troca o PV máximo de [characterId] — ver `HitPointRules.withMaxHitPoints`.
 final class SetMaxHitPointsEvent extends CharacterEvent {
   final String characterId;

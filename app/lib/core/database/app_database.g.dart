@@ -428,6 +428,16 @@ class $CharactersTable extends Characters
         defaultValue: const Constant('[]'),
       ).withConverter<List<String>>($CharactersTable.$converterlanguages);
   @override
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
+  resourcesUsed = GeneratedColumn<String>(
+    'resources_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  ).withConverter<Map<String, int>>($CharactersTable.$converterresourcesUsed);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     nome,
@@ -468,6 +478,7 @@ class $CharactersTable extends Characters
     platinum,
     otherProficiencies,
     languages,
+    resourcesUsed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -902,6 +913,12 @@ class $CharactersTable extends Characters
           data['${effectivePrefix}languages'],
         )!,
       ),
+      resourcesUsed: $CharactersTable.$converterresourcesUsed.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}resources_used'],
+        )!,
+      ),
     );
   }
 
@@ -924,6 +941,8 @@ class $CharactersTable extends Characters
       const StringListConverter();
   static TypeConverter<List<String>, String> $converterlanguages =
       const StringListConverter();
+  static TypeConverter<Map<String, int>, String> $converterresourcesUsed =
+      const IntMapConverter();
 }
 
 class CharacterData extends DataClass implements Insertable<CharacterData> {
@@ -1020,6 +1039,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   final int platinum;
   final List<String> otherProficiencies;
   final List<String> languages;
+  final Map<String, int> resourcesUsed;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -1060,6 +1080,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.platinum,
     required this.otherProficiencies,
     required this.languages,
+    required this.resourcesUsed,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1145,6 +1166,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
         $CharactersTable.$converterlanguages.toSql(languages),
       );
     }
+    {
+      map['resources_used'] = Variable<String>(
+        $CharactersTable.$converterresourcesUsed.toSql(resourcesUsed),
+      );
+    }
     return map;
   }
 
@@ -1203,6 +1229,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       platinum: Value(platinum),
       otherProficiencies: Value(otherProficiencies),
       languages: Value(languages),
+      resourcesUsed: Value(resourcesUsed),
     );
   }
 
@@ -1255,6 +1282,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
         json['otherProficiencies'],
       ),
       languages: serializer.fromJson<List<String>>(json['languages']),
+      resourcesUsed: serializer.fromJson<Map<String, int>>(
+        json['resourcesUsed'],
+      ),
     );
   }
   @override
@@ -1300,6 +1330,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'platinum': serializer.toJson<int>(platinum),
       'otherProficiencies': serializer.toJson<List<String>>(otherProficiencies),
       'languages': serializer.toJson<List<String>>(languages),
+      'resourcesUsed': serializer.toJson<Map<String, int>>(resourcesUsed),
     };
   }
 
@@ -1343,6 +1374,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     int? platinum,
     List<String>? otherProficiencies,
     List<String>? languages,
+    Map<String, int>? resourcesUsed,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -1385,6 +1417,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     platinum: platinum ?? this.platinum,
     otherProficiencies: otherProficiencies ?? this.otherProficiencies,
     languages: languages ?? this.languages,
+    resourcesUsed: resourcesUsed ?? this.resourcesUsed,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -1471,6 +1504,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ? data.otherProficiencies.value
           : this.otherProficiencies,
       languages: data.languages.present ? data.languages.value : this.languages,
+      resourcesUsed: data.resourcesUsed.present
+          ? data.resourcesUsed.value
+          : this.resourcesUsed,
     );
   }
 
@@ -1515,7 +1551,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('gold: $gold, ')
           ..write('platinum: $platinum, ')
           ..write('otherProficiencies: $otherProficiencies, ')
-          ..write('languages: $languages')
+          ..write('languages: $languages, ')
+          ..write('resourcesUsed: $resourcesUsed')
           ..write(')'))
         .toString();
   }
@@ -1561,6 +1598,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     platinum,
     otherProficiencies,
     languages,
+    resourcesUsed,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1604,7 +1642,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.gold == this.gold &&
           other.platinum == this.platinum &&
           other.otherProficiencies == this.otherProficiencies &&
-          other.languages == this.languages);
+          other.languages == this.languages &&
+          other.resourcesUsed == this.resourcesUsed);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1647,6 +1686,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<int> platinum;
   final Value<List<String>> otherProficiencies;
   final Value<List<String>> languages;
+  final Value<Map<String, int>> resourcesUsed;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1688,6 +1728,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.platinum = const Value.absent(),
     this.otherProficiencies = const Value.absent(),
     this.languages = const Value.absent(),
+    this.resourcesUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1730,6 +1771,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.platinum = const Value.absent(),
     this.otherProficiencies = const Value.absent(),
     this.languages = const Value.absent(),
+    this.resourcesUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1778,6 +1820,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<int>? platinum,
     Expression<String>? otherProficiencies,
     Expression<String>? languages,
+    Expression<String>? resourcesUsed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1822,6 +1865,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (platinum != null) 'platinum': platinum,
       if (otherProficiencies != null) 'other_proficiencies': otherProficiencies,
       if (languages != null) 'languages': languages,
+      if (resourcesUsed != null) 'resources_used': resourcesUsed,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1866,6 +1910,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<int>? platinum,
     Value<List<String>>? otherProficiencies,
     Value<List<String>>? languages,
+    Value<Map<String, int>>? resourcesUsed,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1908,6 +1953,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       platinum: platinum ?? this.platinum,
       otherProficiencies: otherProficiencies ?? this.otherProficiencies,
       languages: languages ?? this.languages,
+      resourcesUsed: resourcesUsed ?? this.resourcesUsed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2048,6 +2094,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
         $CharactersTable.$converterlanguages.toSql(languages.value),
       );
     }
+    if (resourcesUsed.present) {
+      map['resources_used'] = Variable<String>(
+        $CharactersTable.$converterresourcesUsed.toSql(resourcesUsed.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2096,6 +2147,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('platinum: $platinum, ')
           ..write('otherProficiencies: $otherProficiencies, ')
           ..write('languages: $languages, ')
+          ..write('resourcesUsed: $resourcesUsed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4988,6 +5040,7 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<int> platinum,
       Value<List<String>> otherProficiencies,
       Value<List<String>> languages,
+      Value<Map<String, int>> resourcesUsed,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -5031,6 +5084,7 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<int> platinum,
       Value<List<String>> otherProficiencies,
       Value<List<String>> languages,
+      Value<Map<String, int>> resourcesUsed,
       Value<int> rowid,
     });
 
@@ -5321,6 +5375,12 @@ class $$CharactersTableFilterComposer
   ColumnWithTypeConverterFilters<List<String>, List<String>, String>
   get languages => $composableBuilder(
     column: $table.languages,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Map<String, int>, Map<String, int>, String>
+  get resourcesUsed => $composableBuilder(
+    column: $table.resourcesUsed,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -5628,6 +5688,11 @@ class $$CharactersTableOrderingComposer
     column: $table.languages,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get resourcesUsed => $composableBuilder(
+    column: $table.resourcesUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -5805,6 +5870,12 @@ class $$CharactersTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>, String> get languages =>
       $composableBuilder(column: $table.languages, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Map<String, int>, String>
+  get resourcesUsed => $composableBuilder(
+    column: $table.resourcesUsed,
+    builder: (column) => column,
+  );
+
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
   ) {
@@ -5978,6 +6049,7 @@ class $$CharactersTableTableManager
                 Value<int> platinum = const Value.absent(),
                 Value<List<String>> otherProficiencies = const Value.absent(),
                 Value<List<String>> languages = const Value.absent(),
+                Value<Map<String, int>> resourcesUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -6019,6 +6091,7 @@ class $$CharactersTableTableManager
                 platinum: platinum,
                 otherProficiencies: otherProficiencies,
                 languages: languages,
+                resourcesUsed: resourcesUsed,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6062,6 +6135,7 @@ class $$CharactersTableTableManager
                 Value<int> platinum = const Value.absent(),
                 Value<List<String>> otherProficiencies = const Value.absent(),
                 Value<List<String>> languages = const Value.absent(),
+                Value<Map<String, int>> resourcesUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -6103,6 +6177,7 @@ class $$CharactersTableTableManager
                 platinum: platinum,
                 otherProficiencies: otherProficiencies,
                 languages: languages,
+                resourcesUsed: resourcesUsed,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

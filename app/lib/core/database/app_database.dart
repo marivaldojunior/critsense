@@ -33,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Versão atual do schema. Fica numa constante para o backup comparar com
   /// a versão do arquivo antes de abrir o banco.
-  static const currentVersion = 12;
+  static const currentVersion = 13;
 
   @override
   int get schemaVersion => currentVersion;
@@ -155,6 +155,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 12) {
         // Cópia do compêndio para uso sem internet.
         await m.createTable(apiCache);
+      }
+      if (from < 13) {
+        // Usos gastos dos recursos de classe (Fúria, Ki, Surto de Ação...).
+        await m.addColumn(characters, characters.resourcesUsed);
       }
     },
   );
