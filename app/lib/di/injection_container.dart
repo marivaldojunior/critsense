@@ -18,6 +18,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/get_session_
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/features_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/inventory_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/point_buy_cubit.dart';
@@ -32,12 +33,14 @@ import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart
 import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
 import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_character_features_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_classes_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipment_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_equipments_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monster_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monsters_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_races_usecase.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_rule_feature_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spell_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_spells_usecase.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/compendium_bloc.dart';
@@ -96,6 +99,15 @@ Future<void> init() async {
       sl<DeleteCharacterUseCase>(),
       sl<AddInventoryItemUseCase>(),
       sl<SaveCharacterSpellUseCase>(),
+    ),
+  );
+
+  // Factory: cada abertura da seção de características recebe um BLoC
+  // próprio, carregado para a classe, a raça e o nível do personagem.
+  sl.registerFactory<FeaturesBloc>(
+    () => FeaturesBloc(
+      sl<GetCharacterFeaturesUseCase>(),
+      sl<GetRuleFeatureDetailUseCase>(),
     ),
   );
 
@@ -243,6 +255,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetRacesUseCase>(
     () => GetRacesUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetCharacterFeaturesUseCase>(
+    () => GetCharacterFeaturesUseCase(sl<ICompendiumRepository>()),
+  );
+  sl.registerLazySingleton<GetRuleFeatureDetailUseCase>(
+    () => GetRuleFeatureDetailUseCase(sl<ICompendiumRepository>()),
   );
   sl.registerLazySingleton<ICompendiumRepository>(
     () => CompendiumRepositoryImpl(sl<ICompendiumRemoteDataSource>()),

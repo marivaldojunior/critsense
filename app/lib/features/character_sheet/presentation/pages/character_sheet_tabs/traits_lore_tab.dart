@@ -7,6 +7,7 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 
 import '../../../domain/entities/character.dart';
 import '../../bloc/character_bloc.dart';
+import '../../widgets/features_section.dart';
 
 /// Aba "Características & Lore": os campos de texto longo do bloco lateral
 /// esquerdo da ficha oficial (Traços, Ideais, Vínculos, Fraquezas) mais o
@@ -69,6 +70,22 @@ class _TraitsLoreTabState extends State<TraitsLoreTab> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Text(
+          'Características de Classe e Raça',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const Divider(),
+        // Lê o nível atual do BLoC: subir de nível recarrega a seção.
+        BlocBuilder<CharacterBloc, CharacterState>(
+          buildWhen: (previous, current) =>
+              previous.findCharacter(widget.character.id)?.level !=
+              current.findCharacter(widget.character.id)?.level,
+          builder: (context, state) => FeaturesSection(
+            character:
+                state.findCharacter(widget.character.id) ?? widget.character,
+          ),
+        ),
+        const SizedBox(height: 24),
         _LoreField(
           label: 'Traços de Personalidade',
           initialValue: widget.character.personalityTraits,

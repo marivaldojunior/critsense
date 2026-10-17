@@ -7,6 +7,7 @@ import '../models/monster_detail_model.dart';
 import '../models/monster_summary_model.dart';
 import '../models/spell_detail_model.dart';
 import '../models/spell_summary_model.dart';
+import '../../domain/entities/rule_feature.dart';
 
 /// Contrato para o acesso remoto ao compêndio do D&D 5e.
 abstract interface class ICompendiumRemoteDataSource {
@@ -55,6 +56,18 @@ abstract interface class ICompendiumRemoteDataSource {
 
   /// Busca a lista de raças jogáveis na API remota.
   Future<List<ApiReferenceModel>> getRaces();
+
+  /// Níveis da classe com as características de cada um (sem subclasse).
+  Future<List<ClassLevelFeatures>> getClassLevels(String classIndex);
+
+  /// Traços raciais da raça [raceIndex].
+  Future<List<ApiReferenceModel>> getRaceTraits(String raceIndex);
+
+  /// Texto de uma característica (`features/`) ou traço (`traits/`).
+  Future<RuleFeatureDetail> getRuleFeatureDetail(
+    String index,
+    RuleFeatureKind kind,
+  );
 }
 
 /// Implementação do datasource remoto usando Dio.
@@ -233,5 +246,54 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
         .cast<Map<String, dynamic>>()
         .map(ApiReferenceModel.fromJson)
         .toList();
+  }
+
+  @override
+  Future<List<ClassLevelFeatures>> getClassLevels(String classIndex) async {
+    final response = await _dio.get<List<dynamic>>(
+      '$_classesEndpoint/$classIndex/levels',
+    );
+    return response.data!
+        .cast<Map<String, dynamic>>()
+        // As linhas com `subclass` são de uma subclasse específica.
+        .where((level) => level['subclass'] == null)
+        .map(
+          (level) => ClassLevelFeatures(
+            level: level['level'] as int,
+            features: (level['features'] as List<dynamic>? ?? const [])
+                .cast<Map<String, dynamic>>()
+                .map(ApiReferenceModel.fromJson)
+                .toList(),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<ApiReferenceModel>> getRaceTraits(String raceIndex) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$_racesEndpoint/$raceIndex',
+    );
+    return (response.data!['traits'] as List<dynamic>? ?? const [])
+        .cast<Map<String, dynamic>>()
+        .map(ApiReferenceModel.fromJson)
+        .toList();
+  }
+
+  @override
+  Future<RuleFeatureDetail> getRuleFeatureDetail(
+    String index,
+    RuleFeatureKind kind,
+  ) async {
+    final path = kind == RuleFeatureKind.classFeature ? 'features' : 'traits';
+    final response = await _dio.get<Map<String, dynamic>>('$path/$index');
+    final json = response.data!;
+    return RuleFeatureDetail(
+      index: json['index'] as String,
+      name: json['name'] as String,
+      desc: (json['desc'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+    );
   }
 }

@@ -3,6 +3,7 @@ import '../entities/equipment_detail.dart';
 import '../entities/equipment_summary.dart';
 import '../entities/monster_detail.dart';
 import '../entities/monster_summary.dart';
+import '../entities/rule_feature.dart';
 import '../entities/spell_detail.dart';
 import '../entities/spell_summary.dart';
 
@@ -10,7 +11,11 @@ import '../entities/spell_summary.dart';
 abstract interface class ICompendiumRepository {
   /// Retorna a lista resumida das magias que casam com [name]/[level]/
   /// [school] (todos opcionais — quando nulos, retorna a lista completa).
-  Future<List<SpellSummary>> getSpells({String? name, int? level, String? school});
+  Future<List<SpellSummary>> getSpells({
+    String? name,
+    int? level,
+    String? school,
+  });
 
   /// Retorna os detalhes completos da magia identificada por [index].
   Future<SpellDetail> getSpellDetail(String index);
@@ -43,4 +48,20 @@ abstract interface class ICompendiumRepository {
 
   /// Retorna a lista de raças jogáveis disponíveis na API.
   Future<List<ApiReference>> getRaces();
+
+  /// Características da classe [classIndex] por nível, do 1º ao
+  /// [upToLevel] (sem subclasse).
+  Future<List<ClassLevelFeatures>> getClassFeatures(
+    String classIndex, {
+    required int upToLevel,
+  });
+
+  /// Traços raciais da raça [raceIndex].
+  Future<List<ApiReference>> getRaceTraits(String raceIndex);
+
+  /// Texto de uma característica de classe ou de um traço racial.
+  Future<RuleFeatureDetail> getRuleFeatureDetail(
+    String index,
+    RuleFeatureKind kind,
+  );
 }

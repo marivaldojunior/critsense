@@ -6,6 +6,7 @@ import '../../domain/entities/equipment_detail.dart';
 import '../../domain/entities/equipment_summary.dart';
 import '../../domain/entities/monster_detail.dart';
 import '../../domain/entities/monster_summary.dart';
+import '../../domain/entities/rule_feature.dart';
 import '../../domain/entities/spell_detail.dart';
 import '../../domain/entities/spell_summary.dart';
 import '../../domain/repositories/i_compendium_repository.dart';
@@ -139,6 +140,39 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   Future<List<ApiReference>> getRaces() async {
     try {
       return await _remoteDataSource.getRaces();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Erro de rede desconhecido.');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<ClassLevelFeatures>> getClassFeatures(
+    String classIndex, {
+    required int upToLevel,
+  }) {
+    return _guard(() async {
+      final levels = await _remoteDataSource.getClassLevels(classIndex);
+      return levels.where((l) => l.level <= upToLevel).toList()
+        ..sort((a, b) => a.level.compareTo(b.level));
+    });
+  }
+
+  @override
+  Future<List<ApiReference>> getRaceTraits(String raceIndex) =>
+      _guard(() => _remoteDataSource.getRaceTraits(raceIndex));
+
+  @override
+  Future<RuleFeatureDetail> getRuleFeatureDetail(
+    String index,
+    RuleFeatureKind kind,
+  ) => _guard(() => _remoteDataSource.getRuleFeatureDetail(index, kind));
+
+  /// Converte erros de rede em [ServerException], como os outros métodos.
+  Future<T> _guard<T>(Future<T> Function() call) async {
+    try {
+      return await call();
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Erro de rede desconhecido.');
     } catch (e) {
