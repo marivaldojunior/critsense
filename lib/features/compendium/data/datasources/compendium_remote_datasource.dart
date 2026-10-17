@@ -68,12 +68,16 @@ abstract interface class ICompendiumRemoteDataSource {
 class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   final Dio _dio;
 
-  // Endpoints da API pública do D&D 5e.
-  static const _spellsEndpoint = 'https://www.dnd5eapi.co/api/spells';
-  static const _monstersEndpoint = 'https://www.dnd5eapi.co/api/monsters';
-  static const _classesEndpoint = 'https://www.dnd5eapi.co/api/classes';
-  static const _racesEndpoint = 'https://www.dnd5eapi.co/api/races';
-  static const _equipmentEndpoint = 'https://www.dnd5eapi.co/api/equipment';
+  /// URL base da API pública do D&D 5e, aplicada ao [Dio] em
+  /// `injection_container.dart` via `BaseOptions.baseUrl`.
+  static const baseUrl = 'https://www.dnd5eapi.co/api/';
+
+  // Caminhos relativos a [baseUrl].
+  static const _spellsEndpoint = 'spells';
+  static const _monstersEndpoint = 'monsters';
+  static const _classesEndpoint = 'classes';
+  static const _racesEndpoint = 'races';
+  static const _equipmentEndpoint = 'equipment';
 
   /// Cache em memória dos monstros da última página de filtros consultada.
   ///
@@ -96,7 +100,8 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
   List<MonsterSummaryModel>? _cachedMonsters;
   String? _cachedMonstersSignature;
 
-  /// Recebe o [Dio] pré-configurado via construtor para facilitar testes com mocks.
+  /// Recebe o [Dio] pré-configurado via construtor para facilitar testes com
+  /// mocks. O [Dio] precisa ter [baseUrl] como `BaseOptions.baseUrl`.
   CompendiumRemoteDataSourceImpl(Dio dio) : _dio = dio;
 
   /// Busca as magias que casam com [name]/[level]/[school] e mapeia a lista

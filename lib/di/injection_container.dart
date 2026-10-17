@@ -155,7 +155,19 @@ Future<void> init() async {
   // disponíveis do SO (socket exhaustion) porque o TCP TIME_WAIT mantém a
   // porta ocupada por até 240s após o fechamento. O mesmo risco existe no Dart:
   // um único Dio singleton centraliza e reutiliza as conexões abertas.
-  sl.registerLazySingleton<Dio>(() => Dio());
+  //
+  // Os timeouts evitam que uma tela de compêndio fique presa no skeleton sem
+  // rede: depois do limite, o Dio lança `DioException` e a tela mostra o
+  // estado de erro.
+  sl.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        baseUrl: CompendiumRemoteDataSourceImpl.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 20),
+      ),
+    ),
+  );
 
   // Factory: cada tela recebe um BLoC zerado, evitando estado compartilhado.
   sl.registerFactory<CompendiumBloc>(
