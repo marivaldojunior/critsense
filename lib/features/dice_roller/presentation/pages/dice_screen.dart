@@ -5,7 +5,6 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:crit_sense/core/hardware_bridge/hardware_bridge.dart';
 import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
@@ -40,8 +39,6 @@ class _DiceView extends StatefulWidget {
 }
 
 class _DiceViewState extends State<_DiceView> {
-  StreamSubscription<void>? _shakeSub;
-
   /// Alimenta o [ConfettiWidget] sobreposto à tela; disparado pelo listener
   /// do BLoC sempre que a rolagem concluída contém um d20 crítico (natural 20).
   late final ConfettiController _confettiController;
@@ -66,9 +63,9 @@ class _DiceViewState extends State<_DiceView> {
   DiceRollStatus? _previousStatus;
 
   /// `true` enquanto o `RollFlowDialog` aberto por [showDialog] está na
-  /// tela — usado só pelo listener de shake, para saber se precisa fechar
-  /// um dialog de resultado já aberto antes de pedir uma rolagem nova (ver
-  /// o listener de `HardwareBridge.onShakeDetected` abaixo).
+  /// tela. Um shake com o dialog de resultado aberto inicia uma rolagem nova
+  /// sem fechar o dialog: o próprio `RollFlowDialog` volta a mostrar os
+  /// dados girando, então o listener abaixo não abre um segundo dialog.
   bool _isRollDialogOpen = false;
 
   @override
@@ -78,28 +75,10 @@ class _DiceViewState extends State<_DiceView> {
       duration: const Duration(seconds: 2),
     );
     unawaited(_audioPlayer.setPlayerMode(PlayerMode.lowLatency));
-    _shakeSub = HardwareBridge.onShakeDetected.listen((_) {
-      if (!mounted) return;
-
-      final bloc = context.read<DiceBloc>();
-      // Um shake com o dialog de resultado já aberto (rolagem anterior
-      // concluída, `status == idle`) precisa fechá-lo antes de pedir uma
-      // rolagem nova — do contrário o listener abaixo abriria um segundo
-      // dialog empilhado por cima do primeiro, que nunca foi fechado.
-      // Só faz isso com `status == idle`: se o dialog aberto é o da própria
-      // física em andamento (`status == rolling`), o próprio `DiceBloc` já
-      // ignora o shake (ver `_onDiceShakeDetected`), então fechá-lo aqui só
-      // interromperia a rolagem em curso sem nada para reabri-lo.
-      if (_isRollDialogOpen && bloc.state.status == DiceRollStatus.idle) {
-        Navigator.of(context).pop();
-      }
-      bloc.add(const DiceShakeDetected());
-    });
   }
 
   @override
   void dispose() {
-    _shakeSub?.cancel();
     _confettiController.dispose();
     _audioPlayer.dispose();
     super.dispose();
@@ -134,6 +113,7 @@ class _DiceViewState extends State<_DiceView> {
         if (previousStatus != DiceRollStatus.rolling &&
             state.status == DiceRollStatus.rolling) {
           _playRollSound(state.pool);
+          if (_isRollDialogOpen) return;
 
           _isRollDialogOpen = true;
           showDialog<void>(

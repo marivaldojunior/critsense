@@ -21,6 +21,7 @@ import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasour
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
+import 'package:crit_sense/features/dice_roller/domain/usecases/watch_shake_usecase.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
 import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
@@ -213,7 +214,9 @@ Future<void> init() async {
   // compartilhariam o mesmo estado — causando bugs difíceis de rastrear.
   // O ciclo de vida do BLoC (criação + dispose) deve espelhar o ciclo de vida
   // do widget que o consome: Factory garante isso.
-  sl.registerFactory<DiceBloc>(() => DiceBloc(sl<RollDiceUseCase>()));
+  sl.registerFactory<DiceBloc>(
+    () => DiceBloc(sl<RollDiceUseCase>(), sl<WatchShakeUseCase>()),
+  );
 
   // ─── Camada de Domínio (Use Cases) ────────────────────────────────────────
   //
@@ -226,6 +229,9 @@ Future<void> init() async {
   // se uma feature nunca for aberta, seu Use Case nunca será instanciado.
   sl.registerLazySingleton<RollDiceUseCase>(
     () => RollDiceUseCase(sl<IDiceRepository>()),
+  );
+  sl.registerLazySingleton<WatchShakeUseCase>(
+    () => WatchShakeUseCase(sl<IDiceRepository>()),
   );
 
   // ─── Camada de Domínio (Repositórios — contratos) ─────────────────────────

@@ -1,18 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_result.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
+import 'package:crit_sense/features/dice_roller/domain/usecases/watch_shake_usecase.dart';
 
 part 'dice_event.dart';
 part 'dice_state.dart';
 
 /// BLoC responsável pelo pool de dados, modificador e ciclo de vida da rolagem.
+///
+/// Escuta o sensor de shake desde a criação até o [close]: cada shake vira
+/// um [DiceShakeDetected], tratado como qualquer outro evento.
 class DiceBloc extends Bloc<DiceEvent, DiceState> {
   final RollDiceUseCase _rollDiceUseCase;
+  late final StreamSubscription<void> _shakeSub;
 
-  DiceBloc(this._rollDiceUseCase) : super(const DiceState()) {
+  DiceBloc(this._rollDiceUseCase, WatchShakeUseCase watchShake)
+    : super(const DiceState()) {
+    // Erros do sensor (ex: plataforma sem o canal nativo) são ignorados: o
+    // shake é um atalho, e o botão "Rolar Dados" continua funcionando.
+    _shakeSub = watchShake().listen(
+      (_) => add(const DiceShakeDetected()),
+      onError: (Object _) {},
+    );
+
     on<DiceTypeAdded>(_onDiceTypeAdded);
     on<DiceTypeRemoved>(_onDiceTypeRemoved);
     on<ModifierIncremented>(_onModifierIncremented);
@@ -96,5 +111,11 @@ class DiceBloc extends Bloc<DiceEvent, DiceState> {
     // reagir (rolling -> rolling não conta como mudança de status).
     if (state.status == DiceRollStatus.rolling) return;
     add(const DiceRollRequested());
+  }
+
+  @override
+  Future<void> close() async {
+    await _shakeSub.cancel();
+    return super.close();
   }
 }

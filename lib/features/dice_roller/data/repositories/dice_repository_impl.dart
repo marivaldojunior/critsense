@@ -50,6 +50,9 @@ class DiceRepositoryImpl implements IDiceRepository {
     return result;
   }
 
+  @override
+  Stream<void> get shakeEvents => _sensorDataSource.onShakeDetected;
+
   /// Rola dois d20 e mantém o maior ([D20RollMode.advantage]) ou o menor
   /// ([D20RollMode.disadvantage]); o outro valor fica em [SingleDieResult.discardedValue]
   /// apenas para exibição.

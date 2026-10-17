@@ -16,4 +16,7 @@ abstract interface class IDiceRepository {
     int modifier,
     D20RollMode d20Mode,
   );
+
+  /// Stream que emite um evento a cada shake do dispositivo.
+  Stream<void> get shakeEvents;
 }
