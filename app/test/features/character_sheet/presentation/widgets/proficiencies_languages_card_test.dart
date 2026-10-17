@@ -59,4 +59,27 @@ void main() {
     expect(find.text('Anão'), findsOneWidget);
     expect(find.text('Comum'), findsOneWidget);
   });
+
+  testWidgets('adicionar e remover um idioma', (tester) async {
+    final bloc = await pumpCard(tester);
+
+    await tester.tap(find.byTooltip('Adicionar idioma'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Élfico');
+    await tester.tap(find.widgetWithText(FilledButton, 'Adicionar'));
+    await waitFor(
+      tester,
+      bloc,
+      (s) => s.findCharacter('c1')!.languages.contains('Élfico'),
+    );
+    expect(find.text('Élfico'), findsOneWidget);
+
+    tester.widget<InputChip>(find.byType(InputChip)).onDeleted!();
+    await waitFor(
+      tester,
+      bloc,
+      (s) => s.findCharacter('c1')!.languages.isEmpty,
+    );
+    expect(find.text('Élfico'), findsNothing);
+  });
 }
