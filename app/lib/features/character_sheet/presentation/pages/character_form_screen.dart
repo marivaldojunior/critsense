@@ -15,9 +15,11 @@ import 'package:crit_sense/features/compendium/domain/entities/api_reference.dar
 
 import '../../domain/entities/alignment.dart' as dnd;
 import '../../domain/entities/attribute.dart';
+import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/rules/srd_rules.dart';
 import '../../domain/srd/srd_class.dart';
+import '../../domain/srd/srd_race.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/form_options_bloc.dart';
 import '../bloc/point_buy_cubit.dart';
@@ -55,6 +57,9 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
 
   /// Valor selecionado no dropdown de raça; corresponde a [ApiReference.name].
   String? _selectedRace;
+
+  /// Atributos escolhidos para o +1 do Meio-Elfo.
+  final Set<AttributeType> _chosenRacialBonuses = {};
 
   /// Valor selecionado no dropdown de classe; corresponde a [ApiReference.name].
   String? _selectedClass;
@@ -113,8 +118,26 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
 
+    final race = SrdRace.fromName(_selectedRace!);
+    if (race != null &&
+        _chosenRacialBonuses.length != race.chosenAbilityBonuses) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Escolha ${race.chosenAbilityBonuses} atributos para o bônus de '
+            '+1 da raça.',
+          ),
+        ),
+      );
+      return;
+    }
+
     final level = int.parse(_levelCtrl.text);
-    final attributes = context.read<PointBuyCubit>().state.attributes;
+    final attributes = applyRacialBonuses(
+      context.read<PointBuyCubit>().state.attributes,
+      race,
+      chosen: _chosenRacialBonuses,
+    );
     final srdClass = SrdClass.fromName(_selectedClass!);
     final maxHp = startingMaxHitPoints(
       hitDie: srdClass?.hitDie ?? SrdClass.defaultHitDie,
@@ -128,7 +151,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       race: _selectedRace!,
       characterClass: _selectedClass!,
       level: level,
-      speed: 30,
+      speed: race?.speed ?? 30,
       maxHitPoints: maxHp,
       currentHitPoints: maxHp,
       temporaryHitPoints: 0,
@@ -314,8 +337,12 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
           _buildDropdown(
             label: 'Raça',
             items: options.races,
-            onChanged: (value) => _selectedRace = value,
+            onChanged: (value) => setState(() {
+              _selectedRace = value;
+              _chosenRacialBonuses.clear();
+            }),
           ),
+          _buildRacialBonuses(),
           _buildDropdown(
             label: 'Classe',
             items: options.classes,
@@ -339,6 +366,57 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
           const SizedBox(height: 4),
           const PointBuySection(),
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  /// Bônus raciais do SRD da raça escolhida e, no Meio-Elfo, a escolha dos
+  /// dois atributos que recebem +1.
+  Widget _buildRacialBonuses() {
+    final race = _selectedRace == null
+        ? null
+        : SrdRace.fromName(_selectedRace!);
+    if (race == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final fixed = race.abilityBonuses.entries
+        .map((e) => '${e.key.label} +${e.value}')
+        .join(', ');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Bônus raciais: $fixed. Deslocamento ${race.speed} pés.',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (race.chosenAbilityBonuses > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Escolha ${race.chosenAbilityBonuses} atributos para +1:',
+              style: theme.textTheme.bodySmall,
+            ),
+            Wrap(
+              spacing: 6,
+              children: [
+                for (final attribute in race.choosableAbilities)
+                  FilterChip(
+                    label: Text(attribute.label),
+                    selected: _chosenRacialBonuses.contains(attribute),
+                    onSelected: (selected) => setState(() {
+                      if (!selected) {
+                        _chosenRacialBonuses.remove(attribute);
+                      } else if (_chosenRacialBonuses.length <
+                          race.chosenAbilityBonuses) {
+                        _chosenRacialBonuses.add(attribute);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );
