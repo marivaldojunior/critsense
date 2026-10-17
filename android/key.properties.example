@@ -1,0 +1,9 @@
+# Copie este arquivo para `android/key.properties` e preencha com os dados
+# da sua chave de release. O `key.properties` está no .gitignore.
+#
+# Para criar a chave:
+#   keytool -genkey -v -keystore <caminho>/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=<caminho>/upload-keystore.jks

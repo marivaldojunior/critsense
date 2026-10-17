@@ -70,7 +70,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 #### Segurança e build
 - [x] **T0.1** Revogue o token do GitHub que está na URL do `origin` em `.git/config`. Crie outro token e use o Git Credential Manager. Não coloque o token na URL.
 - [x] **T0.2** Adicione `<uses-permission android:name="android.permission.INTERNET"/>` ao [AndroidManifest.xml](../android/app/src/main/AndroidManifest.xml) principal. Sem esta permissão, o compêndio não funciona no APK de release.
-- [ ] **T0.3** Crie uma chave de assinatura de release e configure o `signingConfig` sem colocar a chave no repositório.
+- [x] **T0.3** Crie uma chave de assinatura de release e configure o `signingConfig` sem colocar a chave no repositório.
 - [ ] **T0.4** Atualize a `description` do `pubspec.yaml`. Revise se os `dependency_overrides` ainda são necessários.
 
 #### Arquitetura
