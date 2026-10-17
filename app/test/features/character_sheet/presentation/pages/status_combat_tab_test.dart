@@ -186,6 +186,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('o botão PV máximo troca o máximo e sobe os PV atuais', (
+    tester,
+  ) async {
+    final bloc = await pumpTab(
+      tester,
+      buildTestCharacter(currentHitPoints: 20),
+    );
+
+    await scrollTo(tester, find.text('PV máximo'));
+    await tester.tap(find.text('PV máximo'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '38');
+    await tester.tap(find.text('Salvar'));
+    final state = await tester.runAsync(
+      () => bloc.stream
+          .firstWhere((s) => s.findCharacter('c1')?.maxHitPoints == 38)
+          .timeout(const Duration(seconds: 5)),
+    );
+
+    expect(state!.findCharacter('c1')!.currentHitPoints, 28);
+  });
+
   testWidgets('tocar na inspiração liga o marcador', (tester) async {
     final bloc = await pumpTab(tester, buildTestCharacter());
 

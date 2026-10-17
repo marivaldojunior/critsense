@@ -255,4 +255,22 @@ void main() {
       expect(fighter(exhaustion: 6).isDead, isTrue);
     });
   });
+
+  group('PV máximo manual', () {
+    test('subir o máximo sobe os PV atuais pela mesma diferença', () {
+      final c = fighter(current: 20).withMaxHitPoints(38)!;
+      expect(c.maxHitPoints, 38);
+      expect(c.currentHitPoints, 28);
+    });
+
+    test('baixar o máximo só corta o que passa do novo máximo', () {
+      expect(fighter(current: 30).withMaxHitPoints(25)!.currentHitPoints, 25);
+      expect(fighter(current: 10).withMaxHitPoints(25)!.currentHitPoints, 10);
+    });
+
+    test('valor menor que 1 ou igual ao atual não muda nada', () {
+      expect(fighter().withMaxHitPoints(0), isNull);
+      expect(fighter().withMaxHitPoints(30), isNull);
+    });
+  });
 }

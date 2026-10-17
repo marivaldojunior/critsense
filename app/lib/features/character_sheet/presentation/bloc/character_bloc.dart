@@ -197,6 +197,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         ),
       ),
     );
+    on<SetMaxHitPointsEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.withMaxHitPoints(event.maxHitPoints),
+      ),
+    );
     on<SetSpeedEvent>(
       (event, emit) => _updateCharacter(
         emit,

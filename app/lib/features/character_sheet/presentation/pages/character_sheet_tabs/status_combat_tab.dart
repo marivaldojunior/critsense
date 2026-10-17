@@ -307,6 +307,19 @@ class _HpCard extends StatelessWidget {
 
   final Character character;
 
+  Future<void> _editMaxHitPoints(BuildContext context) async {
+    final bloc = context.read<CharacterBloc>();
+    final value = await showNumberEditDialog(
+      context,
+      title: 'PV máximo',
+      initialValue: character.maxHitPoints,
+      helperText:
+          'Use para talentos, itens mágicos ou correções. Se o máximo subir, '
+          'os PV atuais sobem a mesma quantidade.',
+    );
+    if (value != null) bloc.add(SetMaxHitPointsEvent(character.id, value));
+  }
+
   Future<void> _confirmLongRest(BuildContext context) async {
     final bloc = context.read<CharacterBloc>();
     final confirmed = await showDialog<bool>(
@@ -347,11 +360,22 @@ class _HpCard extends StatelessWidget {
               maxHitPoints: character.maxHitPoints,
               temporaryHitPoints: character.temporaryHitPoints,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Dados de vida: ${character.hitDiceRemaining}/${character.level} '
-              '(d${character.hitDie})',
-              style: theme.textTheme.bodySmall,
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Dados de vida: ${character.hitDiceRemaining}/'
+                    '${character.level} (d${character.hitDie})',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _editMaxHitPoints(context),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('PV máximo'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(

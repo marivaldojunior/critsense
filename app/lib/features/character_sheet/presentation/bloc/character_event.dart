@@ -201,6 +201,14 @@ final class SetArmorClassBonusEvent extends CharacterEvent {
 }
 
 /// Define o deslocamento base do personagem [characterId], em pés.
+/// Troca o PV máximo de [characterId] — ver `HitPointRules.withMaxHitPoints`.
+final class SetMaxHitPointsEvent extends CharacterEvent {
+  final String characterId;
+  final int maxHitPoints;
+
+  const SetMaxHitPointsEvent(this.characterId, this.maxHitPoints);
+}
+
 final class SetSpeedEvent extends CharacterEvent {
   final String characterId;
   final int speed;

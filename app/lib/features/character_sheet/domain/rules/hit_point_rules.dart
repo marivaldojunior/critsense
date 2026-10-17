@@ -11,6 +11,20 @@ import 'srd_rules.dart';
 /// um método devolve `null`, a ação não muda nada (ex: gastar um dado de
 /// vida sem nenhum disponível).
 extension HitPointRules on Character {
+  /// Ajuste manual do PV máximo (talentos, itens mágicos e correções).
+  ///
+  /// Subir o máximo sobe os PV atuais pela mesma diferença, como no talento
+  /// Robusto. Baixar o máximo só corta os PV atuais que passam do novo
+  /// máximo. Um valor menor que 1 devolve `null`.
+  Character? withMaxHitPoints(int value) {
+    if (value < 1 || value == maxHitPoints) return null;
+    final gain = value - maxHitPoints;
+    final current = gain > 0
+        ? currentHitPoints + gain
+        : (currentHitPoints > value ? value : currentHitPoints);
+    return copyWith(maxHitPoints: value, currentHitPoints: current);
+  }
+
   /// Dano: primeiro sai dos PV temporários, depois dos PV atuais (nunca
   /// abaixo de 0).
   ///
