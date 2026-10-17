@@ -302,6 +302,29 @@ final class UpdateLoreEvent extends CharacterEvent {
   });
 }
 
+/// Troca os dados básicos do personagem [characterId]: nome, raça, classe,
+/// tendência e foto. Campos `null` ficam como estão.
+///
+/// Trocar a raça ou a classe não recalcula atributos, PV nem proficiências:
+/// o jogador corrige um erro de digitação sem perder o que já ajustou.
+final class UpdateIdentityEvent extends CharacterEvent {
+  final String characterId;
+  final String? name;
+  final String? race;
+  final String? characterClass;
+  final String? alignment;
+  final String? avatarPath;
+
+  const UpdateIdentityEvent(
+    this.characterId, {
+    this.name,
+    this.race,
+    this.characterClass,
+    this.alignment,
+    this.avatarPath,
+  });
+}
+
 /// Troca as proficiências em armaduras, armas e ferramentas e/ou os idiomas
 /// do personagem [characterId]. Listas `null` ficam como estão.
 final class UpdateProficienciesEvent extends CharacterEvent {

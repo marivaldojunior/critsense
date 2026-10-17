@@ -175,6 +175,18 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         ),
       ),
     );
+    on<UpdateIdentityEvent>(
+      (event, emit) => _updateCharacter(emit, event.characterId, (c) {
+        final name = event.name?.trim();
+        return c.copyWith(
+          name: name == null || name.isEmpty ? null : name,
+          race: event.race,
+          characterClass: event.characterClass,
+          alignment: event.alignment,
+          avatarPath: event.avatarPath,
+        );
+      }),
+    );
     on<UpdateProficienciesEvent>(
       (event, emit) => _updateCharacter(
         emit,

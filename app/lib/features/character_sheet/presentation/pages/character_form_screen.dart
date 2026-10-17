@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/core/files/avatar_storage.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
@@ -89,24 +88,10 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     super.dispose();
   }
 
-  /// Abre a [source] (câmera ou galeria) e persiste a imagem escolhida.
-  ///
-  /// O [ImagePicker] retorna um arquivo temporário no cache do sistema —
-  /// similar a um upload recebido em `IFormFile` no ASP.NET Core, cujo
-  /// conteúdo existe apenas durante a requisição. Mover o arquivo para
-  /// `getApplicationDocumentsDirectory()` equivale a salvá-lo em
-  /// `wwwroot/uploads` no servidor: garante persistência entre sessões,
-  /// pois o sistema operacional pode limpar o cache a qualquer momento.
+  /// Abre a [source] (câmera ou galeria) e guarda a imagem escolhida.
   Future<void> _pickImage(ImageSource source) async {
-    final picked = await ImagePicker().pickImage(source: source);
-    if (picked == null) return;
-
-    final docsDir = await getApplicationDocumentsDirectory();
-    final ext = p.extension(picked.path);
-    final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}$ext';
-    final destPath = p.join(docsDir.path, fileName);
-
-    final saved = await File(picked.path).copy(destPath);
+    final saved = await pickAndStoreAvatar(source);
+    if (saved == null) return;
     setState(() => _avatarImage = saved);
   }
 

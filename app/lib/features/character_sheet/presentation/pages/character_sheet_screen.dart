@@ -8,6 +8,7 @@ import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/inventory_bloc.dart';
 import '../widgets/character_avatar.dart';
+import '../widgets/edit_identity_sheet.dart';
 import 'character_sheet_tabs/inventory_tab.dart';
 import 'character_sheet_tabs/spells_tab.dart';
 import 'character_sheet_tabs/status_combat_tab.dart';
@@ -64,7 +65,7 @@ class CharacterSheetScreen extends StatelessWidget {
         final isLowHp =
             liveCharacter.maxHitPoints > 0 && hpRatio <= _lowHpThreshold;
 
-        final sheet = _buildSheet(context);
+        final sheet = _buildSheet(context, liveCharacter);
         if (!isLowHp) return sheet;
 
         return Theme(
@@ -80,18 +81,20 @@ class CharacterSheetScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSheet(BuildContext context) {
+  /// [live] é a versão atual do personagem: o título e a foto da AppBar
+  /// mudam logo depois de uma edição. As abas recebem [character].
+  Widget _buildSheet(BuildContext context, Character live) {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
             children: [
-              CharacterAvatar(character: character, radius: 18),
+              CharacterAvatar(character: live, radius: 18),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  character.name,
+                  live.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -99,6 +102,11 @@ class CharacterSheetScreen extends StatelessWidget {
             ],
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Editar personagem',
+              onPressed: () => showEditIdentitySheet(context, live),
+            ),
             IconButton(
               icon: const DnDIcon(
                 assetPath: 'assets/icons/entity/book.svg',
@@ -110,8 +118,8 @@ class CharacterSheetScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => SessionNotesScreen(
                     characterId: character.id,
-                    characterName: character.name,
-                    avatarPath: character.avatarPath,
+                    characterName: live.name,
+                    avatarPath: live.avatarPath,
                   ),
                 ),
               ),
