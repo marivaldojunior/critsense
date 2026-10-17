@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/condition.dart';
@@ -13,6 +14,7 @@ import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasour
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/roll_history_cubit.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/sheet_roll_cubit.dart';
 
 import '../../../../helpers/character_test_helpers.dart';
@@ -32,7 +34,10 @@ class _SilentSensor implements ISensorDataSource {
 /// Testa a aba Status & Combate: valores derivados, dados de vida,
 /// salvaguardas contra a morte, condições e inspiração.
 void main() {
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    sl.registerSingleton<RollHistoryCubit>(RollHistoryCubit(preferences));
     sl.registerFactoryParam<SheetRollCubit, D20RollMode, void>(
       (mode, _) => SheetRollCubit(
         RollDiceUseCase(DiceRepositoryImpl(_SilentSensor())),
@@ -300,6 +305,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('d20: '), findsOneWidget);
     expect(find.textContaining('descartado'), findsOneWidget);
+    expect(sl<RollHistoryCubit>().state.single.label, 'Atletismo');
     expect(bloc.state.findCharacter('c1')!.proficiencies, isEmpty);
   });
 }

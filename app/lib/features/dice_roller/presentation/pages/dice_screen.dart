@@ -11,9 +11,11 @@ import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/domain/entities/dice_type.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/roll_history_cubit.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/d20_mode_selector.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/dice_type_carousel.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/modifier_control.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_history_sheet.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/roll_flow_dialog.dart';
 import 'package:crit_sense/features/dice_roller/presentation/widgets/selected_dice_row.dart';
 
@@ -127,6 +129,16 @@ class _DiceViewState extends State<_DiceView> {
           return;
         }
 
+        // rolling -> idle: rolagem concluída, vai para o histórico.
+        if (previousStatus == DiceRollStatus.rolling &&
+            state.status == DiceRollStatus.idle &&
+            state.lastResult != null) {
+          sl<RollHistoryCubit>().record(
+            poolLabel(state.pool, state.modifier),
+            state.lastResult!,
+          );
+        }
+
         // rolling -> idle: rolagem concluída, dispara o confete se crítico.
         // Reaproveita `hasCriticalSuccess` do domínio: já considera o valor
         // *mantido* de cada d20 (pós vantagem/desvantagem), não o descartado.
@@ -157,6 +169,7 @@ class _DiceViewState extends State<_DiceView> {
               ),
             ),
             title: const Text('Rolador de Dados'),
+            actions: const [RollHistoryButton()],
           ),
           body: Stack(
             alignment: Alignment.center,

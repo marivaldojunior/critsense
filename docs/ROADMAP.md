@@ -140,7 +140,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TF.6** Mostre o limite de truques e de magias conhecidas por nível.
 - [x] **TF.7** Escolha a subclasse do SRD no nível certo e mostre as características dela.
 - [x] **TF.8** Crie o rastreador de iniciativa com personagens e monstros, turno e rodada.
-- [ ] **TF.9** Guarde o histórico das últimas rolagens.
+- [x] **TF.9** Guarde o histórico das últimas rolagens.
 
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 

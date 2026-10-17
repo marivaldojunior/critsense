@@ -6,7 +6,9 @@ import 'package:crit_sense/di/injection_container.dart';
 
 import '../../domain/entities/d20_roll_mode.dart';
 import '../../domain/entities/dice_result.dart';
+import '../bloc/roll_history_cubit.dart';
 import '../bloc/sheet_roll_cubit.dart';
+import 'roll_history_sheet.dart';
 
 String _signed(int value) => value >= 0 ? '+$value' : '$value';
 
@@ -29,12 +31,33 @@ Future<void> showSheetRoll(
     isScrollControlled: true,
     builder: (_) => BlocProvider<SheetRollCubit>(
       create: (_) => sl<SheetRollCubit>(param1: initialMode),
-      child: _SheetRollBody(
-        title: title,
-        modifier: modifier,
-        damage: damage,
-        versatileDamage: versatileDamage,
-        note: note,
+      // Cada resultado novo vai para o histórico de rolagens.
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<SheetRollCubit, SheetRollState>(
+            listenWhen: (previous, current) =>
+                current.d20Result != null &&
+                !identical(previous.d20Result, current.d20Result),
+            listener: (_, state) =>
+                sl<RollHistoryCubit>().record(title, state.d20Result!),
+          ),
+          BlocListener<SheetRollCubit, SheetRollState>(
+            listenWhen: (previous, current) =>
+                current.damageResult != null &&
+                !identical(previous.damageResult, current.damageResult),
+            listener: (_, state) => sl<RollHistoryCubit>().record(
+              '$title — dano',
+              state.damageResult!,
+            ),
+          ),
+        ],
+        child: _SheetRollBody(
+          title: title,
+          modifier: modifier,
+          damage: damage,
+          versatileDamage: versatileDamage,
+          note: note,
+        ),
       ),
     ),
   );
@@ -72,9 +95,16 @@ class _SheetRollBody extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    '$title (${_signed(modifier)})',
-                    style: theme.textTheme.titleLarge,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '$title (${_signed(modifier)})',
+                          style: theme.textTheme.titleLarge,
+                        ),
+                      ),
+                      const RollHistoryButton(),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   SegmentedButton<D20RollMode>(

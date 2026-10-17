@@ -56,6 +56,7 @@ import 'package:crit_sense/features/compendium/presentation/bloc/equipment_detai
 import 'package:crit_sense/features/compendium/presentation/bloc/monster_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/monster_detail_bloc.dart';
 import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/roll_history_cubit.dart';
 import 'package:crit_sense/features/initiative_tracker/presentation/cubit/initiative_cubit.dart';
 import 'package:dio/dio.dart';
 
@@ -86,6 +87,10 @@ Future<void> init() async {
   final preferences = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(preferences);
   sl.registerFactory<ThemeCubit>(() => ThemeCubit(sl<SharedPreferences>()));
+  // Singleton: o rolador e a ficha gravam no mesmo histórico.
+  sl.registerLazySingleton<RollHistoryCubit>(
+    () => RollHistoryCubit(sl<SharedPreferences>()),
+  );
   // Singleton: o combate continua igual ao sair da tela e voltar.
   sl.registerLazySingleton<InitiativeCubit>(
     () => InitiativeCubit(sl<SharedPreferences>()),
