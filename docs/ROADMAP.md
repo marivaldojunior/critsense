@@ -81,7 +81,8 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 - [x] **T0.9** Salve o tema escolhido pelo usuário. Corrija o botão de tema, que para de funcionar depois do logout.
 
 #### Plataformas
-- [ ] **T0.10** Implemente os canais `feedback` e `sensor` no [AppDelegate.swift](../ios/Runner/AppDelegate.swift), ou documente que o iOS não tem vibração nem shake.
+- [x] **T0.10** Implemente os canais `feedback` e `sensor` no [AppDelegate.swift](../ios/Runner/AppDelegate.swift), ou documente que o iOS não tem vibração nem shake.
+  - [ ] **T0.10a** Compile e teste o app num iPhone (precisa de um Mac). O código Swift foi escrito sem compilar.
 
 #### Testes
 - [ ] **T0.11** Escreva testes para o `DiceBloc` (pool, modificador, vantagem e desvantagem).
