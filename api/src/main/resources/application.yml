@@ -16,6 +16,39 @@ spring:
     open-in-view: false
   flyway:
     locations: classpath:db/migration
+  ai:
+    model:
+      # Provedor do chat: anthropic (padrão) ou openai. Os outros recursos dos
+      # starters (embeddings, imagens, áudio, moderação) ficam desligados.
+      chat: ${AI_PROVIDER:anthropic}
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      timeout: ${AI_PROVIDER_TIMEOUT:90s}
+      max-retries: 1
+      chat:
+        model: ${ANTHROPIC_MODEL:claude-opus-5-5}
+        # O raciocínio do modelo conta dentro deste limite, então ele fica
+        # bem acima do tamanho da resposta em JSON.
+        max-tokens: 16000
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      # O modelo da OpenAI vem de SPRING_AI_OPENAI_CHAT_MODEL; sem ela, vale
+      # o padrão do Spring AI.
+
+critsense:
+  ai:
+    # Tempo máximo de uma chamada de IA, do lado da API. Acima disso, a API
+    # devolve 504 para o cliente.
+    timeout: ${AI_TIMEOUT:120s}
+    rate-limit:
+      # Chamadas de IA por usuário, por minuto.
+      requests-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:10}
 
 management:
   endpoints:
