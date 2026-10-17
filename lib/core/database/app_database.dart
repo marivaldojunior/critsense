@@ -28,6 +28,14 @@ class AppDatabase extends _$AppDatabase {
   /// apenas as migrations pendentes sem recriar o banco.
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    // O SQLite desativa foreign keys por padrão; este PRAGMA as habilita
+    // para que a cascade delete em [Attributes], [InventoryItems] e
+    // [SessionNotes] funcione. Fica no `beforeOpen` (e não no `setup` do
+    // `NativeDatabase`) para valer em qualquer executor — inclusive o banco
+    // em memória dos testes.
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
     onUpgrade: (m, from, to) async {
       if (from < 3) {
         await m.createTable(sessionNotes);
@@ -77,14 +85,7 @@ class AppDatabase extends _$AppDatabase {
       final dbFolder = await getApplicationDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'critsense.sqlite'));
 
-      return NativeDatabase.createInBackground(
-        file,
-        setup: (rawDb) {
-          // O SQLite desativa foreign keys por padrão; este PRAGMA as habilita
-          // para que a cascade delete em [Attributes] funcione corretamente.
-          rawDb.execute('PRAGMA foreign_keys = ON;');
-        },
-      );
+      return NativeDatabase.createInBackground(file);
     });
   }
 }
