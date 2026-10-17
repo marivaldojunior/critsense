@@ -68,6 +68,27 @@ class EquipmentDetail {
   /// Classe de Armadura base; nula para equipamentos que não são armaduras.
   final int? armorClass;
 
+  /// "Light", "Medium", "Heavy" ou "Shield"; `null` se não é armadura.
+  final String? armorCategory;
+
+  /// A armadura soma o modificador de DES à CA.
+  final bool armorDexBonus;
+
+  /// Limite do modificador de DES somado (ex: 2 nas armaduras médias).
+  final int? armorMaxDexBonus;
+
+  /// "Simple" ou "Martial"; `null` se não é arma.
+  final String? weaponCategory;
+
+  /// "Melee" ou "Ranged"; `null` se não é arma.
+  final String? weaponRange;
+
+  /// Índices das propriedades da arma (ex: `finesse`, `versatile`).
+  final List<String> properties;
+
+  /// Dano usando a arma com as duas mãos (propriedade Versátil).
+  final EquipmentDamage? twoHandedDamage;
+
   const EquipmentDetail({
     required this.index,
     required this.name,
@@ -78,5 +99,12 @@ class EquipmentDetail {
     this.damage,
     this.range,
     this.armorClass,
+    this.armorCategory,
+    this.armorDexBonus = false,
+    this.armorMaxDexBonus,
+    this.weaponCategory,
+    this.weaponRange,
+    this.properties = const [],
+    this.twoHandedDamage,
   });
 }

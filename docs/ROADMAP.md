@@ -114,10 +114,10 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TB.3** Guarde as magias com índice, nível e estado de preparada, e mostre os truques separados.
 
 #### Fase C — Inventário e equipamento
-- [ ] **TC.1** Adicione quantidade e peso aos itens, com o total carregado e o limite de carga.
-- [ ] **TC.2** Adicione as moedas (PC, PP, PE, PO, PL).
-- [ ] **TC.3** Marque itens equipados e itens sintonizados (no máximo 3). Calcule a CA pela armadura e pelo escudo equipados.
-- [ ] **TC.4** Gere os ataques das armas equipadas (bônus de ataque e dano).
+- [x] **TC.1** Adicione quantidade e peso aos itens, com o total carregado e o limite de carga.
+- [x] **TC.2** Adicione as moedas (PC, PP, PE, PO, PL).
+- [x] **TC.3** Marque itens equipados e itens sintonizados (no máximo 3). Calcule a CA pela armadura e pelo escudo equipados.
+- [x] **TC.4** Gere os ataques das armas equipadas (bônus de ataque e dano).
 
 #### Fase D — Criação e evolução
 - [ ] **TD.1** Aplique os bônus de atributo e o deslocamento da raça do SRD.

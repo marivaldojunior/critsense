@@ -4,6 +4,7 @@ import '../../domain/entities/attribute.dart';
 import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/character_spell.dart';
+import '../../domain/entities/coins.dart';
 import '../../domain/entities/condition.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
@@ -134,6 +135,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         emit,
         event.characterId,
         (c) => c.withPactSlotRestored(),
+      ),
+    );
+    on<SetCoinsEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.copyWith(coins: c.coins.withAmount(event.coin, event.amount)),
       ),
     );
     on<SetSpeedEvent>(

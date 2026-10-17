@@ -353,6 +353,60 @@ class $CharactersTable extends Characters
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _copperMeta = const VerificationMeta('copper');
+  @override
+  late final GeneratedColumn<int> copper = GeneratedColumn<int>(
+    'copper',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _silverMeta = const VerificationMeta('silver');
+  @override
+  late final GeneratedColumn<int> silver = GeneratedColumn<int>(
+    'silver',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _electrumMeta = const VerificationMeta(
+    'electrum',
+  );
+  @override
+  late final GeneratedColumn<int> electrum = GeneratedColumn<int>(
+    'electrum',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _goldMeta = const VerificationMeta('gold');
+  @override
+  late final GeneratedColumn<int> gold = GeneratedColumn<int>(
+    'gold',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _platinumMeta = const VerificationMeta(
+    'platinum',
+  );
+  @override
+  late final GeneratedColumn<int> platinum = GeneratedColumn<int>(
+    'platinum',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -387,6 +441,11 @@ class $CharactersTable extends Characters
     inspiration,
     spellSlotsUsed,
     pactSlotsUsed,
+    copper,
+    silver,
+    electrum,
+    gold,
+    platinum,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -612,6 +671,36 @@ class $CharactersTable extends Characters
         ),
       );
     }
+    if (data.containsKey('copper')) {
+      context.handle(
+        _copperMeta,
+        copper.isAcceptableOrUnknown(data['copper']!, _copperMeta),
+      );
+    }
+    if (data.containsKey('silver')) {
+      context.handle(
+        _silverMeta,
+        silver.isAcceptableOrUnknown(data['silver']!, _silverMeta),
+      );
+    }
+    if (data.containsKey('electrum')) {
+      context.handle(
+        _electrumMeta,
+        electrum.isAcceptableOrUnknown(data['electrum']!, _electrumMeta),
+      );
+    }
+    if (data.containsKey('gold')) {
+      context.handle(
+        _goldMeta,
+        gold.isAcceptableOrUnknown(data['gold']!, _goldMeta),
+      );
+    }
+    if (data.containsKey('platinum')) {
+      context.handle(
+        _platinumMeta,
+        platinum.isAcceptableOrUnknown(data['platinum']!, _platinumMeta),
+      );
+    }
     return context;
   }
 
@@ -759,6 +848,26 @@ class $CharactersTable extends Characters
         DriftSqlType.int,
         data['${effectivePrefix}pact_slots_used'],
       )!,
+      copper: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}copper'],
+      )!,
+      silver: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}silver'],
+      )!,
+      electrum: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}electrum'],
+      )!,
+      gold: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gold'],
+      )!,
+      platinum: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}platinum'],
+      )!,
     );
   }
 
@@ -866,6 +975,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   final bool inspiration;
   final List<int> spellSlotsUsed;
   final int pactSlotsUsed;
+  final int copper;
+  final int silver;
+  final int electrum;
+  final int gold;
+  final int platinum;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -899,6 +1013,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.inspiration,
     required this.spellSlotsUsed,
     required this.pactSlotsUsed,
+    required this.copper,
+    required this.silver,
+    required this.electrum,
+    required this.gold,
+    required this.platinum,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -969,6 +1088,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       );
     }
     map['pact_slots_used'] = Variable<int>(pactSlotsUsed);
+    map['copper'] = Variable<int>(copper);
+    map['silver'] = Variable<int>(silver);
+    map['electrum'] = Variable<int>(electrum);
+    map['gold'] = Variable<int>(gold);
+    map['platinum'] = Variable<int>(platinum);
     return map;
   }
 
@@ -1020,6 +1144,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       inspiration: Value(inspiration),
       spellSlotsUsed: Value(spellSlotsUsed),
       pactSlotsUsed: Value(pactSlotsUsed),
+      copper: Value(copper),
+      silver: Value(silver),
+      electrum: Value(electrum),
+      gold: Value(gold),
+      platinum: Value(platinum),
     );
   }
 
@@ -1063,6 +1192,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       inspiration: serializer.fromJson<bool>(json['inspiration']),
       spellSlotsUsed: serializer.fromJson<List<int>>(json['spellSlotsUsed']),
       pactSlotsUsed: serializer.fromJson<int>(json['pactSlotsUsed']),
+      copper: serializer.fromJson<int>(json['copper']),
+      silver: serializer.fromJson<int>(json['silver']),
+      electrum: serializer.fromJson<int>(json['electrum']),
+      gold: serializer.fromJson<int>(json['gold']),
+      platinum: serializer.fromJson<int>(json['platinum']),
     );
   }
   @override
@@ -1101,6 +1235,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'inspiration': serializer.toJson<bool>(inspiration),
       'spellSlotsUsed': serializer.toJson<List<int>>(spellSlotsUsed),
       'pactSlotsUsed': serializer.toJson<int>(pactSlotsUsed),
+      'copper': serializer.toJson<int>(copper),
+      'silver': serializer.toJson<int>(silver),
+      'electrum': serializer.toJson<int>(electrum),
+      'gold': serializer.toJson<int>(gold),
+      'platinum': serializer.toJson<int>(platinum),
     };
   }
 
@@ -1137,6 +1276,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     bool? inspiration,
     List<int>? spellSlotsUsed,
     int? pactSlotsUsed,
+    int? copper,
+    int? silver,
+    int? electrum,
+    int? gold,
+    int? platinum,
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -1172,6 +1316,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     inspiration: inspiration ?? this.inspiration,
     spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
     pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
+    copper: copper ?? this.copper,
+    silver: silver ?? this.silver,
+    electrum: electrum ?? this.electrum,
+    gold: gold ?? this.gold,
+    platinum: platinum ?? this.platinum,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -1249,6 +1398,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       pactSlotsUsed: data.pactSlotsUsed.present
           ? data.pactSlotsUsed.value
           : this.pactSlotsUsed,
+      copper: data.copper.present ? data.copper.value : this.copper,
+      silver: data.silver.present ? data.silver.value : this.silver,
+      electrum: data.electrum.present ? data.electrum.value : this.electrum,
+      gold: data.gold.present ? data.gold.value : this.gold,
+      platinum: data.platinum.present ? data.platinum.value : this.platinum,
     );
   }
 
@@ -1286,7 +1440,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('exhaustionLevel: $exhaustionLevel, ')
           ..write('inspiration: $inspiration, ')
           ..write('spellSlotsUsed: $spellSlotsUsed, ')
-          ..write('pactSlotsUsed: $pactSlotsUsed')
+          ..write('pactSlotsUsed: $pactSlotsUsed, ')
+          ..write('copper: $copper, ')
+          ..write('silver: $silver, ')
+          ..write('electrum: $electrum, ')
+          ..write('gold: $gold, ')
+          ..write('platinum: $platinum')
           ..write(')'))
         .toString();
   }
@@ -1325,6 +1484,11 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     inspiration,
     spellSlotsUsed,
     pactSlotsUsed,
+    copper,
+    silver,
+    electrum,
+    gold,
+    platinum,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1361,7 +1525,12 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.exhaustionLevel == this.exhaustionLevel &&
           other.inspiration == this.inspiration &&
           other.spellSlotsUsed == this.spellSlotsUsed &&
-          other.pactSlotsUsed == this.pactSlotsUsed);
+          other.pactSlotsUsed == this.pactSlotsUsed &&
+          other.copper == this.copper &&
+          other.silver == this.silver &&
+          other.electrum == this.electrum &&
+          other.gold == this.gold &&
+          other.platinum == this.platinum);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1397,6 +1566,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<bool> inspiration;
   final Value<List<int>> spellSlotsUsed;
   final Value<int> pactSlotsUsed;
+  final Value<int> copper;
+  final Value<int> silver;
+  final Value<int> electrum;
+  final Value<int> gold;
+  final Value<int> platinum;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1431,6 +1605,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.inspiration = const Value.absent(),
     this.spellSlotsUsed = const Value.absent(),
     this.pactSlotsUsed = const Value.absent(),
+    this.copper = const Value.absent(),
+    this.silver = const Value.absent(),
+    this.electrum = const Value.absent(),
+    this.gold = const Value.absent(),
+    this.platinum = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1466,6 +1645,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.inspiration = const Value.absent(),
     this.spellSlotsUsed = const Value.absent(),
     this.pactSlotsUsed = const Value.absent(),
+    this.copper = const Value.absent(),
+    this.silver = const Value.absent(),
+    this.electrum = const Value.absent(),
+    this.gold = const Value.absent(),
+    this.platinum = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1507,6 +1691,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<bool>? inspiration,
     Expression<String>? spellSlotsUsed,
     Expression<int>? pactSlotsUsed,
+    Expression<int>? copper,
+    Expression<int>? silver,
+    Expression<int>? electrum,
+    Expression<int>? gold,
+    Expression<int>? platinum,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1544,6 +1733,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (inspiration != null) 'inspiration': inspiration,
       if (spellSlotsUsed != null) 'spell_slots_used': spellSlotsUsed,
       if (pactSlotsUsed != null) 'pact_slots_used': pactSlotsUsed,
+      if (copper != null) 'copper': copper,
+      if (silver != null) 'silver': silver,
+      if (electrum != null) 'electrum': electrum,
+      if (gold != null) 'gold': gold,
+      if (platinum != null) 'platinum': platinum,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1581,6 +1775,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<bool>? inspiration,
     Value<List<int>>? spellSlotsUsed,
     Value<int>? pactSlotsUsed,
+    Value<int>? copper,
+    Value<int>? silver,
+    Value<int>? electrum,
+    Value<int>? gold,
+    Value<int>? platinum,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -1616,6 +1815,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       inspiration: inspiration ?? this.inspiration,
       spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
       pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
+      copper: copper ?? this.copper,
+      silver: silver ?? this.silver,
+      electrum: electrum ?? this.electrum,
+      gold: gold ?? this.gold,
+      platinum: platinum ?? this.platinum,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1729,6 +1933,21 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (pactSlotsUsed.present) {
       map['pact_slots_used'] = Variable<int>(pactSlotsUsed.value);
     }
+    if (copper.present) {
+      map['copper'] = Variable<int>(copper.value);
+    }
+    if (silver.present) {
+      map['silver'] = Variable<int>(silver.value);
+    }
+    if (electrum.present) {
+      map['electrum'] = Variable<int>(electrum.value);
+    }
+    if (gold.present) {
+      map['gold'] = Variable<int>(gold.value);
+    }
+    if (platinum.present) {
+      map['platinum'] = Variable<int>(platinum.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1770,6 +1989,11 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('inspiration: $inspiration, ')
           ..write('spellSlotsUsed: $spellSlotsUsed, ')
           ..write('pactSlotsUsed: $pactSlotsUsed, ')
+          ..write('copper: $copper, ')
+          ..write('silver: $silver, ')
+          ..write('electrum: $electrum, ')
+          ..write('gold: $gold, ')
+          ..write('platinum: $platinum, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2323,6 +2547,203 @@ class $InventoryItemsTable extends InventoryItems
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _weightMeta = const VerificationMeta('weight');
+  @override
+  late final GeneratedColumn<double> weight = GeneratedColumn<double>(
+    'weight',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _equippedMeta = const VerificationMeta(
+    'equipped',
+  );
+  @override
+  late final GeneratedColumn<bool> equipped = GeneratedColumn<bool>(
+    'equipped',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("equipped" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _requiresAttunementMeta =
+      const VerificationMeta('requiresAttunement');
+  @override
+  late final GeneratedColumn<bool> requiresAttunement = GeneratedColumn<bool>(
+    'requires_attunement',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("requires_attunement" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _attunedMeta = const VerificationMeta(
+    'attuned',
+  );
+  @override
+  late final GeneratedColumn<bool> attuned = GeneratedColumn<bool>(
+    'attuned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("attuned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _detailsLoadedMeta = const VerificationMeta(
+    'detailsLoaded',
+  );
+  @override
+  late final GeneratedColumn<bool> detailsLoaded = GeneratedColumn<bool>(
+    'details_loaded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("details_loaded" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _armorCategoryMeta = const VerificationMeta(
+    'armorCategory',
+  );
+  @override
+  late final GeneratedColumn<String> armorCategory = GeneratedColumn<String>(
+    'armor_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _armorBaseMeta = const VerificationMeta(
+    'armorBase',
+  );
+  @override
+  late final GeneratedColumn<int> armorBase = GeneratedColumn<int>(
+    'armor_base',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _armorDexBonusMeta = const VerificationMeta(
+    'armorDexBonus',
+  );
+  @override
+  late final GeneratedColumn<bool> armorDexBonus = GeneratedColumn<bool>(
+    'armor_dex_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("armor_dex_bonus" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _armorMaxDexBonusMeta = const VerificationMeta(
+    'armorMaxDexBonus',
+  );
+  @override
+  late final GeneratedColumn<int> armorMaxDexBonus = GeneratedColumn<int>(
+    'armor_max_dex_bonus',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weaponCategoryMeta = const VerificationMeta(
+    'weaponCategory',
+  );
+  @override
+  late final GeneratedColumn<String> weaponCategory = GeneratedColumn<String>(
+    'weapon_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weaponRangeMeta = const VerificationMeta(
+    'weaponRange',
+  );
+  @override
+  late final GeneratedColumn<String> weaponRange = GeneratedColumn<String>(
+    'weapon_range',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _damageDiceMeta = const VerificationMeta(
+    'damageDice',
+  );
+  @override
+  late final GeneratedColumn<String> damageDice = GeneratedColumn<String>(
+    'damage_dice',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _damageTypeMeta = const VerificationMeta(
+    'damageType',
+  );
+  @override
+  late final GeneratedColumn<String> damageType = GeneratedColumn<String>(
+    'damage_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versatileDamageDiceMeta =
+      const VerificationMeta('versatileDamageDice');
+  @override
+  late final GeneratedColumn<String> versatileDamageDice =
+      GeneratedColumn<String>(
+        'versatile_damage_dice',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+  weaponProperties =
+      GeneratedColumn<String>(
+        'weapon_properties',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>(
+        $InventoryItemsTable.$converterweaponProperties,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2330,6 +2751,22 @@ class $InventoryItemsTable extends InventoryItems
     itemIndex,
     name,
     equipmentCategory,
+    quantity,
+    weight,
+    equipped,
+    requiresAttunement,
+    attuned,
+    detailsLoaded,
+    armorCategory,
+    armorBase,
+    armorDexBonus,
+    armorMaxDexBonus,
+    weaponCategory,
+    weaponRange,
+    damageDice,
+    damageType,
+    versatileDamageDice,
+    weaponProperties,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2386,6 +2823,120 @@ class $InventoryItemsTable extends InventoryItems
     } else if (isInserting) {
       context.missing(_equipmentCategoryMeta);
     }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('weight')) {
+      context.handle(
+        _weightMeta,
+        weight.isAcceptableOrUnknown(data['weight']!, _weightMeta),
+      );
+    }
+    if (data.containsKey('equipped')) {
+      context.handle(
+        _equippedMeta,
+        equipped.isAcceptableOrUnknown(data['equipped']!, _equippedMeta),
+      );
+    }
+    if (data.containsKey('requires_attunement')) {
+      context.handle(
+        _requiresAttunementMeta,
+        requiresAttunement.isAcceptableOrUnknown(
+          data['requires_attunement']!,
+          _requiresAttunementMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attuned')) {
+      context.handle(
+        _attunedMeta,
+        attuned.isAcceptableOrUnknown(data['attuned']!, _attunedMeta),
+      );
+    }
+    if (data.containsKey('details_loaded')) {
+      context.handle(
+        _detailsLoadedMeta,
+        detailsLoaded.isAcceptableOrUnknown(
+          data['details_loaded']!,
+          _detailsLoadedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('armor_category')) {
+      context.handle(
+        _armorCategoryMeta,
+        armorCategory.isAcceptableOrUnknown(
+          data['armor_category']!,
+          _armorCategoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('armor_base')) {
+      context.handle(
+        _armorBaseMeta,
+        armorBase.isAcceptableOrUnknown(data['armor_base']!, _armorBaseMeta),
+      );
+    }
+    if (data.containsKey('armor_dex_bonus')) {
+      context.handle(
+        _armorDexBonusMeta,
+        armorDexBonus.isAcceptableOrUnknown(
+          data['armor_dex_bonus']!,
+          _armorDexBonusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('armor_max_dex_bonus')) {
+      context.handle(
+        _armorMaxDexBonusMeta,
+        armorMaxDexBonus.isAcceptableOrUnknown(
+          data['armor_max_dex_bonus']!,
+          _armorMaxDexBonusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('weapon_category')) {
+      context.handle(
+        _weaponCategoryMeta,
+        weaponCategory.isAcceptableOrUnknown(
+          data['weapon_category']!,
+          _weaponCategoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('weapon_range')) {
+      context.handle(
+        _weaponRangeMeta,
+        weaponRange.isAcceptableOrUnknown(
+          data['weapon_range']!,
+          _weaponRangeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('damage_dice')) {
+      context.handle(
+        _damageDiceMeta,
+        damageDice.isAcceptableOrUnknown(data['damage_dice']!, _damageDiceMeta),
+      );
+    }
+    if (data.containsKey('damage_type')) {
+      context.handle(
+        _damageTypeMeta,
+        damageType.isAcceptableOrUnknown(data['damage_type']!, _damageTypeMeta),
+      );
+    }
+    if (data.containsKey('versatile_damage_dice')) {
+      context.handle(
+        _versatileDamageDiceMeta,
+        versatileDamageDice.isAcceptableOrUnknown(
+          data['versatile_damage_dice']!,
+          _versatileDamageDiceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2415,6 +2966,72 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.string,
         data['${effectivePrefix}equipment_category'],
       )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+      weight: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight'],
+      )!,
+      equipped: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}equipped'],
+      )!,
+      requiresAttunement: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}requires_attunement'],
+      )!,
+      attuned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}attuned'],
+      )!,
+      detailsLoaded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}details_loaded'],
+      )!,
+      armorCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}armor_category'],
+      ),
+      armorBase: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}armor_base'],
+      ),
+      armorDexBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}armor_dex_bonus'],
+      )!,
+      armorMaxDexBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}armor_max_dex_bonus'],
+      ),
+      weaponCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weapon_category'],
+      ),
+      weaponRange: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}weapon_range'],
+      ),
+      damageDice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}damage_dice'],
+      ),
+      damageType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}damage_type'],
+      ),
+      versatileDamageDice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}versatile_damage_dice'],
+      ),
+      weaponProperties: $InventoryItemsTable.$converterweaponProperties.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}weapon_properties'],
+        )!,
+      ),
     );
   }
 
@@ -2422,6 +3039,9 @@ class $InventoryItemsTable extends InventoryItems
   $InventoryItemsTable createAlias(String alias) {
     return $InventoryItemsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterweaponProperties =
+      const StringListConverter();
 }
 
 class InventoryItemData extends DataClass
@@ -2440,12 +3060,47 @@ class InventoryItemData extends DataClass
 
   /// Categoria do equipamento (ex: "Weapon", "Armor").
   final String equipmentCategory;
+  final int quantity;
+  final double weight;
+  final bool equipped;
+  final bool requiresAttunement;
+  final bool attuned;
+
+  /// `false` nos itens anteriores à versão 10: a ficha completa os dados
+  /// pelo compêndio quando tem internet.
+  final bool detailsLoaded;
+  final String? armorCategory;
+  final int? armorBase;
+  final bool armorDexBonus;
+  final int? armorMaxDexBonus;
+  final String? weaponCategory;
+  final String? weaponRange;
+  final String? damageDice;
+  final String? damageType;
+  final String? versatileDamageDice;
+  final List<String> weaponProperties;
   const InventoryItemData({
     required this.id,
     required this.characterId,
     required this.itemIndex,
     required this.name,
     required this.equipmentCategory,
+    required this.quantity,
+    required this.weight,
+    required this.equipped,
+    required this.requiresAttunement,
+    required this.attuned,
+    required this.detailsLoaded,
+    this.armorCategory,
+    this.armorBase,
+    required this.armorDexBonus,
+    this.armorMaxDexBonus,
+    this.weaponCategory,
+    this.weaponRange,
+    this.damageDice,
+    this.damageType,
+    this.versatileDamageDice,
+    required this.weaponProperties,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2455,6 +3110,42 @@ class InventoryItemData extends DataClass
     map['item_index'] = Variable<String>(itemIndex);
     map['name'] = Variable<String>(name);
     map['equipment_category'] = Variable<String>(equipmentCategory);
+    map['quantity'] = Variable<int>(quantity);
+    map['weight'] = Variable<double>(weight);
+    map['equipped'] = Variable<bool>(equipped);
+    map['requires_attunement'] = Variable<bool>(requiresAttunement);
+    map['attuned'] = Variable<bool>(attuned);
+    map['details_loaded'] = Variable<bool>(detailsLoaded);
+    if (!nullToAbsent || armorCategory != null) {
+      map['armor_category'] = Variable<String>(armorCategory);
+    }
+    if (!nullToAbsent || armorBase != null) {
+      map['armor_base'] = Variable<int>(armorBase);
+    }
+    map['armor_dex_bonus'] = Variable<bool>(armorDexBonus);
+    if (!nullToAbsent || armorMaxDexBonus != null) {
+      map['armor_max_dex_bonus'] = Variable<int>(armorMaxDexBonus);
+    }
+    if (!nullToAbsent || weaponCategory != null) {
+      map['weapon_category'] = Variable<String>(weaponCategory);
+    }
+    if (!nullToAbsent || weaponRange != null) {
+      map['weapon_range'] = Variable<String>(weaponRange);
+    }
+    if (!nullToAbsent || damageDice != null) {
+      map['damage_dice'] = Variable<String>(damageDice);
+    }
+    if (!nullToAbsent || damageType != null) {
+      map['damage_type'] = Variable<String>(damageType);
+    }
+    if (!nullToAbsent || versatileDamageDice != null) {
+      map['versatile_damage_dice'] = Variable<String>(versatileDamageDice);
+    }
+    {
+      map['weapon_properties'] = Variable<String>(
+        $InventoryItemsTable.$converterweaponProperties.toSql(weaponProperties),
+      );
+    }
     return map;
   }
 
@@ -2465,6 +3156,38 @@ class InventoryItemData extends DataClass
       itemIndex: Value(itemIndex),
       name: Value(name),
       equipmentCategory: Value(equipmentCategory),
+      quantity: Value(quantity),
+      weight: Value(weight),
+      equipped: Value(equipped),
+      requiresAttunement: Value(requiresAttunement),
+      attuned: Value(attuned),
+      detailsLoaded: Value(detailsLoaded),
+      armorCategory: armorCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(armorCategory),
+      armorBase: armorBase == null && nullToAbsent
+          ? const Value.absent()
+          : Value(armorBase),
+      armorDexBonus: Value(armorDexBonus),
+      armorMaxDexBonus: armorMaxDexBonus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(armorMaxDexBonus),
+      weaponCategory: weaponCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weaponCategory),
+      weaponRange: weaponRange == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weaponRange),
+      damageDice: damageDice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(damageDice),
+      damageType: damageType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(damageType),
+      versatileDamageDice: versatileDamageDice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(versatileDamageDice),
+      weaponProperties: Value(weaponProperties),
     );
   }
 
@@ -2479,6 +3202,26 @@ class InventoryItemData extends DataClass
       itemIndex: serializer.fromJson<String>(json['itemIndex']),
       name: serializer.fromJson<String>(json['name']),
       equipmentCategory: serializer.fromJson<String>(json['equipmentCategory']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      weight: serializer.fromJson<double>(json['weight']),
+      equipped: serializer.fromJson<bool>(json['equipped']),
+      requiresAttunement: serializer.fromJson<bool>(json['requiresAttunement']),
+      attuned: serializer.fromJson<bool>(json['attuned']),
+      detailsLoaded: serializer.fromJson<bool>(json['detailsLoaded']),
+      armorCategory: serializer.fromJson<String?>(json['armorCategory']),
+      armorBase: serializer.fromJson<int?>(json['armorBase']),
+      armorDexBonus: serializer.fromJson<bool>(json['armorDexBonus']),
+      armorMaxDexBonus: serializer.fromJson<int?>(json['armorMaxDexBonus']),
+      weaponCategory: serializer.fromJson<String?>(json['weaponCategory']),
+      weaponRange: serializer.fromJson<String?>(json['weaponRange']),
+      damageDice: serializer.fromJson<String?>(json['damageDice']),
+      damageType: serializer.fromJson<String?>(json['damageType']),
+      versatileDamageDice: serializer.fromJson<String?>(
+        json['versatileDamageDice'],
+      ),
+      weaponProperties: serializer.fromJson<List<String>>(
+        json['weaponProperties'],
+      ),
     );
   }
   @override
@@ -2490,6 +3233,22 @@ class InventoryItemData extends DataClass
       'itemIndex': serializer.toJson<String>(itemIndex),
       'name': serializer.toJson<String>(name),
       'equipmentCategory': serializer.toJson<String>(equipmentCategory),
+      'quantity': serializer.toJson<int>(quantity),
+      'weight': serializer.toJson<double>(weight),
+      'equipped': serializer.toJson<bool>(equipped),
+      'requiresAttunement': serializer.toJson<bool>(requiresAttunement),
+      'attuned': serializer.toJson<bool>(attuned),
+      'detailsLoaded': serializer.toJson<bool>(detailsLoaded),
+      'armorCategory': serializer.toJson<String?>(armorCategory),
+      'armorBase': serializer.toJson<int?>(armorBase),
+      'armorDexBonus': serializer.toJson<bool>(armorDexBonus),
+      'armorMaxDexBonus': serializer.toJson<int?>(armorMaxDexBonus),
+      'weaponCategory': serializer.toJson<String?>(weaponCategory),
+      'weaponRange': serializer.toJson<String?>(weaponRange),
+      'damageDice': serializer.toJson<String?>(damageDice),
+      'damageType': serializer.toJson<String?>(damageType),
+      'versatileDamageDice': serializer.toJson<String?>(versatileDamageDice),
+      'weaponProperties': serializer.toJson<List<String>>(weaponProperties),
     };
   }
 
@@ -2499,12 +3258,52 @@ class InventoryItemData extends DataClass
     String? itemIndex,
     String? name,
     String? equipmentCategory,
+    int? quantity,
+    double? weight,
+    bool? equipped,
+    bool? requiresAttunement,
+    bool? attuned,
+    bool? detailsLoaded,
+    Value<String?> armorCategory = const Value.absent(),
+    Value<int?> armorBase = const Value.absent(),
+    bool? armorDexBonus,
+    Value<int?> armorMaxDexBonus = const Value.absent(),
+    Value<String?> weaponCategory = const Value.absent(),
+    Value<String?> weaponRange = const Value.absent(),
+    Value<String?> damageDice = const Value.absent(),
+    Value<String?> damageType = const Value.absent(),
+    Value<String?> versatileDamageDice = const Value.absent(),
+    List<String>? weaponProperties,
   }) => InventoryItemData(
     id: id ?? this.id,
     characterId: characterId ?? this.characterId,
     itemIndex: itemIndex ?? this.itemIndex,
     name: name ?? this.name,
     equipmentCategory: equipmentCategory ?? this.equipmentCategory,
+    quantity: quantity ?? this.quantity,
+    weight: weight ?? this.weight,
+    equipped: equipped ?? this.equipped,
+    requiresAttunement: requiresAttunement ?? this.requiresAttunement,
+    attuned: attuned ?? this.attuned,
+    detailsLoaded: detailsLoaded ?? this.detailsLoaded,
+    armorCategory: armorCategory.present
+        ? armorCategory.value
+        : this.armorCategory,
+    armorBase: armorBase.present ? armorBase.value : this.armorBase,
+    armorDexBonus: armorDexBonus ?? this.armorDexBonus,
+    armorMaxDexBonus: armorMaxDexBonus.present
+        ? armorMaxDexBonus.value
+        : this.armorMaxDexBonus,
+    weaponCategory: weaponCategory.present
+        ? weaponCategory.value
+        : this.weaponCategory,
+    weaponRange: weaponRange.present ? weaponRange.value : this.weaponRange,
+    damageDice: damageDice.present ? damageDice.value : this.damageDice,
+    damageType: damageType.present ? damageType.value : this.damageType,
+    versatileDamageDice: versatileDamageDice.present
+        ? versatileDamageDice.value
+        : this.versatileDamageDice,
+    weaponProperties: weaponProperties ?? this.weaponProperties,
   );
   InventoryItemData copyWithCompanion(InventoryItemsCompanion data) {
     return InventoryItemData(
@@ -2517,6 +3316,44 @@ class InventoryItemData extends DataClass
       equipmentCategory: data.equipmentCategory.present
           ? data.equipmentCategory.value
           : this.equipmentCategory,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      weight: data.weight.present ? data.weight.value : this.weight,
+      equipped: data.equipped.present ? data.equipped.value : this.equipped,
+      requiresAttunement: data.requiresAttunement.present
+          ? data.requiresAttunement.value
+          : this.requiresAttunement,
+      attuned: data.attuned.present ? data.attuned.value : this.attuned,
+      detailsLoaded: data.detailsLoaded.present
+          ? data.detailsLoaded.value
+          : this.detailsLoaded,
+      armorCategory: data.armorCategory.present
+          ? data.armorCategory.value
+          : this.armorCategory,
+      armorBase: data.armorBase.present ? data.armorBase.value : this.armorBase,
+      armorDexBonus: data.armorDexBonus.present
+          ? data.armorDexBonus.value
+          : this.armorDexBonus,
+      armorMaxDexBonus: data.armorMaxDexBonus.present
+          ? data.armorMaxDexBonus.value
+          : this.armorMaxDexBonus,
+      weaponCategory: data.weaponCategory.present
+          ? data.weaponCategory.value
+          : this.weaponCategory,
+      weaponRange: data.weaponRange.present
+          ? data.weaponRange.value
+          : this.weaponRange,
+      damageDice: data.damageDice.present
+          ? data.damageDice.value
+          : this.damageDice,
+      damageType: data.damageType.present
+          ? data.damageType.value
+          : this.damageType,
+      versatileDamageDice: data.versatileDamageDice.present
+          ? data.versatileDamageDice.value
+          : this.versatileDamageDice,
+      weaponProperties: data.weaponProperties.present
+          ? data.weaponProperties.value
+          : this.weaponProperties,
     );
   }
 
@@ -2527,14 +3364,51 @@ class InventoryItemData extends DataClass
           ..write('characterId: $characterId, ')
           ..write('itemIndex: $itemIndex, ')
           ..write('name: $name, ')
-          ..write('equipmentCategory: $equipmentCategory')
+          ..write('equipmentCategory: $equipmentCategory, ')
+          ..write('quantity: $quantity, ')
+          ..write('weight: $weight, ')
+          ..write('equipped: $equipped, ')
+          ..write('requiresAttunement: $requiresAttunement, ')
+          ..write('attuned: $attuned, ')
+          ..write('detailsLoaded: $detailsLoaded, ')
+          ..write('armorCategory: $armorCategory, ')
+          ..write('armorBase: $armorBase, ')
+          ..write('armorDexBonus: $armorDexBonus, ')
+          ..write('armorMaxDexBonus: $armorMaxDexBonus, ')
+          ..write('weaponCategory: $weaponCategory, ')
+          ..write('weaponRange: $weaponRange, ')
+          ..write('damageDice: $damageDice, ')
+          ..write('damageType: $damageType, ')
+          ..write('versatileDamageDice: $versatileDamageDice, ')
+          ..write('weaponProperties: $weaponProperties')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, characterId, itemIndex, name, equipmentCategory);
+  int get hashCode => Object.hashAll([
+    id,
+    characterId,
+    itemIndex,
+    name,
+    equipmentCategory,
+    quantity,
+    weight,
+    equipped,
+    requiresAttunement,
+    attuned,
+    detailsLoaded,
+    armorCategory,
+    armorBase,
+    armorDexBonus,
+    armorMaxDexBonus,
+    weaponCategory,
+    weaponRange,
+    damageDice,
+    damageType,
+    versatileDamageDice,
+    weaponProperties,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2543,7 +3417,23 @@ class InventoryItemData extends DataClass
           other.characterId == this.characterId &&
           other.itemIndex == this.itemIndex &&
           other.name == this.name &&
-          other.equipmentCategory == this.equipmentCategory);
+          other.equipmentCategory == this.equipmentCategory &&
+          other.quantity == this.quantity &&
+          other.weight == this.weight &&
+          other.equipped == this.equipped &&
+          other.requiresAttunement == this.requiresAttunement &&
+          other.attuned == this.attuned &&
+          other.detailsLoaded == this.detailsLoaded &&
+          other.armorCategory == this.armorCategory &&
+          other.armorBase == this.armorBase &&
+          other.armorDexBonus == this.armorDexBonus &&
+          other.armorMaxDexBonus == this.armorMaxDexBonus &&
+          other.weaponCategory == this.weaponCategory &&
+          other.weaponRange == this.weaponRange &&
+          other.damageDice == this.damageDice &&
+          other.damageType == this.damageType &&
+          other.versatileDamageDice == this.versatileDamageDice &&
+          other.weaponProperties == this.weaponProperties);
 }
 
 class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
@@ -2552,6 +3442,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
   final Value<String> itemIndex;
   final Value<String> name;
   final Value<String> equipmentCategory;
+  final Value<int> quantity;
+  final Value<double> weight;
+  final Value<bool> equipped;
+  final Value<bool> requiresAttunement;
+  final Value<bool> attuned;
+  final Value<bool> detailsLoaded;
+  final Value<String?> armorCategory;
+  final Value<int?> armorBase;
+  final Value<bool> armorDexBonus;
+  final Value<int?> armorMaxDexBonus;
+  final Value<String?> weaponCategory;
+  final Value<String?> weaponRange;
+  final Value<String?> damageDice;
+  final Value<String?> damageType;
+  final Value<String?> versatileDamageDice;
+  final Value<List<String>> weaponProperties;
   final Value<int> rowid;
   const InventoryItemsCompanion({
     this.id = const Value.absent(),
@@ -2559,6 +3465,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
     this.itemIndex = const Value.absent(),
     this.name = const Value.absent(),
     this.equipmentCategory = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.weight = const Value.absent(),
+    this.equipped = const Value.absent(),
+    this.requiresAttunement = const Value.absent(),
+    this.attuned = const Value.absent(),
+    this.detailsLoaded = const Value.absent(),
+    this.armorCategory = const Value.absent(),
+    this.armorBase = const Value.absent(),
+    this.armorDexBonus = const Value.absent(),
+    this.armorMaxDexBonus = const Value.absent(),
+    this.weaponCategory = const Value.absent(),
+    this.weaponRange = const Value.absent(),
+    this.damageDice = const Value.absent(),
+    this.damageType = const Value.absent(),
+    this.versatileDamageDice = const Value.absent(),
+    this.weaponProperties = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   InventoryItemsCompanion.insert({
@@ -2567,6 +3489,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
     required String itemIndex,
     required String name,
     required String equipmentCategory,
+    this.quantity = const Value.absent(),
+    this.weight = const Value.absent(),
+    this.equipped = const Value.absent(),
+    this.requiresAttunement = const Value.absent(),
+    this.attuned = const Value.absent(),
+    this.detailsLoaded = const Value.absent(),
+    this.armorCategory = const Value.absent(),
+    this.armorBase = const Value.absent(),
+    this.armorDexBonus = const Value.absent(),
+    this.armorMaxDexBonus = const Value.absent(),
+    this.weaponCategory = const Value.absent(),
+    this.weaponRange = const Value.absent(),
+    this.damageDice = const Value.absent(),
+    this.damageType = const Value.absent(),
+    this.versatileDamageDice = const Value.absent(),
+    this.weaponProperties = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        characterId = Value(characterId),
@@ -2579,6 +3517,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
     Expression<String>? itemIndex,
     Expression<String>? name,
     Expression<String>? equipmentCategory,
+    Expression<int>? quantity,
+    Expression<double>? weight,
+    Expression<bool>? equipped,
+    Expression<bool>? requiresAttunement,
+    Expression<bool>? attuned,
+    Expression<bool>? detailsLoaded,
+    Expression<String>? armorCategory,
+    Expression<int>? armorBase,
+    Expression<bool>? armorDexBonus,
+    Expression<int>? armorMaxDexBonus,
+    Expression<String>? weaponCategory,
+    Expression<String>? weaponRange,
+    Expression<String>? damageDice,
+    Expression<String>? damageType,
+    Expression<String>? versatileDamageDice,
+    Expression<String>? weaponProperties,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2587,6 +3541,23 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
       if (itemIndex != null) 'item_index': itemIndex,
       if (name != null) 'name': name,
       if (equipmentCategory != null) 'equipment_category': equipmentCategory,
+      if (quantity != null) 'quantity': quantity,
+      if (weight != null) 'weight': weight,
+      if (equipped != null) 'equipped': equipped,
+      if (requiresAttunement != null) 'requires_attunement': requiresAttunement,
+      if (attuned != null) 'attuned': attuned,
+      if (detailsLoaded != null) 'details_loaded': detailsLoaded,
+      if (armorCategory != null) 'armor_category': armorCategory,
+      if (armorBase != null) 'armor_base': armorBase,
+      if (armorDexBonus != null) 'armor_dex_bonus': armorDexBonus,
+      if (armorMaxDexBonus != null) 'armor_max_dex_bonus': armorMaxDexBonus,
+      if (weaponCategory != null) 'weapon_category': weaponCategory,
+      if (weaponRange != null) 'weapon_range': weaponRange,
+      if (damageDice != null) 'damage_dice': damageDice,
+      if (damageType != null) 'damage_type': damageType,
+      if (versatileDamageDice != null)
+        'versatile_damage_dice': versatileDamageDice,
+      if (weaponProperties != null) 'weapon_properties': weaponProperties,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2597,6 +3568,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
     Value<String>? itemIndex,
     Value<String>? name,
     Value<String>? equipmentCategory,
+    Value<int>? quantity,
+    Value<double>? weight,
+    Value<bool>? equipped,
+    Value<bool>? requiresAttunement,
+    Value<bool>? attuned,
+    Value<bool>? detailsLoaded,
+    Value<String?>? armorCategory,
+    Value<int?>? armorBase,
+    Value<bool>? armorDexBonus,
+    Value<int?>? armorMaxDexBonus,
+    Value<String?>? weaponCategory,
+    Value<String?>? weaponRange,
+    Value<String?>? damageDice,
+    Value<String?>? damageType,
+    Value<String?>? versatileDamageDice,
+    Value<List<String>>? weaponProperties,
     Value<int>? rowid,
   }) {
     return InventoryItemsCompanion(
@@ -2605,6 +3592,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
       itemIndex: itemIndex ?? this.itemIndex,
       name: name ?? this.name,
       equipmentCategory: equipmentCategory ?? this.equipmentCategory,
+      quantity: quantity ?? this.quantity,
+      weight: weight ?? this.weight,
+      equipped: equipped ?? this.equipped,
+      requiresAttunement: requiresAttunement ?? this.requiresAttunement,
+      attuned: attuned ?? this.attuned,
+      detailsLoaded: detailsLoaded ?? this.detailsLoaded,
+      armorCategory: armorCategory ?? this.armorCategory,
+      armorBase: armorBase ?? this.armorBase,
+      armorDexBonus: armorDexBonus ?? this.armorDexBonus,
+      armorMaxDexBonus: armorMaxDexBonus ?? this.armorMaxDexBonus,
+      weaponCategory: weaponCategory ?? this.weaponCategory,
+      weaponRange: weaponRange ?? this.weaponRange,
+      damageDice: damageDice ?? this.damageDice,
+      damageType: damageType ?? this.damageType,
+      versatileDamageDice: versatileDamageDice ?? this.versatileDamageDice,
+      weaponProperties: weaponProperties ?? this.weaponProperties,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2627,6 +3630,60 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
     if (equipmentCategory.present) {
       map['equipment_category'] = Variable<String>(equipmentCategory.value);
     }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (weight.present) {
+      map['weight'] = Variable<double>(weight.value);
+    }
+    if (equipped.present) {
+      map['equipped'] = Variable<bool>(equipped.value);
+    }
+    if (requiresAttunement.present) {
+      map['requires_attunement'] = Variable<bool>(requiresAttunement.value);
+    }
+    if (attuned.present) {
+      map['attuned'] = Variable<bool>(attuned.value);
+    }
+    if (detailsLoaded.present) {
+      map['details_loaded'] = Variable<bool>(detailsLoaded.value);
+    }
+    if (armorCategory.present) {
+      map['armor_category'] = Variable<String>(armorCategory.value);
+    }
+    if (armorBase.present) {
+      map['armor_base'] = Variable<int>(armorBase.value);
+    }
+    if (armorDexBonus.present) {
+      map['armor_dex_bonus'] = Variable<bool>(armorDexBonus.value);
+    }
+    if (armorMaxDexBonus.present) {
+      map['armor_max_dex_bonus'] = Variable<int>(armorMaxDexBonus.value);
+    }
+    if (weaponCategory.present) {
+      map['weapon_category'] = Variable<String>(weaponCategory.value);
+    }
+    if (weaponRange.present) {
+      map['weapon_range'] = Variable<String>(weaponRange.value);
+    }
+    if (damageDice.present) {
+      map['damage_dice'] = Variable<String>(damageDice.value);
+    }
+    if (damageType.present) {
+      map['damage_type'] = Variable<String>(damageType.value);
+    }
+    if (versatileDamageDice.present) {
+      map['versatile_damage_dice'] = Variable<String>(
+        versatileDamageDice.value,
+      );
+    }
+    if (weaponProperties.present) {
+      map['weapon_properties'] = Variable<String>(
+        $InventoryItemsTable.$converterweaponProperties.toSql(
+          weaponProperties.value,
+        ),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2641,6 +3698,22 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItemData> {
           ..write('itemIndex: $itemIndex, ')
           ..write('name: $name, ')
           ..write('equipmentCategory: $equipmentCategory, ')
+          ..write('quantity: $quantity, ')
+          ..write('weight: $weight, ')
+          ..write('equipped: $equipped, ')
+          ..write('requiresAttunement: $requiresAttunement, ')
+          ..write('attuned: $attuned, ')
+          ..write('detailsLoaded: $detailsLoaded, ')
+          ..write('armorCategory: $armorCategory, ')
+          ..write('armorBase: $armorBase, ')
+          ..write('armorDexBonus: $armorDexBonus, ')
+          ..write('armorMaxDexBonus: $armorMaxDexBonus, ')
+          ..write('weaponCategory: $weaponCategory, ')
+          ..write('weaponRange: $weaponRange, ')
+          ..write('damageDice: $damageDice, ')
+          ..write('damageType: $damageType, ')
+          ..write('versatileDamageDice: $versatileDamageDice, ')
+          ..write('weaponProperties: $weaponProperties, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3535,6 +4608,11 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<bool> inspiration,
       Value<List<int>> spellSlotsUsed,
       Value<int> pactSlotsUsed,
+      Value<int> copper,
+      Value<int> silver,
+      Value<int> electrum,
+      Value<int> gold,
+      Value<int> platinum,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -3571,6 +4649,11 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<bool> inspiration,
       Value<List<int>> spellSlotsUsed,
       Value<int> pactSlotsUsed,
+      Value<int> copper,
+      Value<int> silver,
+      Value<int> electrum,
+      Value<int> gold,
+      Value<int> platinum,
       Value<int> rowid,
     });
 
@@ -3824,6 +4907,31 @@ class $$CharactersTableFilterComposer
 
   ColumnFilters<int> get pactSlotsUsed => $composableBuilder(
     column: $table.pactSlotsUsed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get copper => $composableBuilder(
+    column: $table.copper,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get silver => $composableBuilder(
+    column: $table.silver,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get electrum => $composableBuilder(
+    column: $table.electrum,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get gold => $composableBuilder(
+    column: $table.gold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get platinum => $composableBuilder(
+    column: $table.platinum,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4096,6 +5204,31 @@ class $$CharactersTableOrderingComposer
     column: $table.pactSlotsUsed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get copper => $composableBuilder(
+    column: $table.copper,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get silver => $composableBuilder(
+    column: $table.silver,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get electrum => $composableBuilder(
+    column: $table.electrum,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get gold => $composableBuilder(
+    column: $table.gold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get platinum => $composableBuilder(
+    column: $table.platinum,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -4248,6 +5381,21 @@ class $$CharactersTableAnnotationComposer
     column: $table.pactSlotsUsed,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get copper =>
+      $composableBuilder(column: $table.copper, builder: (column) => column);
+
+  GeneratedColumn<int> get silver =>
+      $composableBuilder(column: $table.silver, builder: (column) => column);
+
+  GeneratedColumn<int> get electrum =>
+      $composableBuilder(column: $table.electrum, builder: (column) => column);
+
+  GeneratedColumn<int> get gold =>
+      $composableBuilder(column: $table.gold, builder: (column) => column);
+
+  GeneratedColumn<int> get platinum =>
+      $composableBuilder(column: $table.platinum, builder: (column) => column);
 
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
@@ -4415,6 +5563,11 @@ class $$CharactersTableTableManager
                 Value<bool> inspiration = const Value.absent(),
                 Value<List<int>> spellSlotsUsed = const Value.absent(),
                 Value<int> pactSlotsUsed = const Value.absent(),
+                Value<int> copper = const Value.absent(),
+                Value<int> silver = const Value.absent(),
+                Value<int> electrum = const Value.absent(),
+                Value<int> gold = const Value.absent(),
+                Value<int> platinum = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -4449,6 +5602,11 @@ class $$CharactersTableTableManager
                 inspiration: inspiration,
                 spellSlotsUsed: spellSlotsUsed,
                 pactSlotsUsed: pactSlotsUsed,
+                copper: copper,
+                silver: silver,
+                electrum: electrum,
+                gold: gold,
+                platinum: platinum,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4485,6 +5643,11 @@ class $$CharactersTableTableManager
                 Value<bool> inspiration = const Value.absent(),
                 Value<List<int>> spellSlotsUsed = const Value.absent(),
                 Value<int> pactSlotsUsed = const Value.absent(),
+                Value<int> copper = const Value.absent(),
+                Value<int> silver = const Value.absent(),
+                Value<int> electrum = const Value.absent(),
+                Value<int> gold = const Value.absent(),
+                Value<int> platinum = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -4519,6 +5682,11 @@ class $$CharactersTableTableManager
                 inspiration: inspiration,
                 spellSlotsUsed: spellSlotsUsed,
                 pactSlotsUsed: pactSlotsUsed,
+                copper: copper,
+                silver: silver,
+                electrum: electrum,
+                gold: gold,
+                platinum: platinum,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5024,6 +6192,22 @@ typedef $$InventoryItemsTableCreateCompanionBuilder =
       required String itemIndex,
       required String name,
       required String equipmentCategory,
+      Value<int> quantity,
+      Value<double> weight,
+      Value<bool> equipped,
+      Value<bool> requiresAttunement,
+      Value<bool> attuned,
+      Value<bool> detailsLoaded,
+      Value<String?> armorCategory,
+      Value<int?> armorBase,
+      Value<bool> armorDexBonus,
+      Value<int?> armorMaxDexBonus,
+      Value<String?> weaponCategory,
+      Value<String?> weaponRange,
+      Value<String?> damageDice,
+      Value<String?> damageType,
+      Value<String?> versatileDamageDice,
+      Value<List<String>> weaponProperties,
       Value<int> rowid,
     });
 typedef $$InventoryItemsTableUpdateCompanionBuilder =
@@ -5033,6 +6217,22 @@ typedef $$InventoryItemsTableUpdateCompanionBuilder =
       Value<String> itemIndex,
       Value<String> name,
       Value<String> equipmentCategory,
+      Value<int> quantity,
+      Value<double> weight,
+      Value<bool> equipped,
+      Value<bool> requiresAttunement,
+      Value<bool> attuned,
+      Value<bool> detailsLoaded,
+      Value<String?> armorCategory,
+      Value<int?> armorBase,
+      Value<bool> armorDexBonus,
+      Value<int?> armorMaxDexBonus,
+      Value<String?> weaponCategory,
+      Value<String?> weaponRange,
+      Value<String?> damageDice,
+      Value<String?> damageType,
+      Value<String?> versatileDamageDice,
+      Value<List<String>> weaponProperties,
       Value<int> rowid,
     });
 
@@ -5092,6 +6292,87 @@ class $$InventoryItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weight => $composableBuilder(
+    column: $table.weight,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get equipped => $composableBuilder(
+    column: $table.equipped,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get requiresAttunement => $composableBuilder(
+    column: $table.requiresAttunement,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get attuned => $composableBuilder(
+    column: $table.attuned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get detailsLoaded => $composableBuilder(
+    column: $table.detailsLoaded,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get armorCategory => $composableBuilder(
+    column: $table.armorCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get armorBase => $composableBuilder(
+    column: $table.armorBase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get armorDexBonus => $composableBuilder(
+    column: $table.armorDexBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get armorMaxDexBonus => $composableBuilder(
+    column: $table.armorMaxDexBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get weaponCategory => $composableBuilder(
+    column: $table.weaponCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get weaponRange => $composableBuilder(
+    column: $table.weaponRange,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get damageDice => $composableBuilder(
+    column: $table.damageDice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get damageType => $composableBuilder(
+    column: $table.damageType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get versatileDamageDice => $composableBuilder(
+    column: $table.versatileDamageDice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get weaponProperties => $composableBuilder(
+    column: $table.weaponProperties,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   $$CharactersTableFilterComposer get characterId {
     final $$CharactersTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5145,6 +6426,86 @@ class $$InventoryItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weight => $composableBuilder(
+    column: $table.weight,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get equipped => $composableBuilder(
+    column: $table.equipped,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get requiresAttunement => $composableBuilder(
+    column: $table.requiresAttunement,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get attuned => $composableBuilder(
+    column: $table.attuned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get detailsLoaded => $composableBuilder(
+    column: $table.detailsLoaded,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get armorCategory => $composableBuilder(
+    column: $table.armorCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get armorBase => $composableBuilder(
+    column: $table.armorBase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get armorDexBonus => $composableBuilder(
+    column: $table.armorDexBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get armorMaxDexBonus => $composableBuilder(
+    column: $table.armorMaxDexBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get weaponCategory => $composableBuilder(
+    column: $table.weaponCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get weaponRange => $composableBuilder(
+    column: $table.weaponRange,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get damageDice => $composableBuilder(
+    column: $table.damageDice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get damageType => $composableBuilder(
+    column: $table.damageType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get versatileDamageDice => $composableBuilder(
+    column: $table.versatileDamageDice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get weaponProperties => $composableBuilder(
+    column: $table.weaponProperties,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CharactersTableOrderingComposer get characterId {
     final $$CharactersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5191,6 +6552,77 @@ class $$InventoryItemsTableAnnotationComposer
     column: $table.equipmentCategory,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<double> get weight =>
+      $composableBuilder(column: $table.weight, builder: (column) => column);
+
+  GeneratedColumn<bool> get equipped =>
+      $composableBuilder(column: $table.equipped, builder: (column) => column);
+
+  GeneratedColumn<bool> get requiresAttunement => $composableBuilder(
+    column: $table.requiresAttunement,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get attuned =>
+      $composableBuilder(column: $table.attuned, builder: (column) => column);
+
+  GeneratedColumn<bool> get detailsLoaded => $composableBuilder(
+    column: $table.detailsLoaded,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get armorCategory => $composableBuilder(
+    column: $table.armorCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get armorBase =>
+      $composableBuilder(column: $table.armorBase, builder: (column) => column);
+
+  GeneratedColumn<bool> get armorDexBonus => $composableBuilder(
+    column: $table.armorDexBonus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get armorMaxDexBonus => $composableBuilder(
+    column: $table.armorMaxDexBonus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get weaponCategory => $composableBuilder(
+    column: $table.weaponCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get weaponRange => $composableBuilder(
+    column: $table.weaponRange,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get damageDice => $composableBuilder(
+    column: $table.damageDice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get damageType => $composableBuilder(
+    column: $table.damageType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get versatileDamageDice => $composableBuilder(
+    column: $table.versatileDamageDice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get weaponProperties =>
+      $composableBuilder(
+        column: $table.weaponProperties,
+        builder: (column) => column,
+      );
 
   $$CharactersTableAnnotationComposer get characterId {
     final $$CharactersTableAnnotationComposer composer = $composerBuilder(
@@ -5251,6 +6683,22 @@ class $$InventoryItemsTableTableManager
                 Value<String> itemIndex = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> equipmentCategory = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<double> weight = const Value.absent(),
+                Value<bool> equipped = const Value.absent(),
+                Value<bool> requiresAttunement = const Value.absent(),
+                Value<bool> attuned = const Value.absent(),
+                Value<bool> detailsLoaded = const Value.absent(),
+                Value<String?> armorCategory = const Value.absent(),
+                Value<int?> armorBase = const Value.absent(),
+                Value<bool> armorDexBonus = const Value.absent(),
+                Value<int?> armorMaxDexBonus = const Value.absent(),
+                Value<String?> weaponCategory = const Value.absent(),
+                Value<String?> weaponRange = const Value.absent(),
+                Value<String?> damageDice = const Value.absent(),
+                Value<String?> damageType = const Value.absent(),
+                Value<String?> versatileDamageDice = const Value.absent(),
+                Value<List<String>> weaponProperties = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InventoryItemsCompanion(
                 id: id,
@@ -5258,6 +6706,22 @@ class $$InventoryItemsTableTableManager
                 itemIndex: itemIndex,
                 name: name,
                 equipmentCategory: equipmentCategory,
+                quantity: quantity,
+                weight: weight,
+                equipped: equipped,
+                requiresAttunement: requiresAttunement,
+                attuned: attuned,
+                detailsLoaded: detailsLoaded,
+                armorCategory: armorCategory,
+                armorBase: armorBase,
+                armorDexBonus: armorDexBonus,
+                armorMaxDexBonus: armorMaxDexBonus,
+                weaponCategory: weaponCategory,
+                weaponRange: weaponRange,
+                damageDice: damageDice,
+                damageType: damageType,
+                versatileDamageDice: versatileDamageDice,
+                weaponProperties: weaponProperties,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5267,6 +6731,22 @@ class $$InventoryItemsTableTableManager
                 required String itemIndex,
                 required String name,
                 required String equipmentCategory,
+                Value<int> quantity = const Value.absent(),
+                Value<double> weight = const Value.absent(),
+                Value<bool> equipped = const Value.absent(),
+                Value<bool> requiresAttunement = const Value.absent(),
+                Value<bool> attuned = const Value.absent(),
+                Value<bool> detailsLoaded = const Value.absent(),
+                Value<String?> armorCategory = const Value.absent(),
+                Value<int?> armorBase = const Value.absent(),
+                Value<bool> armorDexBonus = const Value.absent(),
+                Value<int?> armorMaxDexBonus = const Value.absent(),
+                Value<String?> weaponCategory = const Value.absent(),
+                Value<String?> weaponRange = const Value.absent(),
+                Value<String?> damageDice = const Value.absent(),
+                Value<String?> damageType = const Value.absent(),
+                Value<String?> versatileDamageDice = const Value.absent(),
+                Value<List<String>> weaponProperties = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InventoryItemsCompanion.insert(
                 id: id,
@@ -5274,6 +6754,22 @@ class $$InventoryItemsTableTableManager
                 itemIndex: itemIndex,
                 name: name,
                 equipmentCategory: equipmentCategory,
+                quantity: quantity,
+                weight: weight,
+                equipped: equipped,
+                requiresAttunement: requiresAttunement,
+                attuned: attuned,
+                detailsLoaded: detailsLoaded,
+                armorCategory: armorCategory,
+                armorBase: armorBase,
+                armorDexBonus: armorDexBonus,
+                armorMaxDexBonus: armorMaxDexBonus,
+                weaponCategory: weaponCategory,
+                weaponRange: weaponRange,
+                damageDice: damageDice,
+                damageType: damageType,
+                versatileDamageDice: versatileDamageDice,
+                weaponProperties: weaponProperties,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

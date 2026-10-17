@@ -3,6 +3,7 @@ import '../srd/spell_slots.dart';
 import '../srd/srd_class.dart';
 import 'attribute.dart';
 import 'attribute_type.dart';
+import 'coins.dart';
 import 'condition.dart';
 import 'proficiency.dart';
 
@@ -116,6 +117,9 @@ class Character {
   /// Espaços da Magia de Pacto (Bruxo) já gastos.
   final int pactSlotsUsed;
 
+  /// Moedas do personagem (PC, PP, PE, PO, PL).
+  final Coins coins;
+
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
   /// compêndio). Uma lista simples basta: o registro não carrega mais dados
   /// além do nome.
@@ -151,6 +155,7 @@ class Character {
     this.avatarPath,
     this.spellSlotsUsed = const [0, 0, 0, 0, 0, 0, 0, 0, 0],
     this.pactSlotsUsed = 0,
+    this.coins = const Coins(),
     this.defeatedBosses = const [],
   });
 
@@ -187,6 +192,7 @@ class Character {
     String? avatarPath,
     List<int>? spellSlotsUsed,
     int? pactSlotsUsed,
+    Coins? coins,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -218,6 +224,7 @@ class Character {
       avatarPath: avatarPath ?? this.avatarPath,
       spellSlotsUsed: spellSlotsUsed ?? this.spellSlotsUsed,
       pactSlotsUsed: pactSlotsUsed ?? this.pactSlotsUsed,
+      coins: coins ?? this.coins,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }
@@ -241,7 +248,8 @@ class Character {
   int get initiative => modifierOf(AttributeType.dexterity);
 
   /// CA sem armadura, com a Defesa sem Armadura do Bárbaro (DES + CON) e do
-  /// Monge (DES + SAB), mais [armorClassBonus].
+  /// Monge (DES + SAB), mais [armorClassBonus]. Com o inventário à mão, use
+  /// `armorClassWithEquipment`, que conta a armadura e o escudo equipados.
   int get armorClass =>
       unarmoredArmorClass(
         srdClass: srdClass,

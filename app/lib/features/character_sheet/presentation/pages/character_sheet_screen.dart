@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/di/injection_container.dart';
 
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
+import '../bloc/inventory_bloc.dart';
 import '../widgets/character_avatar.dart';
 import 'character_sheet_tabs/inventory_tab.dart';
 import 'character_sheet_tabs/spells_tab.dart';
@@ -36,8 +38,19 @@ class CharacterSheetScreen extends StatelessWidget {
 
   final Character character;
 
+  /// O [InventoryBloc] fica no nível da ficha (acima do tema de PV baixo,
+  /// para não ser recriado quando o tema muda): a aba Inventário edita os
+  /// itens, e a aba Status & Combate usa os itens equipados na CA e nos
+  /// ataques.
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<InventoryBloc>(
+      create: (_) => sl<InventoryBloc>()..add(LoadInventoryEvent(character.id)),
+      child: _buildThemedSheet(),
+    );
+  }
+
+  Widget _buildThemedSheet() {
     return BlocBuilder<CharacterBloc, CharacterState>(
       buildWhen: (previous, current) => !identical(
         previous.findCharacter(character.id),
@@ -118,7 +131,7 @@ class CharacterSheetScreen extends StatelessWidget {
           children: [
             StatusCombatTab(character: character),
             TraitsLoreTab(character: character),
-            InventoryTab(characterId: character.id),
+            InventoryTab(character: character),
             SpellsTab(character: character),
           ],
         ),

@@ -169,9 +169,10 @@ class _EquipmentTile extends StatelessWidget {
   /// Abre o [CharacterPickerBottomSheet] e, se um personagem for escolhido,
   /// adiciona o item ao inventário dele.
   ///
-  /// A API de listagem não fornece categoria do equipamento; valor padrão
-  /// substituível ao buscar os detalhes futuramente (a tela de detalhes já
-  /// usa a categoria real — ver [EquipmentDetailScreen]).
+  /// A API de listagem não traz categoria, peso nem dados de combate: o item
+  /// fica com `detailsLoaded: false`, e o inventário completa os dados pelo
+  /// compêndio na próxima abertura (a tela de detalhes já salva tudo — ver
+  /// [EquipmentDetailScreen]).
   Future<void> _showCharacterPicker(BuildContext context) async {
     final character = await CharacterPickerBottomSheet.show(context);
     if (character == null) return;
@@ -183,6 +184,7 @@ class _EquipmentTile extends StatelessWidget {
       itemIndex: equipment.index,
       name: equipment.name,
       equipmentCategory: 'Unknown',
+      detailsLoaded: false,
     );
 
     // Cross-feature: dispara o Command no BLoC de character_sheet a partir

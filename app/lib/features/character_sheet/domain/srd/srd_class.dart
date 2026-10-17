@@ -27,11 +27,16 @@ enum SrdClass {
     'barbarian',
     hitDie: 12,
     savingThrows: {AttributeType.strength, AttributeType.constitution},
+    armorTraining: {'light', 'medium', 'shield'},
+    weaponCategories: {'simple', 'martial'},
   ),
   bard(
     'bard',
     hitDie: 8,
     savingThrows: {AttributeType.dexterity, AttributeType.charisma},
+    armorTraining: {'light'},
+    weaponCategories: {'simple'},
+    weaponIndices: {'crossbow-hand', 'longsword', 'rapier', 'shortsword'},
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.charisma,
   ),
@@ -39,6 +44,8 @@ enum SrdClass {
     'cleric',
     hitDie: 8,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    armorTraining: {'light', 'medium', 'shield'},
+    weaponCategories: {'simple'},
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.wisdom,
     preparesSpells: true,
@@ -47,6 +54,9 @@ enum SrdClass {
     'druid',
     hitDie: 8,
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
+    armorTraining: {'light', 'medium', 'shield'},
+    weaponCategories: {},
+    weaponIndices: {'club', 'dagger', 'dart', 'javelin', 'mace', 'quarterstaff', 'scimitar', 'sickle', 'sling', 'spear'},
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.wisdom,
     preparesSpells: true,
@@ -55,16 +65,23 @@ enum SrdClass {
     'fighter',
     hitDie: 10,
     savingThrows: {AttributeType.strength, AttributeType.constitution},
+    armorTraining: {'light', 'medium', 'heavy', 'shield'},
+    weaponCategories: {'simple', 'martial'},
   ),
   monk(
     'monk',
     hitDie: 8,
     savingThrows: {AttributeType.strength, AttributeType.dexterity},
+    armorTraining: {},
+    weaponCategories: {'simple'},
+    weaponIndices: {'shortsword'},
   ),
   paladin(
     'paladin',
     hitDie: 10,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    armorTraining: {'light', 'medium', 'heavy', 'shield'},
+    weaponCategories: {'simple', 'martial'},
     spellcasting: Spellcasting.half,
     spellcastingAbility: AttributeType.charisma,
     preparesSpells: true,
@@ -73,6 +90,8 @@ enum SrdClass {
     'ranger',
     hitDie: 10,
     savingThrows: {AttributeType.strength, AttributeType.dexterity},
+    armorTraining: {'light', 'medium', 'shield'},
+    weaponCategories: {'simple', 'martial'},
     spellcasting: Spellcasting.half,
     spellcastingAbility: AttributeType.wisdom,
   ),
@@ -80,11 +99,17 @@ enum SrdClass {
     'rogue',
     hitDie: 8,
     savingThrows: {AttributeType.dexterity, AttributeType.intelligence},
+    armorTraining: {'light'},
+    weaponCategories: {'simple'},
+    weaponIndices: {'crossbow-hand', 'longsword', 'rapier', 'shortsword'},
   ),
   sorcerer(
     'sorcerer',
     hitDie: 6,
     savingThrows: {AttributeType.constitution, AttributeType.charisma},
+    armorTraining: {},
+    weaponCategories: {},
+    weaponIndices: {'dagger', 'dart', 'sling', 'quarterstaff', 'crossbow-light'},
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.charisma,
   ),
@@ -92,6 +117,8 @@ enum SrdClass {
     'warlock',
     hitDie: 8,
     savingThrows: {AttributeType.wisdom, AttributeType.charisma},
+    armorTraining: {'light'},
+    weaponCategories: {'simple'},
     spellcasting: Spellcasting.pact,
     spellcastingAbility: AttributeType.charisma,
   ),
@@ -99,6 +126,9 @@ enum SrdClass {
     'wizard',
     hitDie: 6,
     savingThrows: {AttributeType.intelligence, AttributeType.wisdom},
+    armorTraining: {},
+    weaponCategories: {},
+    weaponIndices: {'dagger', 'dart', 'sling', 'quarterstaff', 'crossbow-light'},
     spellcasting: Spellcasting.full,
     spellcastingAbility: AttributeType.intelligence,
     preparesSpells: true,
@@ -112,6 +142,17 @@ enum SrdClass {
 
   /// Testes de resistência em que a classe é proficiente.
   final Set<AttributeType> savingThrows;
+
+  /// Armaduras em que a classe é proficiente: `light`, `medium`, `heavy` e
+  /// `shield`.
+  final Set<String> armorTraining;
+
+  /// Categorias de arma em que a classe é proficiente: `simple`, `martial`.
+  final Set<String> weaponCategories;
+
+  /// Armas específicas (índices da API) fora das categorias acima, ex: o
+  /// Ladino com `rapier`.
+  final Set<String> weaponIndices;
 
   /// Como a classe ganha espaços de magia.
   final Spellcasting spellcasting;
@@ -127,10 +168,21 @@ enum SrdClass {
     this.apiIndex, {
     required this.hitDie,
     required this.savingThrows,
+    required this.armorTraining,
+    required this.weaponCategories,
+    this.weaponIndices = const {},
     this.spellcasting = Spellcasting.none,
     this.spellcastingAbility,
     this.preparesSpells = false,
   });
+
+  /// A classe é proficiente com a arma de índice [weaponIndex] e categoria
+  /// [weaponCategory] ("Simple" ou "Martial").
+  bool isProficientWithWeapon(String weaponIndex, String? weaponCategory) {
+    final category = weaponCategory?.toLowerCase();
+    return (category != null && weaponCategories.contains(category)) ||
+        weaponIndices.contains(weaponIndex);
+  }
 
   /// Dado de vida usado quando a classe não é do SRD.
   static const int defaultHitDie = 8;

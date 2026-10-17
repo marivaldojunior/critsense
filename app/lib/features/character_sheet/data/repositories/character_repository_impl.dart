@@ -6,6 +6,7 @@ import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/condition.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/character_spell.dart';
+import '../../domain/entities/coins.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/session_note.dart';
@@ -91,9 +92,11 @@ class CharacterRepositoryImpl implements ICharacterRepository {
   /// Retorna todos os itens do personagem via query filtrada por [characterId].
   @override
   Future<List<InventoryItem>> getCharacterInventory(String characterId) async {
-    final rows = await (_db.select(
-      _db.inventoryItems,
-    )..where((t) => t.characterId.equals(characterId))).get();
+    final rows =
+        await (_db.select(_db.inventoryItems)
+              ..where((t) => t.characterId.equals(characterId))
+              ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+            .get();
     return rows.map((row) => row._toDomain()).toList();
   }
 
@@ -230,6 +233,13 @@ extension _CharacterDataMapper on CharacterData {
       avatarPath: avatarPath,
       spellSlotsUsed: spellSlotsUsed,
       pactSlotsUsed: pactSlotsUsed,
+      coins: Coins({
+        Coin.copper: copper,
+        Coin.silver: silver,
+        Coin.electrum: electrum,
+        Coin.gold: gold,
+        Coin.platinum: platinum,
+      }),
       defeatedBosses: defeatedBosses,
     );
   }
@@ -316,6 +326,11 @@ extension _CharacterToCompanion on Character {
       spells: const Value([]),
       spellSlotsUsed: Value(spellSlotsUsed),
       pactSlotsUsed: Value(pactSlotsUsed),
+      copper: Value(coins.of(Coin.copper)),
+      silver: Value(coins.of(Coin.silver)),
+      electrum: Value(coins.of(Coin.electrum)),
+      gold: Value(coins.of(Coin.gold)),
+      platinum: Value(coins.of(Coin.platinum)),
       defeatedBosses: Value(defeatedBosses),
       proficiencies: Value(proficiencies.map(_proficiencyToKey).toList()),
     );
@@ -346,6 +361,22 @@ extension _InventoryItemDataMapper on InventoryItemData {
       itemIndex: itemIndex,
       name: name,
       equipmentCategory: equipmentCategory,
+      quantity: quantity,
+      weight: weight,
+      equipped: equipped,
+      requiresAttunement: requiresAttunement,
+      attuned: attuned,
+      detailsLoaded: detailsLoaded,
+      armorCategory: armorCategory,
+      armorBase: armorBase,
+      armorDexBonus: armorDexBonus,
+      armorMaxDexBonus: armorMaxDexBonus,
+      weaponCategory: weaponCategory,
+      weaponRange: weaponRange,
+      damageDice: damageDice,
+      damageType: damageType,
+      versatileDamageDice: versatileDamageDice,
+      weaponProperties: weaponProperties,
     );
   }
 }
@@ -359,6 +390,22 @@ extension _InventoryItemToCompanion on InventoryItem {
       itemIndex: Value(itemIndex),
       name: Value(name),
       equipmentCategory: Value(equipmentCategory),
+      quantity: Value(quantity),
+      weight: Value(weight),
+      equipped: Value(equipped),
+      requiresAttunement: Value(requiresAttunement),
+      attuned: Value(attuned),
+      detailsLoaded: Value(detailsLoaded),
+      armorCategory: Value(armorCategory),
+      armorBase: Value(armorBase),
+      armorDexBonus: Value(armorDexBonus),
+      armorMaxDexBonus: Value(armorMaxDexBonus),
+      weaponCategory: Value(weaponCategory),
+      weaponRange: Value(weaponRange),
+      damageDice: Value(damageDice),
+      damageType: Value(damageType),
+      versatileDamageDice: Value(versatileDamageDice),
+      weaponProperties: Value(weaponProperties),
     );
   }
 }

@@ -3,12 +3,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/attribute.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/condition.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/delete_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/get_all_characters_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/get_character_inventory_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/inventory_bloc.dart';
+import 'package:crit_sense/features/compendium/domain/usecases/get_equipment_detail_usecase.dart';
 
 class MockGetAllCharactersUseCase extends Mock
     implements GetAllCharactersUseCase {}
@@ -79,4 +84,56 @@ loadedCharacterBloc(List<Character> characters) async {
   bloc.add(const LoadCharactersEvent());
   await loaded;
   return (bloc: bloc, saveCharacter: save);
+}
+
+class MockGetCharacterInventoryUseCase extends Mock
+    implements GetCharacterInventoryUseCase {}
+
+class MockDeleteInventoryItemUseCase extends Mock
+    implements DeleteInventoryItemUseCase {}
+
+class MockGetEquipmentDetailUseCase extends Mock
+    implements GetEquipmentDetailUseCase {}
+
+/// [InventoryBloc] com use cases falsos, já carregado com [items]. Salvar um
+/// item atualiza a lista devolvida nas próximas cargas.
+Future<InventoryBloc> loadedInventoryBloc(
+  List<InventoryItem> items, {
+  String characterId = 'c1',
+}) async {
+  registerFallbackValue(
+    const InventoryItem(
+      id: 'fallback',
+      characterId: 'c1',
+      itemIndex: 'fallback',
+      name: 'fallback',
+      equipmentCategory: '',
+    ),
+  );
+  final current = [...items];
+  final getInventory = MockGetCharacterInventoryUseCase();
+  final save = MockAddInventoryItemUseCase();
+  when(() => getInventory(characterId)).thenAnswer((_) async => [...current]);
+  when(() => save(any())).thenAnswer((invocation) async {
+    final item = invocation.positionalArguments.single as InventoryItem;
+    final index = current.indexWhere((i) => i.id == item.id);
+    if (index == -1) {
+      current.add(item);
+    } else {
+      current[index] = item;
+    }
+  });
+
+  final bloc = InventoryBloc(
+    getInventory,
+    MockDeleteInventoryItemUseCase(),
+    save,
+    MockGetEquipmentDetailUseCase(),
+  );
+  final loaded = bloc.stream.firstWhere(
+    (s) => s.status == InventoryStatus.success,
+  );
+  bloc.add(LoadInventoryEvent(characterId));
+  await loaded;
+  return bloc;
 }

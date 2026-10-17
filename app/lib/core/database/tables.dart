@@ -180,6 +180,13 @@ class Characters extends Table {
       .map(const IntListConverter())();
   IntColumn get pactSlotsUsed => integer().withDefault(const Constant(0))();
 
+  // ── Moedas (versão 10) ────────────────────────────────────────────────
+  IntColumn get copper => integer().withDefault(const Constant(0))();
+  IntColumn get silver => integer().withDefault(const Constant(0))();
+  IntColumn get electrum => integer().withDefault(const Constant(0))();
+  IntColumn get gold => integer().withDefault(const Constant(0))();
+  IntColumn get platinum => integer().withDefault(const Constant(0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -254,6 +261,35 @@ class InventoryItems extends Table {
 
   /// Categoria do equipamento (ex: "Weapon", "Armor").
   TextColumn get equipmentCategory => text()();
+
+  // ── Quantidade, peso, equipado e sintonia (versão 10) ─────────────────
+  IntColumn get quantity => integer().withDefault(const Constant(1))();
+  RealColumn get weight => real().withDefault(const Constant(0))();
+  BoolColumn get equipped => boolean().withDefault(const Constant(false))();
+  BoolColumn get requiresAttunement =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get attuned => boolean().withDefault(const Constant(false))();
+
+  /// `false` nos itens anteriores à versão 10: a ficha completa os dados
+  /// pelo compêndio quando tem internet.
+  BoolColumn get detailsLoaded => boolean().withDefault(const Constant(true))();
+
+  // Armadura
+  TextColumn get armorCategory => text().nullable()();
+  IntColumn get armorBase => integer().nullable()();
+  BoolColumn get armorDexBonus =>
+      boolean().withDefault(const Constant(false))();
+  IntColumn get armorMaxDexBonus => integer().nullable()();
+
+  // Arma
+  TextColumn get weaponCategory => text().nullable()();
+  TextColumn get weaponRange => text().nullable()();
+  TextColumn get damageDice => text().nullable()();
+  TextColumn get damageType => text().nullable()();
+  TextColumn get versatileDamageDice => text().nullable()();
+  TextColumn get weaponProperties => text()
+      .withDefault(const Constant('[]'))
+      .map(const StringListConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

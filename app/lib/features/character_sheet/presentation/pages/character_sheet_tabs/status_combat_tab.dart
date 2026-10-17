@@ -7,8 +7,11 @@ import '../../../domain/entities/attribute_type.dart';
 import '../../../domain/entities/character.dart';
 import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
+import '../../../domain/rules/equipment_rules.dart';
 import '../../bloc/character_bloc.dart';
+import '../../bloc/inventory_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
+import '../../widgets/attacks_card.dart';
 import '../../widgets/conditions_card.dart';
 import '../../widgets/death_saves_card.dart';
 import '../../widgets/hp_management_sheet.dart';
@@ -37,10 +40,17 @@ class StatusCombatTab extends StatelessWidget {
       ),
       builder: (context, state) {
         final live = state.findCharacter(character.id) ?? character;
+        // A CA e os ataques dependem dos itens equipados (InventoryBloc).
+        final items = context.watch<InventoryBloc>().state.items;
         final combat = <Widget>[
-          _TopStats(character: live),
+          _TopStats(
+            character: live,
+            armorClass: armorClassWithEquipment(live, items),
+          ),
           const SizedBox(height: 10),
           _HpCard(character: live),
+          const SizedBox(height: 10),
+          AttacksCard(attacks: weaponAttacks(live, items)),
           if (live.currentHitPoints == 0 && live.maxHitPoints > 0) ...[
             const SizedBox(height: 10),
             DeathSavesCard(character: live),
@@ -90,9 +100,12 @@ class StatusCombatTab extends StatelessWidget {
 String _signed(int value) => value >= 0 ? '+$value' : '$value';
 
 class _TopStats extends StatelessWidget {
-  const _TopStats({required this.character});
+  const _TopStats({required this.character, required this.armorClass});
 
   final Character character;
+
+  /// CA com a armadura e o escudo equipados.
+  final int armorClass;
 
   Future<void> _editArmorClassBonus(BuildContext context) async {
     final bloc = context.read<CharacterBloc>();
@@ -102,8 +115,8 @@ class _TopStats extends StatelessWidget {
       initialValue: character.armorClassBonus,
       allowNegative: true,
       helperText:
-          'A CA é calculada pela DES e pela classe. Use este bônus para '
-          'itens mágicos ou magias ativas.',
+          'A CA é calculada pela armadura, pelo escudo, pela DES e pela '
+          'classe. Use este bônus para itens mágicos ou magias ativas.',
     );
     if (bonus != null) bloc.add(SetArmorClassBonusEvent(character.id, bonus));
   }
@@ -133,7 +146,7 @@ class _TopStats extends StatelessWidget {
               child: _StatCard(
                 iconAsset: 'assets/icons/attribute/ac.svg',
                 label: 'CA',
-                value: '${character.armorClass}',
+                value: '$armorClass',
                 onTap: () => _editArmorClassBonus(context),
               ),
             ),

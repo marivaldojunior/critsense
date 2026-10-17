@@ -124,6 +124,8 @@ Future<void> init() async {
     () => InventoryBloc(
       sl<GetCharacterInventoryUseCase>(),
       sl<DeleteInventoryItemUseCase>(),
+      sl<AddInventoryItemUseCase>(),
+      sl<GetEquipmentDetailUseCase>(),
     ),
   );
 

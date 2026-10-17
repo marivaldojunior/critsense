@@ -7,6 +7,7 @@ import 'package:crit_sense/features/character_sheet/domain/entities/attribute.da
 import 'package:crit_sense/features/character_sheet/domain/entities/attribute_type.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/character_spell.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/coins.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/proficiency.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/session_note.dart';
@@ -211,6 +212,72 @@ void main() {
         () => repository.addInventoryItem(buildItem('x', characterId: 'nope')),
         throwsA(isA<SqliteException>()),
       );
+    });
+  });
+
+  group('inventário completo e moedas', () {
+    setUp(() => repository.saveCharacter(buildCharacter()));
+
+    test(
+      'guarda quantidade, peso, equipado, sintonia e dados de combate',
+      () async {
+        await repository.addInventoryItem(
+          buildItem('longsword').copyWith(
+            quantity: 2,
+            weight: 3,
+            equipped: true,
+            requiresAttunement: true,
+            attuned: true,
+            weaponCategory: 'Martial',
+            weaponRange: 'Melee',
+            damageDice: '1d8',
+            damageType: 'Slashing',
+            versatileDamageDice: '1d10',
+            weaponProperties: const ['versatile'],
+            armorCategory: 'Shield',
+            armorBase: 2,
+            armorDexBonus: true,
+            armorMaxDexBonus: 2,
+          ),
+        );
+
+        final item = (await repository.getCharacterInventory('char-1')).single;
+
+        expect(item.quantity, 2);
+        expect(item.weight, 3);
+        expect(item.equipped, isTrue);
+        expect(item.requiresAttunement, isTrue);
+        expect(item.attuned, isTrue);
+        expect(item.detailsLoaded, isTrue);
+        expect(item.weaponCategory, 'Martial');
+        expect(item.weaponRange, 'Melee');
+        expect(item.damageDice, '1d8');
+        expect(item.damageType, 'Slashing');
+        expect(item.versatileDamageDice, '1d10');
+        expect(item.weaponProperties, ['versatile']);
+        expect(item.armorCategory, 'Shield');
+        expect(item.armorBase, 2);
+        expect(item.armorDexBonus, isTrue);
+        expect(item.armorMaxDexBonus, 2);
+      },
+    );
+
+    test('guarda as moedas', () async {
+      await repository.saveCharacter(
+        buildCharacter().copyWith(
+          coins: const Coins()
+              .withAmount(Coin.gold, 15)
+              .withAmount(Coin.copper, 7)
+              .withAmount(Coin.platinum, 1),
+        ),
+      );
+
+      final coins = (await repository.getAllCharacters()).single.coins;
+
+      expect(coins.of(Coin.gold), 15);
+      expect(coins.of(Coin.copper), 7);
+      expect(coins.of(Coin.platinum), 1);
+      expect(coins.of(Coin.silver), 0);
     });
   });
 

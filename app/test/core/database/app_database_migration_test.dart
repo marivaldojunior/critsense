@@ -81,6 +81,18 @@ void main() {
         '"inspiration" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("id"))',
   );
 
+  // Versão 9: igual à 8, com os espaços de magia.
+  final charactersV9 = charactersV8.replaceFirst(
+    'PRIMARY KEY ("id"))',
+    "\"spell_slots_used\" TEXT NOT NULL DEFAULT '[0,0,0,0,0,0,0,0,0]', "
+        '"pact_slots_used" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("id"))',
+  );
+  const characterSpellsTable =
+      'CREATE TABLE "character_spells" ("id" TEXT NOT NULL, "character_id" '
+      'TEXT NOT NULL REFERENCES characters (id) ON DELETE CASCADE, '
+      '"spell_index" TEXT NOT NULL, "name" TEXT NOT NULL, "level" INTEGER '
+      'NULL, "prepared" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("id"))';
+
   /// Abre um [AppDatabase] sobre um banco em memória que começa na
   /// [version] informada, com as tabelas de [statements] e uma linha de
   /// personagem inserida por [insertCharacter].
@@ -264,6 +276,51 @@ void main() {
     expect(spells.every((s) => s.level == null), isTrue);
     expect(character.spellSlotsUsed, everyElement(0));
     expect(oldColumn, '[]');
+  });
+
+  test('da versão 9 para a atual: itens antigos ficam com quantidade 1 e '
+      'dados do compêndio pendentes; moedas começam em 0', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (rawDb) {
+          final userVersion =
+              rawDb.select('PRAGMA user_version').first.values.first as int;
+          if (userVersion != 0) return;
+          for (final statement in [
+            charactersV9,
+            attributesTable,
+            inventoryTable,
+            sessionNotesTable,
+            characterSpellsTable,
+          ]) {
+            rawDb.execute(statement);
+          }
+          rawDb.execute(
+            "INSERT INTO characters (id, nome, raca, classe, nivel, "
+            "max_hit_points, current_hit_points) VALUES ('c1', 'Thorin', "
+            "'Dwarf', 'Fighter', 3, 30, 30)",
+          );
+          rawDb.execute("INSERT INTO attributes (character_id) VALUES ('c1')");
+          rawDb.execute(
+            "INSERT INTO inventory_items VALUES ('i1', 'c1', 'longsword', "
+            "'Longsword', 'Weapon')",
+          );
+          rawDb.execute('PRAGMA user_version = 9');
+        },
+      ),
+    );
+    addTearDown(db.close);
+    final repository = CharacterRepositoryImpl(db);
+
+    final item = (await repository.getCharacterInventory('c1')).single;
+    final character = (await repository.getAllCharacters()).single;
+
+    expect(item.quantity, 1);
+    expect(item.weight, 0);
+    expect(item.equipped, isFalse);
+    expect(item.detailsLoaded, isFalse);
+    expect(item.weaponProperties, isEmpty);
+    expect(character.coins.totalCoins, 0);
   });
 
   test('índice da API a partir do nome da magia', () {

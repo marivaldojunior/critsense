@@ -241,3 +241,12 @@ final class RestorePactSlotEvent extends CharacterEvent {
 
   const RestorePactSlotEvent(this.characterId);
 }
+
+/// Define a quantidade da moeda [coin] do personagem [characterId].
+final class SetCoinsEvent extends CharacterEvent {
+  final String characterId;
+  final Coin coin;
+  final int amount;
+
+  const SetCoinsEvent(this.characterId, this.coin, this.amount);
+}

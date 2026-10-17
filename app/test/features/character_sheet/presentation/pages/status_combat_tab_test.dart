@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:crit_sense/features/character_sheet/domain/entities/character.dart';
 import 'package:crit_sense/features/character_sheet/domain/entities/condition.dart';
+import 'package:crit_sense/features/character_sheet/domain/entities/inventory_item.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/pages/character_sheet_tabs/status_combat_tab.dart';
 
@@ -18,6 +19,7 @@ void main() {
     WidgetTester tester,
     Character character, {
     bool wide = false,
+    List<InventoryItem> items = const [],
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = wide
@@ -29,12 +31,19 @@ void main() {
         await tester.runAsync(() => loadedCharacterBloc([character])) ??
         (throw StateError('bloc não carregou'));
     addTearDown(bloc.close);
+    final inventory =
+        await tester.runAsync(() => loadedInventoryBloc(items)) ??
+        (throw StateError('inventário não carregou'));
+    addTearDown(inventory.close);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: BlocProvider.value(
-            value: bloc,
+          body: MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: bloc),
+              BlocProvider.value(value: inventory),
+            ],
             child: StatusCombatTab(character: character),
           ),
         ),
@@ -52,6 +61,45 @@ void main() {
     expect(find.text('+2'), findsWidgets); // iniciativa e proficiência
     expect(find.text('Dados de vida: 4/4 (d10)'), findsOneWidget);
     expect(find.text('Salvaguardas contra a morte'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a CA conta a armadura equipada e a arma aparece nos ataques', (
+    tester,
+  ) async {
+    await pumpTab(
+      tester,
+      buildTestCharacter(),
+      items: const [
+        InventoryItem(
+          id: 'chain',
+          characterId: 'c1',
+          itemIndex: 'chain-mail',
+          name: 'Chain Mail',
+          equipmentCategory: 'Armor',
+          armorCategory: 'Heavy',
+          armorBase: 16,
+          equipped: true,
+        ),
+        InventoryItem(
+          id: 'sword',
+          characterId: 'c1',
+          itemIndex: 'longsword',
+          name: 'Longsword',
+          equipmentCategory: 'Weapon',
+          weaponCategory: 'Martial',
+          weaponRange: 'Melee',
+          damageDice: '1d8',
+          damageType: 'Slashing',
+          equipped: true,
+        ),
+      ],
+    );
+
+    expect(find.text('16'), findsOneWidget); // CA da cota de malha
+    expect(find.text('Longsword'), findsOneWidget);
+    expect(find.text('1d8-1 cortante'), findsOneWidget); // FOR 8 (-1)
+    expect(find.text('Ataque desarmado'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

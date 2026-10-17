@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// Aplica migrações incrementais quando o banco existente é mais antigo que
   /// [schemaVersion]. Equivale ao `Update-Database` do EF Core, que aplica
@@ -105,6 +105,43 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(characters, characters.pactSlotsUsed);
         await m.createTable(characterSpells);
         await _migrateSpellNames();
+      }
+      if (from < 10) {
+        // Inventário completo: quantidade, peso, equipado, sintonia, dados
+        // de armadura e de arma, e as moedas do personagem.
+        for (final column in [
+          inventoryItems.quantity,
+          inventoryItems.weight,
+          inventoryItems.equipped,
+          inventoryItems.requiresAttunement,
+          inventoryItems.attuned,
+          inventoryItems.detailsLoaded,
+          inventoryItems.armorCategory,
+          inventoryItems.armorBase,
+          inventoryItems.armorDexBonus,
+          inventoryItems.armorMaxDexBonus,
+          inventoryItems.weaponCategory,
+          inventoryItems.weaponRange,
+          inventoryItems.damageDice,
+          inventoryItems.damageType,
+          inventoryItems.versatileDamageDice,
+          inventoryItems.weaponProperties,
+        ]) {
+          await m.addColumn(inventoryItems, column);
+        }
+        // Os itens antigos não têm peso nem dados de combate.
+        await customStatement(
+          'UPDATE inventory_items SET details_loaded = 0',
+        );
+        for (final column in [
+          characters.copper,
+          characters.silver,
+          characters.electrum,
+          characters.gold,
+          characters.platinum,
+        ]) {
+          await m.addColumn(characters, column);
+        }
       }
     },
   );
