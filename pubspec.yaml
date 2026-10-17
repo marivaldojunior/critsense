@@ -1,5 +1,5 @@
 name: crit_sense
-description: "A new Flutter project."
+description: "Companion app de D&D 5e: fichas de personagem, compêndio SRD e rolador de dados."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -68,6 +68,11 @@ dev_dependencies:
   drift_dev: ^2.34.5
   flutter_launcher_icons: ^0.14.4
 
+# Ainda necessários (verificado com Flutter 3.44.1): o `drift_dev` 2.34.5+
+# exige `analyzer` >=13, mas o `bloc_test` puxa o pacote `test`, cujas versões
+# compatíveis com o `test_api` fixado pelo `flutter_test` exigem `analyzer` <13.
+# Sem os overrides, o `flutter pub get` falha. Reavalie ao atualizar o Flutter
+# ou o `bloc_test`.
 dependency_overrides:
   test_api: 0.7.11
   analyzer: ^13.0.0
