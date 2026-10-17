@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/attribute.dart';
-import '../../domain/entities/attribute_type.dart';
 import '../../domain/entities/condition.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/character_spell.dart';
@@ -10,8 +10,9 @@ import '../../domain/entities/coins.dart';
 import '../../domain/entities/inventory_item.dart';
 import '../../domain/entities/proficiency.dart';
 import '../../domain/entities/session_note.dart';
-import '../../domain/entities/skill.dart';
 import '../../domain/repositories/i_character_repository.dart';
+import '../backup/character_backup_codec.dart';
+import '../mappers/proficiency_keys.dart';
 
 /// Implementação concreta de [ICharacterRepository] usando o banco SQLite via Drift.
 ///
@@ -178,6 +179,45 @@ class CharacterRepositoryImpl implements ICharacterRepository {
   }
 
   @override
+  Future<String> exportCharacter(String characterId) async {
+    final character = (await getAllCharacters())
+        .where((c) => c.id == characterId)
+        .firstOrNull;
+    if (character == null) {
+      throw StateError('Personagem $characterId não encontrado.');
+    }
+    return const CharacterBackupCodec().encode(
+      CharacterBackup(
+        character: character,
+        inventory: await getCharacterInventory(characterId),
+        spells: await getCharacterSpells(characterId),
+        notes: await getSessionNotes(characterId),
+      ),
+    );
+  }
+
+  @override
+  Future<Character> importCharacter(String json) async {
+    final backup = const CharacterBackupCodec().decode(
+      json,
+      newId: () => const Uuid().v4(),
+    );
+    await _db.transaction(() async {
+      await saveCharacter(backup.character);
+      for (final item in backup.inventory) {
+        await addInventoryItem(item);
+      }
+      for (final spell in backup.spells) {
+        await saveCharacterSpell(spell);
+      }
+      for (final note in backup.notes) {
+        await addSessionNote(note);
+      }
+    });
+    return backup.character;
+  }
+
+  @override
   Future<void> deleteCharacterSpell(String spellId) async {
     await (_db.delete(
       _db.characterSpells,
@@ -227,7 +267,7 @@ extension _CharacterDataMapper on CharacterData {
       flaws: flaws ?? '',
       experiencePoints: experiencePoints,
       proficiencies: proficiencies
-          .map(_proficiencyFromKey)
+          .map(proficiencyFromKey)
           .whereType<Proficiency>()
           .toList(),
       avatarPath: avatarPath,
@@ -245,37 +285,6 @@ extension _CharacterDataMapper on CharacterData {
       defeatedBosses: defeatedBosses,
     );
   }
-}
-
-// Chaves das proficiências na coluna `proficiencies` — usam o `name` dos
-// enums, então renomear um valor de [Skill] ou [AttributeType] exige uma
-// migração dos dados salvos.
-const _skillKeyPrefix = 'skill:';
-const _savingThrowKeyPrefix = 'save:';
-
-String _proficiencyToKey(Proficiency proficiency) => switch (proficiency) {
-  SkillProficiency(:final skill) => '$_skillKeyPrefix${skill.name}',
-  SavingThrowProficiency(:final attribute) =>
-    '$_savingThrowKeyPrefix${attribute.name}',
-};
-
-/// Converte a chave salva de volta para a [Proficiency]. Uma chave
-/// desconhecida (ex: valor de enum removido) vira `null` e é ignorada, em
-/// vez de impedir a carga do personagem.
-Proficiency? _proficiencyFromKey(String key) {
-  if (key.startsWith(_skillKeyPrefix)) {
-    final name = key.substring(_skillKeyPrefix.length);
-    final skill = Skill.values.where((s) => s.name == name).firstOrNull;
-    return skill == null ? null : SkillProficiency(skill);
-  }
-  if (key.startsWith(_savingThrowKeyPrefix)) {
-    final name = key.substring(_savingThrowKeyPrefix.length);
-    final attribute = AttributeType.values
-        .where((a) => a.name == name)
-        .firstOrNull;
-    return attribute == null ? null : SavingThrowProficiency(attribute);
-  }
-  return null;
 }
 
 extension _AttributeDataMapper on AttributeData {
@@ -336,7 +345,7 @@ extension _CharacterToCompanion on Character {
       gold: Value(coins.of(Coin.gold)),
       platinum: Value(coins.of(Coin.platinum)),
       defeatedBosses: Value(defeatedBosses),
-      proficiencies: Value(proficiencies.map(_proficiencyToKey).toList()),
+      proficiencies: Value(proficiencies.map(proficiencyToKey).toList()),
     );
   }
 }

@@ -42,4 +42,12 @@ abstract interface class ICharacterRepository {
 
   /// Remove a magia [spellId] do grimório.
   Future<void> deleteCharacterSpell(String spellId);
+
+  /// Backup em JSON do personagem [characterId], com inventário, grimório e
+  /// diário de campanha.
+  Future<String> exportCharacter(String characterId);
+
+  /// Importa um backup em JSON como um personagem novo (ids novos) e o
+  /// devolve. Lança [FormatException] se o arquivo não é um backup válido.
+  Future<Character> importCharacter(String json);
 }

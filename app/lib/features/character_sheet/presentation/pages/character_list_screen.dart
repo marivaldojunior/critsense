@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:crit_sense/di/injection_container.dart';
+
 import 'package:crit_sense/core/presentation/widgets/app_drawer.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 
 import '../../domain/entities/character.dart';
+import '../bloc/character_backup_cubit.dart';
 import '../bloc/character_bloc.dart';
 import '../widgets/character_avatar.dart';
 import 'character_form_screen.dart';
@@ -64,8 +67,36 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<CharacterBackupCubit>(
+      create: (_) => sl<CharacterBackupCubit>(),
+      child: BlocListener<CharacterBackupCubit, CharacterBackupState>(
+        listener: (context, state) {
+          if (state.status == BackupStatus.success && state.imported != null) {
+            context.read<CharacterBloc>().add(const LoadCharactersEvent());
+          }
+          if (state.message != null) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.message!)));
+          }
+        },
+        child: Builder(builder: _buildScaffold),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Personagens')),
+      appBar: AppBar(
+        title: const Text('Personagens'),
+        actions: [
+          IconButton(
+            tooltip: 'Importar personagem',
+            icon: const Icon(Icons.file_open_outlined),
+            onPressed: () => context.read<CharacterBackupCubit>().import(),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(),
       // BlocBuilder observa o stream do CharacterBloc e reconstrói apenas
       // o subwidget que envolve — análogo ao React: em vez de re-renderizar
@@ -77,10 +108,12 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: switch (state) {
-              CharacterInitial() =>
-                const SizedBox.shrink(key: ValueKey('initial')),
-              CharacterLoading() =>
-                const _CharacterListSkeleton(key: ValueKey('loading')),
+              CharacterInitial() => const SizedBox.shrink(
+                key: ValueKey('initial'),
+              ),
+              CharacterLoading() => const _CharacterListSkeleton(
+                key: ValueKey('loading'),
+              ),
               CharacterLoaded(:final characters) => _buildLoaded(
                 context,
                 characters,
@@ -235,11 +268,30 @@ class _CharacterCard extends StatelessWidget {
           '${character.characterClass} • Nível ${character.level}',
           style: theme.textTheme.bodySmall,
         ),
-        trailing: Chip(
-          label: Text(
-            'HP ${character.currentHitPoints}/${character.maxHitPoints}',
-          ),
-          visualDensity: VisualDensity.compact,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Chip(
+              label: Text(
+                'HP ${character.currentHitPoints}/${character.maxHitPoints}',
+              ),
+              visualDensity: VisualDensity.compact,
+            ),
+            PopupMenuButton<String>(
+              tooltip: 'Mais opções',
+              onSelected: (_) =>
+                  context.read<CharacterBackupCubit>().export(character),
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'export',
+                  child: ListTile(
+                    leading: Icon(Icons.ios_share),
+                    title: Text('Exportar (JSON)'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         onTap: () => Navigator.push(
           context,

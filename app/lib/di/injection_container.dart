@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:crit_sense/core/database/app_database.dart';
+import 'package:crit_sense/core/files/backup_file_gateway.dart';
 import 'package:crit_sense/core/network/drift_api_cache_store.dart';
 import 'package:crit_sense/core/network/offline_cache_interceptor.dart';
 import 'package:crit_sense/core/theme/theme_cubit.dart';
@@ -9,6 +10,7 @@ import 'package:crit_sense/features/character_sheet/data/repositories/character_
 import 'package:crit_sense/features/character_sheet/domain/repositories/i_character_repository.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_inventory_item_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/add_session_note_usecase.dart';
+import 'package:crit_sense/features/character_sheet/domain/usecases/character_backup_usecases.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_character_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/delete_inventory_item_usecase.dart';
@@ -20,6 +22,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/get_session_
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_spell_usecase.dart';
 import 'package:crit_sense/features/character_sheet/domain/usecases/save_character_use_case.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_backup_cubit.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/features_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/inventory_bloc.dart';
@@ -113,6 +116,24 @@ Future<void> init() async {
       sl<GetCharacterFeaturesUseCase>(),
       sl<GetRuleFeatureDetailUseCase>(),
     ),
+  );
+
+  // Factory: exportar e importar personagens (arquivo JSON).
+  sl.registerFactory<CharacterBackupCubit>(
+    () => CharacterBackupCubit(
+      sl<ExportCharacterUseCase>(),
+      sl<ImportCharacterUseCase>(),
+      sl<BackupFileGateway>(),
+    ),
+  );
+  sl.registerLazySingleton<BackupFileGateway>(
+    () => const PlatformBackupFileGateway(),
+  );
+  sl.registerLazySingleton<ExportCharacterUseCase>(
+    () => ExportCharacterUseCase(sl<ICharacterRepository>()),
+  );
+  sl.registerLazySingleton<ImportCharacterUseCase>(
+    () => ImportCharacterUseCase(sl<ICharacterRepository>()),
   );
 
   // Factory: cada abertura da aba de magias recebe um BLoC próprio.

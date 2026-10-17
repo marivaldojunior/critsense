@@ -129,7 +129,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 #### Fase E — Integração e robustez
 - [x] **TE.1** Role testes, salvaguardas, iniciativa e ataques direto da ficha.
 - [x] **TE.2** Guarde no aparelho os dados do compêndio já consultados, para uso sem internet.
-- [ ] **TE.3** Exporte e importe personagens em JSON.
+- [x] **TE.3** Exporte e importe personagens em JSON.
 
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
