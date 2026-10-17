@@ -284,6 +284,7 @@ extension _CharacterDataMapper on CharacterData {
       }),
       resourcesUsed: resourcesUsed,
       concentrationSpell: concentrationSpell,
+      subclass: subclass,
       defeatedBosses: defeatedBosses,
     );
   }
@@ -348,6 +349,7 @@ extension _CharacterToCompanion on Character {
       platinum: Value(coins.of(Coin.platinum)),
       resourcesUsed: Value(resourcesUsed),
       concentrationSpell: Value(concentrationSpell),
+      subclass: Value(subclass),
       defeatedBosses: Value(defeatedBosses),
       proficiencies: Value(proficiencies.map(proficiencyToKey).toList()),
     );

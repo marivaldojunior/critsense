@@ -218,6 +218,9 @@ class Characters extends Table {
   // ── Concentração (versão 14) ──────────────────────────────────────────
   TextColumn get concentrationSpell => text().nullable()();
 
+  // ── Subclasse (versão 15) ─────────────────────────────────────────────
+  TextColumn get subclass => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

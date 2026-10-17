@@ -56,6 +56,13 @@ abstract interface class ICompendiumRepository {
     required int upToLevel,
   });
 
+  /// Características da subclasse [subclassIndex] por nível, até o
+  /// [upToLevel].
+  Future<List<ClassLevelFeatures>> getSubclassFeatures(
+    String subclassIndex, {
+    required int upToLevel,
+  });
+
   /// Traços raciais da raça [raceIndex].
   Future<List<ApiReference>> getRaceTraits(String raceIndex);
 

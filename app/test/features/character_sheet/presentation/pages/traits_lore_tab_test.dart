@@ -27,6 +27,7 @@ void main() {
         classIndex: any(named: 'classIndex'),
         raceIndex: any(named: 'raceIndex'),
         level: any(named: 'level'),
+        subclassIndex: any(named: 'subclassIndex'),
       ),
     ).thenThrow(Exception('sem rede'));
     sl.registerFactory<FeaturesBloc>(

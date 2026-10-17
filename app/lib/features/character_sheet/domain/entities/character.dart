@@ -137,6 +137,11 @@ class Character {
   /// está concentrado. Ver `ConcentrationRules`.
   final String? concentrationSpell;
 
+  /// Subclasse do personagem: o índice da API para a subclasse do SRD (ex:
+  /// `champion`) ou um nome livre para outra subclasse. `null` = ainda sem
+  /// subclasse.
+  final String? subclass;
+
   /// Monstros/chefes derrotados pelo personagem (índice ou nome no
   /// compêndio). Uma lista simples basta: o registro não carrega mais dados
   /// além do nome.
@@ -177,6 +182,7 @@ class Character {
     this.languages = const [],
     this.resourcesUsed = const {},
     this.concentrationSpell,
+    this.subclass,
     this.defeatedBosses = const [],
   });
 
@@ -219,6 +225,8 @@ class Character {
     Map<String, int>? resourcesUsed,
     String? concentrationSpell,
     bool clearConcentration = false,
+    String? subclass,
+    bool clearSubclass = false,
     List<String>? defeatedBosses,
   }) {
     return Character(
@@ -257,6 +265,7 @@ class Character {
       concentrationSpell: clearConcentration
           ? null
           : concentrationSpell ?? this.concentrationSpell,
+      subclass: clearSubclass ? null : subclass ?? this.subclass,
       defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     );
   }
@@ -355,6 +364,20 @@ class Character {
     final limit = modifierOf(ability) + levels;
     return limit < 1 ? 1 : limit;
   }
+
+  /// Índice da API da subclasse do SRD, ou `null` sem subclasse ou com uma
+  /// subclasse fora do SRD.
+  String? get srdSubclassIndex {
+    final srd = srdClass?.srdSubclass;
+    return srd != null && subclass == srd.apiIndex ? subclass : null;
+  }
+
+  /// Nome da subclasse na ficha, ou `null` sem subclasse.
+  String? get subclassName =>
+      srdSubclassIndex != null ? srdClass!.srdSubclass.name : subclass;
+
+  /// O personagem já chegou ao nível de escolher a subclasse.
+  bool get canChooseSubclass => level >= (srdClass?.subclassLevel ?? 3);
 
   /// Quantos truques o personagem conhece, ou `null` se a classe não tem
   /// truques.

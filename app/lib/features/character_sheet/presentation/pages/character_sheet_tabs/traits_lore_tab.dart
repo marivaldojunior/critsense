@@ -78,9 +78,12 @@ class _TraitsLoreTabState extends State<TraitsLoreTab> {
         const Divider(),
         // Lê o nível atual do BLoC: subir de nível recarrega a seção.
         BlocBuilder<CharacterBloc, CharacterState>(
-          buildWhen: (previous, current) =>
-              previous.findCharacter(widget.character.id)?.level !=
-              current.findCharacter(widget.character.id)?.level,
+          buildWhen: (previous, current) {
+            final before = previous.findCharacter(widget.character.id);
+            final after = current.findCharacter(widget.character.id);
+            return before?.level != after?.level ||
+                before?.subclass != after?.subclass;
+          },
           builder: (context, state) => FeaturesSection(
             character:
                 state.findCharacter(widget.character.id) ?? widget.character,

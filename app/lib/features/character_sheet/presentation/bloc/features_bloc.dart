@@ -17,10 +17,14 @@ final class LoadFeaturesEvent extends FeaturesEvent {
   final String? raceIndex;
   final int level;
 
+  /// Subclasse do SRD; `null` = sem subclasse ou fora do SRD.
+  final String? subclassIndex;
+
   const LoadFeaturesEvent({
     required this.classIndex,
     required this.raceIndex,
     required this.level,
+    this.subclassIndex,
   });
 }
 
@@ -37,6 +41,7 @@ enum FeaturesStatus { initial, loading, success, failure }
 class FeaturesState extends Equatable {
   final FeaturesStatus status;
   final List<ClassLevelFeatures> classFeatures;
+  final List<ClassLevelFeatures> subclassFeatures;
   final List<ApiReference> racialTraits;
 
   /// Textos já buscados, por índice.
@@ -48,6 +53,7 @@ class FeaturesState extends Equatable {
   const FeaturesState({
     this.status = FeaturesStatus.initial,
     this.classFeatures = const [],
+    this.subclassFeatures = const [],
     this.racialTraits = const [],
     this.details = const {},
     this.failedDetails = const {},
@@ -56,6 +62,7 @@ class FeaturesState extends Equatable {
   FeaturesState copyWith({
     FeaturesStatus? status,
     List<ClassLevelFeatures>? classFeatures,
+    List<ClassLevelFeatures>? subclassFeatures,
     List<ApiReference>? racialTraits,
     Map<String, RuleFeatureDetail>? details,
     Set<String>? failedDetails,
@@ -63,6 +70,7 @@ class FeaturesState extends Equatable {
     return FeaturesState(
       status: status ?? this.status,
       classFeatures: classFeatures ?? this.classFeatures,
+      subclassFeatures: subclassFeatures ?? this.subclassFeatures,
       racialTraits: racialTraits ?? this.racialTraits,
       details: details ?? this.details,
       failedDetails: failedDetails ?? this.failedDetails,
@@ -73,6 +81,7 @@ class FeaturesState extends Equatable {
   List<Object?> get props => [
     status,
     classFeatures,
+    subclassFeatures,
     racialTraits,
     details,
     failedDetails,
@@ -100,11 +109,13 @@ class FeaturesBloc extends Bloc<FeaturesEvent, FeaturesState> {
         classIndex: event.classIndex,
         raceIndex: event.raceIndex,
         level: event.level,
+        subclassIndex: event.subclassIndex,
       );
       emit(
         state.copyWith(
           status: FeaturesStatus.success,
           classFeatures: features.classFeatures,
+          subclassFeatures: features.subclassFeatures,
           racialTraits: features.racialTraits,
         ),
       );

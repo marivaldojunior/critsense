@@ -60,6 +60,9 @@ abstract interface class ICompendiumRemoteDataSource {
   /// Níveis da classe com as características de cada um (sem subclasse).
   Future<List<ClassLevelFeatures>> getClassLevels(String classIndex);
 
+  /// Níveis da subclasse [subclassIndex] com as características de cada um.
+  Future<List<ClassLevelFeatures>> getSubclassLevels(String subclassIndex);
+
   /// Traços raciais da raça [raceIndex].
   Future<List<ApiReferenceModel>> getRaceTraits(String raceIndex);
 
@@ -257,6 +260,27 @@ class CompendiumRemoteDataSourceImpl implements ICompendiumRemoteDataSource {
         .cast<Map<String, dynamic>>()
         // As linhas com `subclass` são de uma subclasse específica.
         .where((level) => level['subclass'] == null)
+        .map(
+          (level) => ClassLevelFeatures(
+            level: level['level'] as int,
+            features: (level['features'] as List<dynamic>? ?? const [])
+                .cast<Map<String, dynamic>>()
+                .map(ApiReferenceModel.fromJson)
+                .toList(),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<ClassLevelFeatures>> getSubclassLevels(
+    String subclassIndex,
+  ) async {
+    final response = await _dio.get<List<dynamic>>(
+      'subclasses/$subclassIndex/levels',
+    );
+    return response.data!
+        .cast<Map<String, dynamic>>()
         .map(
           (level) => ClassLevelFeatures(
             level: level['level'] as int,

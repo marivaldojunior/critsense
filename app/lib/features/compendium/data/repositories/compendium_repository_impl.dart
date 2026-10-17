@@ -160,6 +160,18 @@ class CompendiumRepositoryImpl implements ICompendiumRepository {
   }
 
   @override
+  Future<List<ClassLevelFeatures>> getSubclassFeatures(
+    String subclassIndex, {
+    required int upToLevel,
+  }) {
+    return _guard(() async {
+      final levels = await _remoteDataSource.getSubclassLevels(subclassIndex);
+      return levels.where((l) => l.level <= upToLevel).toList()
+        ..sort((a, b) => a.level.compareTo(b.level));
+    });
+  }
+
+  @override
   Future<List<ApiReference>> getRaceTraits(String raceIndex) =>
       _guard(() => _remoteDataSource.getRaceTraits(raceIndex));
 

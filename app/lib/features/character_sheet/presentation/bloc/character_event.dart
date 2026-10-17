@@ -244,6 +244,15 @@ final class SetConcentrationEvent extends CharacterEvent {
   const SetConcentrationEvent(this.characterId, this.spell);
 }
 
+/// Troca a subclasse de [characterId]: o índice da subclasse do SRD ou um
+/// nome livre. `null` ou texto vazio remove a subclasse.
+final class SetSubclassEvent extends CharacterEvent {
+  final String characterId;
+  final String? subclass;
+
+  const SetSubclassEvent(this.characterId, this.subclass);
+}
+
 /// Troca o PV máximo de [characterId] — ver `HitPointRules.withMaxHitPoints`.
 final class SetMaxHitPointsEvent extends CharacterEvent {
   final String characterId;

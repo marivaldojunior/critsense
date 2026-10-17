@@ -448,6 +448,17 @@ class $CharactersTable extends Characters
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _subclassMeta = const VerificationMeta(
+    'subclass',
+  );
+  @override
+  late final GeneratedColumn<String> subclass = GeneratedColumn<String>(
+    'subclass',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -491,6 +502,7 @@ class $CharactersTable extends Characters
     languages,
     resourcesUsed,
     concentrationSpell,
+    subclass,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -755,6 +767,12 @@ class $CharactersTable extends Characters
         ),
       );
     }
+    if (data.containsKey('subclass')) {
+      context.handle(
+        _subclassMeta,
+        subclass.isAcceptableOrUnknown(data['subclass']!, _subclassMeta),
+      );
+    }
     return context;
   }
 
@@ -944,6 +962,10 @@ class $CharactersTable extends Characters
         DriftSqlType.string,
         data['${effectivePrefix}concentration_spell'],
       ),
+      subclass: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subclass'],
+      ),
     );
   }
 
@@ -1066,6 +1088,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
   final List<String> languages;
   final Map<String, int> resourcesUsed;
   final String? concentrationSpell;
+  final String? subclass;
   const CharacterData({
     required this.id,
     required this.nome,
@@ -1108,6 +1131,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     required this.languages,
     required this.resourcesUsed,
     this.concentrationSpell,
+    this.subclass,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1201,6 +1225,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     if (!nullToAbsent || concentrationSpell != null) {
       map['concentration_spell'] = Variable<String>(concentrationSpell);
     }
+    if (!nullToAbsent || subclass != null) {
+      map['subclass'] = Variable<String>(subclass);
+    }
     return map;
   }
 
@@ -1263,6 +1290,9 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       concentrationSpell: concentrationSpell == null && nullToAbsent
           ? const Value.absent()
           : Value(concentrationSpell),
+      subclass: subclass == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subclass),
     );
   }
 
@@ -1321,6 +1351,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       concentrationSpell: serializer.fromJson<String?>(
         json['concentrationSpell'],
       ),
+      subclass: serializer.fromJson<String?>(json['subclass']),
     );
   }
   @override
@@ -1368,6 +1399,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       'languages': serializer.toJson<List<String>>(languages),
       'resourcesUsed': serializer.toJson<Map<String, int>>(resourcesUsed),
       'concentrationSpell': serializer.toJson<String?>(concentrationSpell),
+      'subclass': serializer.toJson<String?>(subclass),
     };
   }
 
@@ -1413,6 +1445,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     List<String>? languages,
     Map<String, int>? resourcesUsed,
     Value<String?> concentrationSpell = const Value.absent(),
+    Value<String?> subclass = const Value.absent(),
   }) => CharacterData(
     id: id ?? this.id,
     nome: nome ?? this.nome,
@@ -1459,6 +1492,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     concentrationSpell: concentrationSpell.present
         ? concentrationSpell.value
         : this.concentrationSpell,
+    subclass: subclass.present ? subclass.value : this.subclass,
   );
   CharacterData copyWithCompanion(CharactersCompanion data) {
     return CharacterData(
@@ -1551,6 +1585,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
       concentrationSpell: data.concentrationSpell.present
           ? data.concentrationSpell.value
           : this.concentrationSpell,
+      subclass: data.subclass.present ? data.subclass.value : this.subclass,
     );
   }
 
@@ -1597,7 +1632,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           ..write('otherProficiencies: $otherProficiencies, ')
           ..write('languages: $languages, ')
           ..write('resourcesUsed: $resourcesUsed, ')
-          ..write('concentrationSpell: $concentrationSpell')
+          ..write('concentrationSpell: $concentrationSpell, ')
+          ..write('subclass: $subclass')
           ..write(')'))
         .toString();
   }
@@ -1645,6 +1681,7 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
     languages,
     resourcesUsed,
     concentrationSpell,
+    subclass,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1690,7 +1727,8 @@ class CharacterData extends DataClass implements Insertable<CharacterData> {
           other.otherProficiencies == this.otherProficiencies &&
           other.languages == this.languages &&
           other.resourcesUsed == this.resourcesUsed &&
-          other.concentrationSpell == this.concentrationSpell);
+          other.concentrationSpell == this.concentrationSpell &&
+          other.subclass == this.subclass);
 }
 
 class CharactersCompanion extends UpdateCompanion<CharacterData> {
@@ -1735,6 +1773,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
   final Value<List<String>> languages;
   final Value<Map<String, int>> resourcesUsed;
   final Value<String?> concentrationSpell;
+  final Value<String?> subclass;
   final Value<int> rowid;
   const CharactersCompanion({
     this.id = const Value.absent(),
@@ -1778,6 +1817,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.languages = const Value.absent(),
     this.resourcesUsed = const Value.absent(),
     this.concentrationSpell = const Value.absent(),
+    this.subclass = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharactersCompanion.insert({
@@ -1822,6 +1862,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     this.languages = const Value.absent(),
     this.resourcesUsed = const Value.absent(),
     this.concentrationSpell = const Value.absent(),
+    this.subclass = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nome = Value(nome),
@@ -1872,6 +1913,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Expression<String>? languages,
     Expression<String>? resourcesUsed,
     Expression<String>? concentrationSpell,
+    Expression<String>? subclass,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1918,6 +1960,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       if (languages != null) 'languages': languages,
       if (resourcesUsed != null) 'resources_used': resourcesUsed,
       if (concentrationSpell != null) 'concentration_spell': concentrationSpell,
+      if (subclass != null) 'subclass': subclass,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1964,6 +2007,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     Value<List<String>>? languages,
     Value<Map<String, int>>? resourcesUsed,
     Value<String?>? concentrationSpell,
+    Value<String?>? subclass,
     Value<int>? rowid,
   }) {
     return CharactersCompanion(
@@ -2008,6 +2052,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
       languages: languages ?? this.languages,
       resourcesUsed: resourcesUsed ?? this.resourcesUsed,
       concentrationSpell: concentrationSpell ?? this.concentrationSpell,
+      subclass: subclass ?? this.subclass,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2156,6 +2201,9 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
     if (concentrationSpell.present) {
       map['concentration_spell'] = Variable<String>(concentrationSpell.value);
     }
+    if (subclass.present) {
+      map['subclass'] = Variable<String>(subclass.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2206,6 +2254,7 @@ class CharactersCompanion extends UpdateCompanion<CharacterData> {
           ..write('languages: $languages, ')
           ..write('resourcesUsed: $resourcesUsed, ')
           ..write('concentrationSpell: $concentrationSpell, ')
+          ..write('subclass: $subclass, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5100,6 +5149,7 @@ typedef $$CharactersTableCreateCompanionBuilder =
       Value<List<String>> languages,
       Value<Map<String, int>> resourcesUsed,
       Value<String?> concentrationSpell,
+      Value<String?> subclass,
       Value<int> rowid,
     });
 typedef $$CharactersTableUpdateCompanionBuilder =
@@ -5145,6 +5195,7 @@ typedef $$CharactersTableUpdateCompanionBuilder =
       Value<List<String>> languages,
       Value<Map<String, int>> resourcesUsed,
       Value<String?> concentrationSpell,
+      Value<String?> subclass,
       Value<int> rowid,
     });
 
@@ -5446,6 +5497,11 @@ class $$CharactersTableFilterComposer
 
   ColumnFilters<String> get concentrationSpell => $composableBuilder(
     column: $table.concentrationSpell,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subclass => $composableBuilder(
+    column: $table.subclass,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5763,6 +5819,11 @@ class $$CharactersTableOrderingComposer
     column: $table.concentrationSpell,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get subclass => $composableBuilder(
+    column: $table.subclass,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharactersTableAnnotationComposer
@@ -5951,6 +6012,9 @@ class $$CharactersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get subclass =>
+      $composableBuilder(column: $table.subclass, builder: (column) => column);
+
   Expression<T> attributesRefs<T extends Object>(
     Expression<T> Function($$AttributesTableAnnotationComposer a) f,
   ) {
@@ -6126,6 +6190,7 @@ class $$CharactersTableTableManager
                 Value<List<String>> languages = const Value.absent(),
                 Value<Map<String, int>> resourcesUsed = const Value.absent(),
                 Value<String?> concentrationSpell = const Value.absent(),
+                Value<String?> subclass = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion(
                 id: id,
@@ -6169,6 +6234,7 @@ class $$CharactersTableTableManager
                 languages: languages,
                 resourcesUsed: resourcesUsed,
                 concentrationSpell: concentrationSpell,
+                subclass: subclass,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6214,6 +6280,7 @@ class $$CharactersTableTableManager
                 Value<List<String>> languages = const Value.absent(),
                 Value<Map<String, int>> resourcesUsed = const Value.absent(),
                 Value<String?> concentrationSpell = const Value.absent(),
+                Value<String?> subclass = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharactersCompanion.insert(
                 id: id,
@@ -6257,6 +6324,7 @@ class $$CharactersTableTableManager
                 languages: languages,
                 resourcesUsed: resourcesUsed,
                 concentrationSpell: concentrationSpell,
+                subclass: subclass,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

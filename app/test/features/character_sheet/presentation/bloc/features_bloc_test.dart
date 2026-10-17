@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/features_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/widgets/features_section.dart';
 import 'package:crit_sense/features/compendium/domain/entities/api_reference.dart';
@@ -28,6 +30,7 @@ void main() {
         features: [ApiReference(index: 'second-wind', name: 'Second Wind')],
       ),
     ],
+    subclassFeatures: [],
     racialTraits: [ApiReference(index: 'darkvision', name: 'Darkvision')],
   );
 
@@ -146,5 +149,94 @@ void main() {
     await tester.tap(find.text('Darkvision'));
     await tester.pumpAndSettle();
     expect(find.text('Enxerga no escuro.'), findsOneWidget);
+  });
+
+  testWidgets('escolher a subclasse do SRD mostra as características dela', (
+    tester,
+  ) async {
+    when(
+      () => getFeatures(classIndex: 'fighter', raceIndex: 'dwarf', level: 4),
+    ).thenAnswer((_) async => features);
+    when(
+      () => getFeatures(
+        classIndex: 'fighter',
+        raceIndex: 'dwarf',
+        level: 4,
+        subclassIndex: 'champion',
+      ),
+    ).thenAnswer(
+      (_) async => (
+        classFeatures: features.classFeatures,
+        subclassFeatures: const [
+          ClassLevelFeatures(
+            level: 3,
+            features: [
+              ApiReference(
+                index: 'improved-critical',
+                name: 'Improved Critical',
+              ),
+            ],
+          ),
+        ],
+        racialTraits: features.racialTraits,
+      ),
+    );
+    sl.registerFactory<FeaturesBloc>(
+      () => FeaturesBloc(getFeatures, getDetail),
+    );
+    addTearDown(sl.reset);
+    final character = buildTestCharacter();
+    final (:bloc, saveCharacter: _) =
+        await tester.runAsync(() => loadedCharacterBloc([character])) ??
+        (throw StateError('bloc não carregou'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: BlocProvider.value(
+            value: bloc,
+            child: SingleChildScrollView(
+              child: BlocBuilder<CharacterBloc, CharacterState>(
+                builder: (context, state) => FeaturesSection(
+                  character: state.findCharacter('c1') ?? character,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Escolha a subclasse.'), findsOneWidget);
+
+    await tester.tap(find.text('Escolher'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Campeão'));
+    await tester.runAsync(
+      () => bloc.stream
+          .firstWhere((s) => s.findCharacter('c1')?.subclass == 'champion')
+          .timeout(const Duration(seconds: 5)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Campeão'), findsOneWidget);
+    expect(find.text('Campeão — nível 3'), findsOneWidget);
+    expect(find.text('Improved Critical'), findsOneWidget);
+  });
+
+  test('a subclasse vem no nível certo de cada classe', () {
+    expect(buildTestCharacter(level: 2).canChooseSubclass, isFalse);
+    expect(buildTestCharacter(level: 3).canChooseSubclass, isTrue);
+    expect(
+      buildTestCharacter(characterClass: 'Cleric', level: 1).canChooseSubclass,
+      isTrue,
+    );
+    final homebrew = buildTestCharacter().copyWith(
+      subclass: 'Cavaleiro Rúnico',
+    );
+    expect(homebrew.srdSubclassIndex, isNull);
+    expect(homebrew.subclassName, 'Cavaleiro Rúnico');
+    expect(homebrew.copyWith(clearSubclass: true).subclass, isNull);
   });
 }

@@ -230,6 +230,15 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
             : c.withConcentration(event.spell!),
       ),
     );
+    on<SetSubclassEvent>(
+      (event, emit) => _updateCharacter(emit, event.characterId, (c) {
+        final value = event.subclass?.trim() ?? '';
+        if (value == (c.subclass ?? '')) return null;
+        return value.isEmpty
+            ? c.copyWith(clearSubclass: true)
+            : c.copyWith(subclass: value);
+      }),
+    );
     on<SetMaxHitPointsEvent>(
       (event, emit) => _updateCharacter(
         emit,

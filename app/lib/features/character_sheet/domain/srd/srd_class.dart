@@ -224,6 +224,30 @@ enum SrdClass {
   static Set<int> abilityScoreImprovementLevelsFor(SrdClass? srdClass) =>
       srdClass?.abilityScoreImprovementLevels ?? {4, 8, 12, 16, 19};
 
+  /// Subclasse que o SRD 5.1 traz para a classe (uma por classe): o índice
+  /// na API 5e-bits e o nome em português.
+  ({String apiIndex, String name}) get srdSubclass => switch (this) {
+    SrdClass.barbarian => (apiIndex: 'berserker', name: 'Caminho do Berserker'),
+    SrdClass.bard => (apiIndex: 'lore', name: 'Colégio do Conhecimento'),
+    SrdClass.cleric => (apiIndex: 'life', name: 'Domínio da Vida'),
+    SrdClass.druid => (apiIndex: 'land', name: 'Círculo da Terra'),
+    SrdClass.fighter => (apiIndex: 'champion', name: 'Campeão'),
+    SrdClass.monk => (apiIndex: 'open-hand', name: 'Caminho da Mão Aberta'),
+    SrdClass.paladin => (apiIndex: 'devotion', name: 'Juramento de Devoção'),
+    SrdClass.ranger => (apiIndex: 'hunter', name: 'Caçador'),
+    SrdClass.rogue => (apiIndex: 'thief', name: 'Ladrão'),
+    SrdClass.sorcerer => (apiIndex: 'draconic', name: 'Linhagem Dracônica'),
+    SrdClass.warlock => (apiIndex: 'fiend', name: 'O Corruptor'),
+    SrdClass.wizard => (apiIndex: 'evocation', name: 'Escola de Evocação'),
+  };
+
+  /// Nível em que a classe escolhe a subclasse.
+  int get subclassLevel => switch (this) {
+    SrdClass.cleric || SrdClass.sorcerer || SrdClass.warlock => 1,
+    SrdClass.druid || SrdClass.wizard => 2,
+    _ => 3,
+  };
+
   /// Dado de vida usado quando a classe não é do SRD.
   static const int defaultHitDie = 8;
 

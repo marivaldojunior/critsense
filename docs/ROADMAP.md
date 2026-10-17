@@ -138,7 +138,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TF.4** Conte os usos dos recursos de classe (Fúria, Retomar o Fôlego e outros) e recupere os usos nos descansos.
 - [x] **TF.5** Marque a magia em concentração e sugira o teste de CON ao sofrer dano.
 - [x] **TF.6** Mostre o limite de truques e de magias conhecidas por nível.
-- [ ] **TF.7** Escolha a subclasse do SRD no nível certo e mostre as características dela.
+- [x] **TF.7** Escolha a subclasse do SRD no nível certo e mostre as características dela.
 - [ ] **TF.8** Crie o rastreador de iniciativa com personagens e monstros, turno e rodada.
 - [ ] **TF.9** Guarde o histórico das últimas rolagens.
 

@@ -85,6 +85,7 @@ class CharacterBackupCodec {
         'coins': {for (final coin in Coin.values) coin.name: c.coins.of(coin)},
         'resourcesUsed': c.resourcesUsed,
         'concentrationSpell': c.concentrationSpell,
+        'subclass': c.subclass,
         'defeatedBosses': c.defeatedBosses,
       },
       'inventory': [
@@ -218,6 +219,7 @@ class CharacterBackupCodec {
       concentrationSpell: c['concentrationSpell'] is String
           ? c['concentrationSpell'] as String
           : null,
+      subclass: c['subclass'] is String ? c['subclass'] as String : null,
       defeatedBosses: _strings(c['defeatedBosses']),
     );
 

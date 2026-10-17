@@ -71,6 +71,7 @@ void main() {
     spellSlotsUsed: const [1, 0, 0, 0, 0, 0, 0, 0, 0],
     resourcesUsed: const {'action-surge': 1},
     concentrationSpell: 'Bless',
+    subclass: 'champion',
     coins: const Coins().withAmount(Coin.gold, 42),
     avatarPath: '/storage/thorin.png',
     defeatedBosses: const ['Goblin Boss'],
@@ -158,6 +159,7 @@ void main() {
         expect(copy.spellSlotsUsed.first, 1);
         expect(copy.resourcesUsed, {'action-surge': 1});
         expect(copy.concentrationSpell, 'Bless');
+        expect(copy.subclass, 'champion');
         expect(copy.coins.of(Coin.gold), 42);
         expect(copy.armorClassBonus, 1);
         expect(copy.defeatedBosses, ['Goblin Boss']);
