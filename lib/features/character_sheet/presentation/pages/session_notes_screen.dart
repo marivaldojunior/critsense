@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,15 +9,14 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import '../../domain/entities/session_note.dart';
-import '../../domain/usecases/add_session_note_usecase.dart';
-import '../../domain/usecases/delete_session_note_usecase.dart';
-import '../../domain/usecases/get_session_notes_usecase.dart';
+import '../bloc/session_notes_bloc.dart';
 
 /// Tela do Diário de Campanha: lista e gerencia as notas de sessão de um personagem.
 ///
 /// Recebe [characterId] e [characterName] como parâmetros de rota para exibir
-/// e persistir notas vinculadas ao personagem correto.
-class SessionNotesScreen extends StatefulWidget {
+/// e persistir notas vinculadas ao personagem correto. O estado das notas
+/// fica no [SessionNotesBloc], criado por esta tela.
+class SessionNotesScreen extends StatelessWidget {
   /// Identificador do personagem dono das notas.
   final String characterId;
 
@@ -34,42 +34,41 @@ class SessionNotesScreen extends StatefulWidget {
   });
 
   @override
-  State<SessionNotesScreen> createState() => _SessionNotesScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<SessionNotesBloc>(
+      create: (_) =>
+          sl<SessionNotesBloc>()..add(LoadSessionNotesEvent(characterId)),
+      child: _SessionNotesView(
+        characterId: characterId,
+        characterName: characterName,
+        avatarPath: avatarPath,
+      ),
+    );
+  }
 }
 
-class _SessionNotesScreenState extends State<SessionNotesScreen> {
-  final _getNotesUseCase = sl<GetSessionNotesUseCase>();
-  final _addNoteUseCase = sl<AddSessionNoteUseCase>();
-  final _deleteNoteUseCase = sl<DeleteSessionNoteUseCase>();
+class _SessionNotesView extends StatelessWidget {
+  final String characterId;
+  final String characterName;
+  final String? avatarPath;
 
-  /// Lista de notas carregadas do banco; recarregada após cada mutação.
-  List<SessionNote> _notes = [];
-  bool _isLoading = true;
+  const _SessionNotesView({
+    required this.characterId,
+    required this.characterName,
+    this.avatarPath,
+  });
 
-  @override
-  void initState() {
-    super.initState();
-    _loadNotes();
-  }
-
-  /// Carrega (ou recarrega) as notas do personagem a partir do repositório.
-  Future<void> _loadNotes() async {
-    final notes = await _getNotesUseCase(widget.characterId);
-    if (!mounted) return;
-    setState(() {
-      _notes = notes;
-      _isLoading = false;
-    });
-  }
-
-  /// Remove [note] da lista visível imediatamente e agenda a exclusão real
-  /// no repositório para quando o SnackBar de desfazer fechar sem
-  /// interação (timeout ou substituição por outro SnackBar). Tocar em
-  /// "Desfazer" reinsere a nota na posição original e a exclusão real
-  /// nunca chega a ser persistida.
-  void _handleDeleteNote(SessionNote note) {
-    final index = _notes.indexOf(note);
-    setState(() => _notes.removeAt(index));
+  /// Esconde [note] da lista imediatamente e só confirma a exclusão no
+  /// [SessionNotesBloc] quando o SnackBar de desfazer fecha sem interação
+  /// (timeout ou substituição por outro SnackBar). Tocar em "Desfazer"
+  /// devolve a nota à posição original e a exclusão nunca é persistida.
+  ///
+  /// O SnackBar vive no `ScaffoldMessenger` raiz e pode fechar depois que a
+  /// tela saiu — por isso o `isClosed`: nesse caso o próprio
+  /// [SessionNotesBloc.close] já concluiu a exclusão.
+  void _handleDeleteNote(BuildContext context, SessionNote note) {
+    final bloc = context.read<SessionNotesBloc>()
+      ..add(HideSessionNoteEvent(note));
 
     ScaffoldMessenger.of(context)
         .showSnackBar(
@@ -78,23 +77,22 @@ class _SessionNotesScreenState extends State<SessionNotesScreen> {
             action: SnackBarAction(
               label: 'Desfazer',
               onPressed: () {
-                if (!mounted) return;
-                setState(
-                  () => _notes.insert(index.clamp(0, _notes.length), note),
-                );
+                if (!bloc.isClosed) bloc.add(UndoHideSessionNoteEvent(note));
               },
             ),
           ),
         )
         .closed
-        .then((reason) async {
-          if (reason == SnackBarClosedReason.action) return;
-          await _deleteNoteUseCase(note.id);
+        .then((reason) {
+          if (reason == SnackBarClosedReason.action || bloc.isClosed) return;
+          bloc.add(ConfirmDeleteSessionNoteEvent(note));
         });
   }
 
-  /// Exibe o painel de criação de nota e persiste ao confirmar.
-  void _showAddNoteSheet() {
+  /// Exibe o painel de criação de nota e envia a nota ao [SessionNotesBloc]
+  /// ao confirmar.
+  void _showAddNoteSheet(BuildContext context) {
+    final bloc = context.read<SessionNotesBloc>();
     final titleCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -144,20 +142,21 @@ class _SessionNotesScreenState extends State<SessionNotesScreen> {
               FilledButton.icon(
                 icon: const Icon(Icons.save_outlined),
                 label: const Text('Salvar'),
-                onPressed: () async {
+                onPressed: () {
                   if (!formKey.currentState!.validate()) return;
 
-                  final note = SessionNote(
-                    id: const Uuid().v4(),
-                    characterId: widget.characterId,
-                    title: titleCtrl.text.trim(),
-                    content: contentCtrl.text.trim(),
-                    createdAt: DateTime.now(),
+                  bloc.add(
+                    AddSessionNoteEvent(
+                      SessionNote(
+                        id: const Uuid().v4(),
+                        characterId: characterId,
+                        title: titleCtrl.text.trim(),
+                        content: contentCtrl.text.trim(),
+                        createdAt: DateTime.now(),
+                      ),
+                    ),
                   );
-
-                  await _addNoteUseCase(note);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  await _loadNotes();
+                  Navigator.pop(ctx);
                 },
               ),
             ],
@@ -176,62 +175,104 @@ class _SessionNotesScreenState extends State<SessionNotesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: widget.avatarPath != null
+        leading: avatarPath != null
             ? Padding(
                 padding: const EdgeInsets.all(8),
                 child: CircleAvatar(
-                  backgroundImage: FileImage(File(widget.avatarPath!)),
+                  backgroundImage: FileImage(File(avatarPath!)),
                 ),
               )
             : null,
         title: Text(
-          'Diário: ${widget.characterName}',
+          'Diário: $characterName',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _isLoading
-            ? const _SessionNotesSkeleton(key: ValueKey('loading'))
-            : _notes.isEmpty
-            ? Center(
-                key: const ValueKey('empty'),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DnDIcon(
-                      assetPath: 'assets/icons/entity/book.svg',
-                      size: 64,
-                      color: theme.colorScheme.outlineVariant,
-                    ),
-                    const SizedBox(height: 12),
-                    const Text('Nenhuma anotação ainda.'),
-                  ],
-                ),
-              )
-            : ListView.builder(
-                key: const ValueKey('loaded'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                itemCount: _notes.length,
-                itemBuilder: (context, index) {
-                  final note = _notes[index];
-                  return _SessionNoteCard(
-                    note: note,
-                    onDismissed: () => _handleDeleteNote(note),
-                  );
-                },
-              ),
+      body: BlocConsumer<SessionNotesBloc, SessionNotesState>(
+        // Erros de escrita (salvar/excluir) não trocam a lista por uma tela
+        // de erro: aparecem só num SnackBar. O erro de carga já tem a sua
+        // própria tela, então não gera SnackBar.
+        listenWhen: (previous, current) =>
+            current.errorMessage != null &&
+            current.status != SessionNotesStatus.failure,
+        listener: (context, state) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+        },
+        builder: (context, state) => AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _buildBody(context, theme, state),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddNoteSheet,
+        onPressed: () => _showAddNoteSheet(context),
         tooltip: 'Nova anotação',
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  /// Resolve o corpo da tela a partir do [state] — cada branch tem uma
+  /// [ValueKey] distinta para o [AnimatedSwitcher] disparar o fade.
+  Widget _buildBody(
+    BuildContext context,
+    ThemeData theme,
+    SessionNotesState state,
+  ) {
+    switch (state.status) {
+      case SessionNotesStatus.initial:
+      case SessionNotesStatus.loading:
+        return const _SessionNotesSkeleton(key: ValueKey('loading'));
+      case SessionNotesStatus.failure:
+        return Center(
+          key: const ValueKey('failure'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Não foi possível carregar as notas.'),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: () => context.read<SessionNotesBloc>().add(
+                  LoadSessionNotesEvent(characterId),
+                ),
+                child: const Text('Tentar novamente'),
+              ),
+            ],
+          ),
+        );
+      case SessionNotesStatus.success:
+        if (state.notes.isEmpty) {
+          return Center(
+            key: const ValueKey('empty'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DnDIcon(
+                  assetPath: 'assets/icons/entity/book.svg',
+                  size: 64,
+                  color: theme.colorScheme.outlineVariant,
+                ),
+                const SizedBox(height: 12),
+                const Text('Nenhuma anotação ainda.'),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          key: const ValueKey('loaded'),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          itemCount: state.notes.length,
+          itemBuilder: (context, index) {
+            final note = state.notes[index];
+            return _SessionNoteCard(
+              note: note,
+              onDismissed: () => _handleDeleteNote(context, note),
+            );
+          },
+        );
+    }
   }
 }
 

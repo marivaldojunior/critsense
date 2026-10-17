@@ -15,6 +15,7 @@ import 'package:crit_sense/features/character_sheet/domain/usecases/save_charact
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/form_options_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/bloc/point_buy_cubit.dart';
+import 'package:crit_sense/features/character_sheet/presentation/bloc/session_notes_bloc.dart';
 import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
 import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
@@ -80,6 +81,16 @@ Future<void> init() async {
       sl<SaveCharacterUseCase>(),
       sl<DeleteCharacterUseCase>(),
       sl<AddInventoryItemUseCase>(),
+    ),
+  );
+
+  // Factory: cada abertura do Diário de Campanha recebe um BLoC próprio,
+  // carregado só com as notas do personagem aberto.
+  sl.registerFactory<SessionNotesBloc>(
+    () => SessionNotesBloc(
+      sl<GetSessionNotesUseCase>(),
+      sl<AddSessionNoteUseCase>(),
+      sl<DeleteSessionNoteUseCase>(),
     ),
   );
 
