@@ -8,11 +8,41 @@ import 'package:crit_sense/features/character_sheet/domain/entities/inventory_it
 import 'package:crit_sense/features/character_sheet/presentation/bloc/character_bloc.dart';
 import 'package:crit_sense/features/character_sheet/presentation/pages/character_sheet_tabs/status_combat_tab.dart';
 
+import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/dice_roller/data/datasources/sensor_datasource.dart';
+import 'package:crit_sense/features/dice_roller/data/repositories/dice_repository_impl.dart';
+import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
+import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/sheet_roll_cubit.dart';
+
 import '../../../../helpers/character_test_helpers.dart';
+
+/// Sensor sem hardware para os testes.
+class _SilentSensor implements ISensorDataSource {
+  @override
+  Future<void> triggerCriticalSuccess() async {}
+
+  @override
+  Future<void> triggerCriticalFailure() async {}
+
+  @override
+  Stream<void> get onShakeDetected => const Stream.empty();
+}
 
 /// Testa a aba Status & Combate: valores derivados, dados de vida,
 /// salvaguardas contra a morte, condições e inspiração.
 void main() {
+  setUp(() {
+    sl.registerFactoryParam<SheetRollCubit, D20RollMode, void>(
+      (mode, _) => SheetRollCubit(
+        RollDiceUseCase(DiceRepositoryImpl(_SilentSensor())),
+        initialMode: mode,
+      ),
+    );
+  });
+
+  tearDown(() => sl.reset());
+
   /// Desenha a aba numa tela de celular (400 × 860), ou numa tela larga
   /// (layout de duas colunas) com [wide].
   Future<CharacterBloc> pumpTab(
@@ -168,5 +198,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Com inspiração'), findsOneWidget);
+  });
+
+  testWidgets('tocar numa perícia rola o teste; a caixa marca a proficiência', (
+    tester,
+  ) async {
+    final bloc = await pumpTab(
+      tester,
+      buildTestCharacter(conditions: const [Condition.poisoned]),
+    );
+
+    await scrollTo(tester, find.text('Atletismo'));
+    await tester.ensureVisible(find.text('Atletismo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Atletismo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Atletismo (-1)'), findsOneWidget); // FOR 8
+    expect(find.text('Desvantagem: Envenenado'), findsOneWidget);
+    await tester.tap(find.text('Rolar d20'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('d20: '), findsOneWidget);
+    expect(find.textContaining('descartado'), findsOneWidget);
+    expect(bloc.state.findCharacter('c1')!.proficiencies, isEmpty);
   });
 }

@@ -5,9 +5,11 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/spell_detail_screen.dart';
 import 'package:crit_sense/features/compendium/presentation/pages/spells_screen.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/sheet_roll_sheet.dart';
 
 import '../../../domain/entities/character.dart';
 import '../../../domain/entities/character_spell.dart';
+import '../../../domain/rules/roll_rules.dart';
 import '../../../domain/srd/spell_slots.dart';
 import '../../bloc/character_bloc.dart';
 import '../../bloc/spellbook_bloc.dart';
@@ -90,9 +92,24 @@ class _SpellcastingCard extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: _Stat(
-                label: 'Ataque mágico',
-                value: _signed(character.spellAttackBonus!),
+              child: InkWell(
+                onTap: () {
+                  final suggestion = suggestedRollMode(
+                    character,
+                    RollKind.attack,
+                  );
+                  showSheetRoll(
+                    context,
+                    title: 'Ataque mágico',
+                    modifier: character.spellAttackBonus!,
+                    initialMode: suggestion.mode,
+                    note: rollSuggestionNote(suggestion),
+                  );
+                },
+                child: _Stat(
+                  label: 'Ataque mágico (toque para rolar)',
+                  value: _signed(character.spellAttackBonus!),
+                ),
               ),
             ),
           ],

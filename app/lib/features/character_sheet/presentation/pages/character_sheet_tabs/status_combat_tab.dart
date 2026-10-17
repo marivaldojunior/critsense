@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
+import 'package:crit_sense/features/dice_roller/presentation/widgets/sheet_roll_sheet.dart';
 
 import '../../../domain/entities/attribute_type.dart';
 import '../../../domain/entities/character.dart';
 import '../../../domain/entities/proficiency.dart';
 import '../../../domain/entities/skill.dart';
 import '../../../domain/rules/equipment_rules.dart';
+import '../../../domain/rules/roll_rules.dart';
 import '../../bloc/character_bloc.dart';
 import '../../bloc/inventory_bloc.dart';
 import '../../widgets/animated_hp_bar.dart';
@@ -57,7 +59,18 @@ class StatusCombatTab extends StatelessWidget {
             DeathSavesCard(character: live),
           ],
           const SizedBox(height: 10),
-          AttacksCard(attacks: weaponAttacks(live, items)),
+          AttacksCard(
+            attacks: weaponAttacks(live, items),
+            onAttackTap: (attack) => _roll(
+              context,
+              live,
+              title: attack.name,
+              modifier: attack.attackBonus,
+              kind: RollKind.attack,
+              damage: attack.damage,
+              versatileDamage: attack.versatileDamage,
+            ),
+          ),
           const SizedBox(height: 10),
           ConditionsCard(character: live),
           const SizedBox(height: 10),
@@ -103,6 +116,29 @@ class StatusCombatTab extends StatelessWidget {
 }
 
 String _signed(int value) => value >= 0 ? '+$value' : '$value';
+
+/// Abre a rolagem da ficha com o modo sugerido pelas condições.
+void _roll(
+  BuildContext context,
+  Character character, {
+  required String title,
+  required int modifier,
+  required RollKind kind,
+  AttributeType? attribute,
+  String? damage,
+  String? versatileDamage,
+}) {
+  final suggestion = suggestedRollMode(character, kind, attribute: attribute);
+  showSheetRoll(
+    context,
+    title: title,
+    modifier: modifier,
+    damage: damage,
+    versatileDamage: versatileDamage,
+    initialMode: suggestion.mode,
+    note: rollSuggestionNote(suggestion),
+  );
+}
 
 class _TopStats extends StatelessWidget {
   const _TopStats({required this.character, required this.armorClass});
@@ -161,6 +197,13 @@ class _TopStats extends StatelessWidget {
                 iconAsset: 'assets/icons/combat/initiative.svg',
                 label: 'Iniciativa',
                 value: _signed(character.initiative),
+                onTap: () => _roll(
+                  context,
+                  character,
+                  title: 'Iniciativa',
+                  modifier: character.initiative,
+                  kind: RollKind.abilityCheck,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -394,6 +437,14 @@ class _ProficienciesPanel extends StatelessWidget {
             checked: character.proficiencies.contains(
               SavingThrowProficiency(attribute),
             ),
+            onRoll: () => _roll(
+              context,
+              character,
+              title: 'Resistência de ${attribute.label}',
+              modifier: bloc.savingThrowModifier(character, attribute),
+              kind: RollKind.savingThrow,
+              attribute: attribute,
+            ),
             onChanged: () => bloc.add(
               ToggleProficiencyEvent(
                 character.id,
@@ -411,6 +462,13 @@ class _ProficienciesPanel extends StatelessWidget {
             sublabel: skill.attribute.label,
             modifier: bloc.skillModifier(character, skill),
             checked: character.proficiencies.contains(SkillProficiency(skill)),
+            onRoll: () => _roll(
+              context,
+              character,
+              title: skill.label,
+              modifier: bloc.skillModifier(character, skill),
+              kind: RollKind.abilityCheck,
+            ),
             onChanged: () => bloc.add(
               ToggleProficiencyEvent(character.id, SkillProficiency(skill)),
             ),
@@ -468,6 +526,7 @@ class _ProficiencyRow extends StatelessWidget {
     required this.modifier,
     required this.checked,
     required this.onChanged,
+    required this.onRoll,
   });
 
   final String iconAsset;
@@ -475,7 +534,10 @@ class _ProficiencyRow extends StatelessWidget {
   final String? sublabel;
   final int modifier;
   final bool checked;
+
+  /// Tocar na linha rola o teste; a caixa marca a proficiência.
   final VoidCallback onChanged;
+  final VoidCallback onRoll;
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +545,7 @@ class _ProficiencyRow extends StatelessWidget {
     final modifierLabel = modifier >= 0 ? '+$modifier' : '$modifier';
 
     return InkWell(
-      onTap: onChanged,
+      onTap: onRoll,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(

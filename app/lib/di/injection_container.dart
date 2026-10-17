@@ -29,7 +29,9 @@ import 'package:crit_sense/features/dice_roller/data/repositories/dice_repositor
 import 'package:crit_sense/features/dice_roller/domain/repositories/i_dice_repository.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/roll_dice_usecase.dart';
 import 'package:crit_sense/features/dice_roller/domain/usecases/watch_shake_usecase.dart';
+import 'package:crit_sense/features/dice_roller/domain/entities/d20_roll_mode.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/dice_bloc.dart';
+import 'package:crit_sense/features/dice_roller/presentation/bloc/sheet_roll_cubit.dart';
 import 'package:crit_sense/features/compendium/data/datasources/compendium_remote_datasource.dart';
 import 'package:crit_sense/features/compendium/data/repositories/compendium_repository_impl.dart';
 import 'package:crit_sense/features/compendium/domain/repositories/i_compendium_repository.dart';
@@ -278,6 +280,11 @@ Future<void> init() async {
   // compartilhariam o mesmo estado — causando bugs difíceis de rastrear.
   // O ciclo de vida do BLoC (criação + dispose) deve espelhar o ciclo de vida
   // do widget que o consome: Factory garante isso.
+  // Rolagem a partir da ficha; o parâmetro é o modo inicial do d20
+  // (vantagem/desvantagem sugerida pelas condições do personagem).
+  sl.registerFactoryParam<SheetRollCubit, D20RollMode, void>(
+    (mode, _) => SheetRollCubit(sl<RollDiceUseCase>(), initialMode: mode),
+  );
   sl.registerFactory<DiceBloc>(
     () => DiceBloc(sl<RollDiceUseCase>(), sl<WatchShakeUseCase>()),
   );
