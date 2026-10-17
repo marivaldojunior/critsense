@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: critsense-api
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/critsense}
+    username: ${DB_USER:critsense}
+    password: ${DB_PASSWORD:critsense}
+  jpa:
+    # O schema é responsabilidade do Flyway; o Hibernate só confere se as
+    # entidades batem com as tabelas.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+server:
+  error:
+    include-stacktrace: never

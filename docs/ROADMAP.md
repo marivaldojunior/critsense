@@ -100,7 +100,7 @@ Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa també
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
 #### Estrutura
-- [ ] **T1.1** Crie o projeto Spring Boot em `api/` (Web, Validation, Security, Data JPA, Flyway, PostgreSQL, Actuator, Spring AI).
+- [x] **T1.1** Crie o projeto Spring Boot em `api/` (Web, Validation, Security, Data JPA, Flyway, PostgreSQL, Actuator, Spring AI).
 - [ ] **T1.2** Crie o `docker-compose.yml` na raiz com a API e o PostgreSQL.
 - [ ] **T1.3** Configure o provedor do LLM por variável de ambiente. Crie um `.env.example` sem valores reais e adicione `.env` ao `.gitignore`.
 - [ ] **T1.4** Configure o springdoc-openapi e exporte o contrato para `contracts/openapi.yaml`.
