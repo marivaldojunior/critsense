@@ -41,15 +41,18 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 ### 📜 Ficha de Personagem
 * **Criação pelas regras do SRD:** compra de pontos, matriz padrão ou rolagem 4d6; bônus e deslocamento da raça; PV pelo dado de vida da classe; testes de resistência, proficiências de equipamento e idiomas preenchidos pela classe e pela raça.
 * **Combate:** CA calculada pela armadura, pelo escudo e pela Defesa sem Armadura; iniciativa e bônus de proficiência pelo atributo e pelo nível; ataques das armas equipadas (acuidade, distância, versátil).
-* **Vida e descanso:** dano com PV temporário, dano massivo, salvaguardas contra a morte, dados de vida no Descanso Curto e recuperação no Descanso Longo.
+* **Vida e descanso:** dano com PV temporário, dano massivo, salvaguardas contra a morte, dados de vida no Descanso Curto e recuperação no Descanso Longo. O PV máximo também aceita ajuste manual.
+* **Recursos de classe:** usos de Fúria, Ki, Surto de Ação, Canalizar Divindade e outros recursos do SRD, com recarga no Descanso Curto ou Longo.
+* **Concentração:** marca a magia em concentração; depois de dano, o app mostra a CD do teste de CON e abre a rolagem.
 * **Condições e exaustão:** as 14 condições do SRD e os 6 níveis de exaustão, com efeito no deslocamento e na vantagem/desvantagem das rolagens.
-* **Magia:** espaços de magia pelas tabelas do SRD (incluindo a Magia de Pacto), CD e ataque mágico, grimório com magias preparadas.
+* **Magia:** espaços de magia pelas tabelas do SRD (incluindo a Magia de Pacto), CD e ataque mágico, grimório com magias preparadas e limite de truques e de magias conhecidas.
 * **Inventário:** quantidade, peso e limite de carga, moedas, itens equipados e sintonia (máximo de 3).
-* **Evolução:** XP pela tabela do SRD, subida de nível com PV (média ou rolagem), Aumento de Valor de Atributo e as características de classe e raça de cada nível.
+* **Evolução:** XP pela tabela do SRD, subida de nível com PV (média ou rolagem), Aumento de Valor de Atributo, subclasse do SRD e as características de classe, subclasse e raça de cada nível.
+* **Edição:** nome, raça, classe, tendência e foto podem mudar depois da criação.
 * **Rolar direto da ficha:** perícias, testes de resistência, iniciativa, ataques e dano, com vantagem e desvantagem sugeridas pelas condições.
 * **Backup:** exportar e importar personagens em JSON.
 * **Diário de Campanha:** notas de sessão por personagem com criação via formulário validado e **exclusão com sistema de Undo** — a nota some da lista imediatamente e só é removida do banco se o usuário não tocar em "Desfazer" dentro da janela do `SnackBar`.
-* **Persistência local:** todos os dados da ficha (atributos, proficiências, inventário, magias, notas, chefes derrotados) ficam no aparelho, com schema versionado e migrações incrementais no Drift.
+* **Persistência local:** todos os dados da ficha (atributos, proficiências, inventário, magias, notas, chefes derrotados) ficam no aparelho, com schema versionado e migrações incrementais no Drift. Antes de cada migração, o app copia o arquivo do banco.
 
 ### 📚 Compêndio D&D 5e
 * Integração com a **API 5e-bits** via `Dio`, cobrindo **Magias**, **Equipamentos** e **Bestiário**, cada um com tela de listagem e detalhe dedicadas (stat blocks completos para monstros, componentes/duração para magias, dano/CA para equipamentos).
@@ -61,8 +64,13 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 * Registro de **chefes/monstros derrotados** vinculados ao personagem, direto da tela de detalhe do Bestiário.
 * Toda a persistência dessas ações é gravada no banco **Drift/SQLite** do personagem, sem acoplamento direto entre os módulos de `compendium` e `character_sheet`.
 
+### ⚔️ Rastreador de Iniciativa
+* Combate com personagens da lista, monstros do bestiário (CA, PV e DES) e outras criaturas.
+* Rola a iniciativa, ordena, passa o turno e conta as rodadas. O combate fica salvo ao fechar o app.
+
 ### 🎲 Rolador de Dados
 * Pool com múltiplos tipos e quantidades de dados (d4 a d100).
+* Histórico das 50 rolagens mais novas, do rolador e da ficha.
 * Modificador global configurável e modos de **vantagem/desvantagem** aplicados especificamente ao d20.
 * **Suporte a hardware:** disparo de rolagem via sensor de movimento do dispositivo (shake), além do CTA manual fixo na tela, e vibração em acerto crítico e falha crítica. Os canais nativos estão em `MainActivity.kt` (Android) e `AppDelegate.swift` (iOS). A versão iOS ainda não foi compilada nem testada num aparelho.
 
