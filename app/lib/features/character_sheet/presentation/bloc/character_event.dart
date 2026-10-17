@@ -277,3 +277,27 @@ final class LevelUpEvent extends CharacterEvent {
     this.abilityIncreases = const {},
   });
 }
+
+/// Muda só os campos de texto do bloco de Traços & Lore do personagem
+/// [characterId]. Os campos `null` ficam como estão.
+///
+/// Diferente de [SaveCharacterEvent], este evento aplica as mudanças sobre a
+/// versão atual do personagem no BLoC, então não desfaz o que mudou em outra
+/// aba (PV, nível, espaços de magia) depois que a aba de texto abriu.
+final class UpdateLoreEvent extends CharacterEvent {
+  final String characterId;
+  final String? personalityTraits;
+  final String? ideals;
+  final String? bonds;
+  final String? flaws;
+  final String? background;
+
+  const UpdateLoreEvent(
+    this.characterId, {
+    this.personalityTraits,
+    this.ideals,
+    this.bonds,
+    this.flaws,
+    this.background,
+  });
+}

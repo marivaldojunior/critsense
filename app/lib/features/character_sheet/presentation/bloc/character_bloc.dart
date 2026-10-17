@@ -162,6 +162,19 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         ),
       ),
     );
+    on<UpdateLoreEvent>(
+      (event, emit) => _updateCharacter(
+        emit,
+        event.characterId,
+        (c) => c.copyWith(
+          personalityTraits: event.personalityTraits,
+          ideals: event.ideals,
+          bonds: event.bonds,
+          flaws: event.flaws,
+          background: event.background,
+        ),
+      ),
+    );
     on<SetSpeedEvent>(
       (event, emit) => _updateCharacter(
         emit,

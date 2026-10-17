@@ -12,11 +12,11 @@ import '../../bloc/character_bloc.dart';
 /// esquerdo da ficha oficial (Traços, Ideais, Vínculos, Fraquezas) mais o
 /// Antecedente/Histórico do cabeçalho.
 ///
-/// [StatefulWidget] porque mantém um rascunho local ([_draft]) e um único
-/// debounce compartilhado entre os cinco campos: cada [SaveCharacterEvent]
-/// precisa do [Character] inteiro, então salvar um campo isoladamente com
-/// o [character] original (sem as edições feitas nos outros campos ainda
-/// não persistidas) sobrescreveria essas edições com dados desatualizados.
+/// [StatefulWidget] porque junta as edições pendentes dos cinco campos e
+/// salva com um único debounce. O salvamento usa [UpdateLoreEvent], que só
+/// muda os campos de texto da versão atual do personagem: salvar uma cópia
+/// do personagem guardada na abertura da aba desfaria o que mudou nas
+/// outras abas (PV, nível, espaços de magia) nesse meio-tempo.
 class TraitsLoreTab extends StatefulWidget {
   const TraitsLoreTab({super.key, required this.character});
 
@@ -26,30 +26,42 @@ class TraitsLoreTab extends StatefulWidget {
   State<TraitsLoreTab> createState() => _TraitsLoreTabState();
 }
 
-class _TraitsLoreTabState extends State<TraitsLoreTab> {
-  late Character _draft;
-  Timer? _debounce;
+enum _LoreKey { personalityTraits, ideals, bonds, flaws, background }
 
-  @override
-  void initState() {
-    super.initState();
-    _draft = widget.character;
-  }
+class _TraitsLoreTabState extends State<TraitsLoreTab> {
+  final Map<_LoreKey, String> _pending = {};
+  Timer? _debounce;
+  late final CharacterBloc _bloc = context.read<CharacterBloc>();
 
   @override
   void dispose() {
     _debounce?.cancel();
+    // Salva o que ainda estava no debounce ao sair da aba.
+    _flush();
     super.dispose();
   }
 
-  /// Aplica [apply] ao rascunho acumulado e reagenda o salvamento para
-  /// 500ms após a última edição em qualquer campo desta aba.
-  void _onFieldChanged(Character Function(Character) apply) {
-    _draft = apply(_draft);
+  /// Guarda a edição e reagenda o salvamento para 500ms após a última
+  /// edição em qualquer campo desta aba.
+  void _onFieldChanged(_LoreKey field, String value) {
+    _pending[field] = value;
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      context.read<CharacterBloc>().add(SaveCharacterEvent(_draft));
-    });
+    _debounce = Timer(const Duration(milliseconds: 500), _flush);
+  }
+
+  void _flush() {
+    if (_pending.isEmpty) return;
+    _bloc.add(
+      UpdateLoreEvent(
+        widget.character.id,
+        personalityTraits: _pending[_LoreKey.personalityTraits],
+        ideals: _pending[_LoreKey.ideals],
+        bonds: _pending[_LoreKey.bonds],
+        flaws: _pending[_LoreKey.flaws],
+        background: _pending[_LoreKey.background],
+      ),
+    );
+    _pending.clear();
   }
 
   @override
@@ -60,33 +72,32 @@ class _TraitsLoreTabState extends State<TraitsLoreTab> {
         _LoreField(
           label: 'Traços de Personalidade',
           initialValue: widget.character.personalityTraits,
-          onChanged: (v) =>
-              _onFieldChanged((c) => c.copyWith(personalityTraits: v)),
+          onChanged: (v) => _onFieldChanged(_LoreKey.personalityTraits, v),
         ),
         const SizedBox(height: 16),
         _LoreField(
           label: 'Ideais',
           initialValue: widget.character.ideals,
-          onChanged: (v) => _onFieldChanged((c) => c.copyWith(ideals: v)),
+          onChanged: (v) => _onFieldChanged(_LoreKey.ideals, v),
         ),
         const SizedBox(height: 16),
         _LoreField(
           label: 'Vínculos',
           initialValue: widget.character.bonds,
-          onChanged: (v) => _onFieldChanged((c) => c.copyWith(bonds: v)),
+          onChanged: (v) => _onFieldChanged(_LoreKey.bonds, v),
         ),
         const SizedBox(height: 16),
         _LoreField(
           label: 'Fraquezas',
           initialValue: widget.character.flaws,
-          onChanged: (v) => _onFieldChanged((c) => c.copyWith(flaws: v)),
+          onChanged: (v) => _onFieldChanged(_LoreKey.flaws, v),
         ),
         const SizedBox(height: 16),
         _LoreField(
           label: 'Histórico',
           initialValue: widget.character.background,
           minLines: 5,
-          onChanged: (v) => _onFieldChanged((c) => c.copyWith(background: v)),
+          onChanged: (v) => _onFieldChanged(_LoreKey.background, v),
         ),
         const SizedBox(height: 24),
         Text(
