@@ -109,6 +109,8 @@ void main() {
     expect(find.text('Truques'), findsOneWidget);
     expect(find.text('1º nível'), findsWidgets);
     expect(find.text('Preparadas: 1/6'), findsOneWidget); // 3 + 3
+    expect(find.text('Truques: 1/3'), findsOneWidget);
+    expect(find.textContaining('Conhecidas'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

@@ -35,6 +35,12 @@ class SpellbookState extends Equatable {
   int get preparedCount =>
       spells.where((s) => s.prepared && !s.isCantrip).length;
 
+  /// Quantos truques estão no grimório.
+  int get cantripCount => spells.where((s) => s.isCantrip).length;
+
+  /// Quantas magias (sem contar truques) estão no grimório.
+  int get leveledSpellCount => spells.length - cantripCount;
+
   @override
   List<Object?> get props => [status, spells, errorMessage];
 }

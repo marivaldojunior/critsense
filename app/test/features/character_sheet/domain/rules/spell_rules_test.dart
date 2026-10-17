@@ -74,6 +74,28 @@ void main() {
       expect(sorcerer.preparedSpellLimit, isNull); // conhece, não prepara
     });
 
+    test('truques e magias conhecidas por classe e nível', () {
+      int? cantrips(String c, int level) => buildTestCharacter(
+        characterClass: c,
+        level: level,
+      ).cantripsKnownLimit;
+      int? known(String c, int level) =>
+          buildTestCharacter(characterClass: c, level: level).spellsKnownLimit;
+
+      expect(cantrips('Wizard', 1), 3);
+      expect(cantrips('Wizard', 4), 4);
+      expect(cantrips('Sorcerer', 10), 6);
+      expect(cantrips('Paladin', 10), isNull);
+      expect(cantrips('Fighter', 10), isNull);
+      expect(known('Bard', 1), 4);
+      expect(known('Bard', 10), 14);
+      expect(known('Sorcerer', 20), 15);
+      expect(known('Warlock', 11), 11);
+      expect(known('Ranger', 1), 0);
+      expect(known('Ranger', 2), 2);
+      expect(known('Wizard', 5), isNull);
+    });
+
     test('limite de preparadas é no mínimo 1', () {
       final weakCleric = buildTestCharacter(
         characterClass: 'Cleric',

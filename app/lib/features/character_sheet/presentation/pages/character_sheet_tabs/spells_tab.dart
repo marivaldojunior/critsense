@@ -269,6 +269,8 @@ class _Spellbook extends StatelessWidget {
     final theme = Theme.of(context);
     final preparesSpells = character.srdClass?.preparesSpells ?? false;
     final limit = character.preparedSpellLimit;
+    final cantripLimit = character.cantripsKnownLimit;
+    final knownLimit = character.spellsKnownLimit;
 
     return BlocConsumer<SpellbookBloc, SpellbookState>(
       listenWhen: (previous, current) =>
@@ -285,15 +287,16 @@ class _Spellbook extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Grimório', style: theme.textTheme.titleMedium),
-                  if (limit != null)
-                    Text(
-                      'Preparadas: ${state.preparedCount}/$limit',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: state.preparedCount > limit
-                            ? theme.colorScheme.error
-                            : null,
-                      ),
+                  if (cantripLimit != null)
+                    _LimitText('Truques', state.cantripCount, cantripLimit),
+                  if (knownLimit != null)
+                    _LimitText(
+                      'Conhecidas',
+                      state.leveledSpellCount,
+                      knownLimit,
                     ),
+                  if (limit != null)
+                    _LimitText('Preparadas', state.preparedCount, limit),
                 ],
               ),
             ),
@@ -370,6 +373,26 @@ class _Spellbook extends StatelessWidget {
       groups.putIfAbsent(spell.level, () => []).add(spell);
     }
     return groups;
+  }
+}
+
+/// Contagem com limite, ex: "Truques: 2/3". Fica vermelha acima do limite.
+class _LimitText extends StatelessWidget {
+  const _LimitText(this.label, this.count, this.limit);
+
+  final String label;
+  final int count;
+  final int limit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      '$label: $count/$limit',
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: count > limit ? theme.colorScheme.error : null,
+      ),
+    );
   }
 }
 

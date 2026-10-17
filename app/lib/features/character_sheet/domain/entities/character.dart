@@ -1,5 +1,6 @@
 import '../rules/srd_rules.dart';
 import '../srd/spell_slots.dart';
+import '../srd/spells_known.dart';
 import '../srd/srd_class.dart';
 import 'attribute.dart';
 import 'attribute_type.dart';
@@ -354,6 +355,14 @@ class Character {
     final limit = modifierOf(ability) + levels;
     return limit < 1 ? 1 : limit;
   }
+
+  /// Quantos truques o personagem conhece, ou `null` se a classe não tem
+  /// truques.
+  int? get cantripsKnownLimit => cantripsKnownFor(srdClass, level);
+
+  /// Quantas magias o personagem conhece (Bardo, Patrulheiro, Feiticeiro e
+  /// Bruxo), ou `null` nas classes que preparam magias.
+  int? get spellsKnownLimit => spellsKnownFor(srdClass, level);
 
   /// Morto: 3 falhas nas salvaguardas, dano massivo ou exaustão 6.
   bool get isDead =>
