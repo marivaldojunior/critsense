@@ -142,6 +142,18 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 - [x] **TF.8** Crie o rastreador de iniciativa com personagens e monstros, turno e rodada.
 - [x] **TF.9** Guarde o histórico das últimas rolagens.
 
+### Fase G — Comandos por voz (IA no aparelho)
+
+Esta fase vem depois dos testes da Fase F no aparelho. A voz só converte a fala num evento que o app já tem. As regras do SRD continuam no código: a IA nunca calcula PV nem dados.
+
+- [ ] **TG.1** Transcreva a fala no aparelho com o reconhecimento de voz do Android, em pt-BR e sem internet quando possível.
+- [ ] **TG.2** Converta frases simples em comandos com regras fixas, sem IA (ex.: "dano 12", "curar 5", "rolar 2d6 mais 3", "descanso curto"). Escreva testes unitários com frases de exemplo.
+- [ ] **TG.3** Use um modelo no aparelho (Gemini Nano pelo ML Kit GenAI) para frases livres. O modelo devolve um JSON com o comando, e o app valida esse JSON. Em aparelhos sem o modelo, use só as regras da TG.2.
+- [ ] **TG.4** Mostre o comando entendido e peça a confirmação antes de aplicar.
+- [ ] **TG.5** Dite as notas de lore e de sessão direto para o Diário de Campanha.
+- [ ] **TG.6** Resuma as notas da sessão com o modelo no aparelho, sem enviar o texto para a nuvem.
+- [ ] **TG.7** Adicione um botão de microfone na ficha e no rastreador de iniciativa (ex.: "o lobo leva 8 de dano", "próximo turno").
+
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
 #### Estrutura
@@ -215,3 +227,6 @@ A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e
 2. Faça a T0.2: ela é um bug de release.
 3. Faça as tarefas de arquitetura (T0.5 a T0.8) antes da Fase 1. A nova feature `ai_tools` vai copiar esses padrões.
 4. Comece a Fase 1 pela estrutura e pela autenticação (T1.1 a T1.8), e só depois faça o NPC.
+5. Teste a Fase F no aparelho antes de começar a Fase G.
+6. Na Fase G, faça as regras fixas (TG.1 e TG.2) antes do modelo no aparelho (TG.3).
+7. Depois da Fase G, volte às Fases 2 e 3 (IA pela API) e, por último, à Fase 4 (front React).
