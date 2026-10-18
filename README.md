@@ -1,6 +1,9 @@
 # ⚔️ CritSense
 
-**Companion app completo para mestres e jogadores de D&D 5e** — gerenciamento de fichas de personagem, compêndio do SRD 5.1 (magias, equipamentos e bestiário) e rolador de dados físico, em um único app. Tudo funciona **offline**: as fichas ficam no aparelho, e o compêndio guarda uma cópia de tudo o que já foi consultado.
+**Projeto de estudo em Flutter e Java, com experimentos de IA no Android e numa API própria.** O tema é um app companheiro de D&D 5e: ficha de personagem pelas regras do SRD 5.1, compêndio (magias, equipamentos e bestiário), rastreador de iniciativa e rolador de dados. As fichas ficam no aparelho, e o compêndio funciona sem internet depois da primeira consulta.
+
+> [!NOTE]
+> O CritSense não é um produto. Ele serve para praticar arquitetura, testes e CI, e para testar recursos de IA em dois lugares: no próprio aparelho Android e numa API em Java.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
@@ -10,6 +13,18 @@
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F?logo=spring&logoColor=white)
+
+---
+
+## 🎯 Objetivos de Estudo
+
+| Área | O que o projeto pratica |
+|---|---|
+| **Flutter** | Clean Architecture, BLoC/Cubit, `get_it`, Drift/SQLite com migrações, cache offline com `Dio`, testes de widget e de migração. |
+| **Java** | Spring Boot 4, Spring Security com JWT, Flyway, PostgreSQL, Testcontainers, contrato OpenAPI e erros RFC 9457. |
+| **IA na API** | Spring AI com provedor configurável, saída em JSON validada, prompts versionados, rate limit e timeout. |
+| **IA no Android** | Próximo passo: recursos de IA que rodam no aparelho, sem enviar os dados da ficha para a nuvem (em pesquisa). |
+| **Processo** | Monorepo, CI separado por pasta no GitHub Actions e roadmap por fases em [docs/ROADMAP.md](docs/ROADMAP.md). |
 
 ---
 
@@ -90,7 +105,12 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 
 ## 🧠 API e Inteligência Artificial
 
-A pasta [api/](api/) tem a API própria do CritSense, em Java 21 com Spring Boot 4.1 e Spring AI 2.0:
+A IA é a parte experimental do projeto. Ela tem duas frentes:
+
+1. **IA no Android (próxima fase):** a pesquisa das opções de IA que rodam no aparelho. Os primeiros usos são o resumo das notas de sessão e sugestões para a história do personagem.
+2. **IA na API (primeiro experimento pronto):** a pasta [api/](api/) tem a API própria do CritSense, em Java 21 com Spring Boot 4.1 e Spring AI 2.0. O app ainda não chama a API; essa ligação está pausada no [roadmap](docs/ROADMAP.md).
+
+O que a API já tem:
 
 * **Gerador de NPCs** (`POST /api/v1/npcs/generate`): a IA cria nome, raça, personalidade, segredo e ganchos de aventura, sempre em JSON validado contra um schema. Uma resposta inválida recebe uma nova tentativa com a lista de erros; se continuar inválida, a API devolve um erro, nunca um JSON quebrado.
 * **Provedor configurável:** Anthropic (padrão, `claude-opus-5-5`) ou OpenAI, escolhido pela variável `AI_PROVIDER`. A chave fica só no backend.
