@@ -58,6 +58,10 @@ import 'package:crit_sense/features/compendium/presentation/bloc/monster_detail_
 import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bloc.dart';
 import 'package:crit_sense/features/dice_roller/presentation/bloc/roll_history_cubit.dart';
 import 'package:crit_sense/features/initiative_tracker/presentation/cubit/initiative_cubit.dart';
+import 'package:crit_sense/features/voice_commands/data/services/device_speech_input.dart';
+import 'package:crit_sense/features/voice_commands/domain/services/command_interpreter.dart';
+import 'package:crit_sense/features/voice_commands/domain/services/speech_input.dart';
+import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
 import 'package:dio/dio.dart';
 
 /// Instância global do service locator.
@@ -87,6 +91,19 @@ Future<void> init() async {
   final preferences = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(preferences);
   sl.registerFactory<ThemeCubit>(() => ThemeCubit(sl<SharedPreferences>()));
+  // Comandos por voz (Fase G): um só reconhecimento de voz para o app e um
+  // cubit novo a cada abertura da folha.
+  sl.registerLazySingleton<SpeechInput>(DeviceSpeechInput.new);
+  sl.registerLazySingleton<CommandInterpreter>(
+    () => const RuleBasedInterpreter(),
+  );
+  sl.registerFactoryParam<VoiceCommandCubit, VoiceScope, void>(
+    (scope, _) => VoiceCommandCubit(
+      sl<SpeechInput>(),
+      sl<CommandInterpreter>(),
+      scope: scope,
+    ),
+  );
   // Singleton: o rolador e a ficha gravam no mesmo histórico.
   sl.registerLazySingleton<RollHistoryCubit>(
     () => RollHistoryCubit(sl<SharedPreferences>()),
