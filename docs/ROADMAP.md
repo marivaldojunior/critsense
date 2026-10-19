@@ -146,7 +146,7 @@ Estas fases deixam a ficha pronta para uma sessão real. As regras de cálculo s
 
 Esta fase vem depois dos testes da Fase F no aparelho. A voz só converte a fala num evento que o app já tem. As regras do SRD continuam no código: a IA nunca calcula PV nem dados.
 
-- [ ] **TG.1** Transcreva a fala no aparelho com o reconhecimento de voz do Android, em pt-BR e sem internet quando possível.
+- [x] **TG.1** Transcreva a fala no aparelho com o reconhecimento de voz do Android, em pt-BR e sem internet quando possível.
 - [ ] **TG.2** Converta frases simples em comandos com regras fixas, sem IA (ex.: "dano 12", "curar 5", "rolar 2d6 mais 3", "descanso curto"). Escreva testes unitários com frases de exemplo.
 - [ ] **TG.3** Use um modelo no aparelho (Gemini Nano pelo ML Kit GenAI) para frases livres. O modelo devolve um JSON com o comando, e o app valida esse JSON. Em aparelhos sem o modelo, use só as regras da TG.2.
 - [ ] **TG.4** Mostre o comando entendido e peça a confirmação antes de aplicar.

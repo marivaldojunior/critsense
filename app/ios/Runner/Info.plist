@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O CritSense usa o microfone para os comandos por voz da ficha.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O CritSense transcreve a sua fala para aplicar os comandos por voz.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
