@@ -23,7 +23,7 @@
 | **Flutter** | Clean Architecture, BLoC/Cubit, `get_it`, Drift/SQLite com migrações, cache offline com `Dio`, testes de widget e de migração. |
 | **Java** | Spring Boot 4, Spring Security com JWT, Flyway, PostgreSQL, Testcontainers, contrato OpenAPI e erros RFC 9457. |
 | **IA na API** | Spring AI com provedor configurável, saída em JSON validada, prompts versionados, rate limit e timeout. |
-| **IA no Android** | Próximo passo: recursos de IA que rodam no aparelho, sem enviar os dados da ficha para a nuvem (em pesquisa). |
+| **IA no Android** | Comandos por voz com regras fixas e Gemini Nano (ML Kit GenAI) no aparelho, canal Kotlin próprio e resumo de sessão sem enviar as notas para a nuvem. |
 | **Processo** | Monorepo, CI separado por pasta no GitHub Actions e roadmap por fases em [docs/ROADMAP.md](docs/ROADMAP.md). |
 
 ---
@@ -83,6 +83,13 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 * Combate com personagens da lista, monstros do bestiário (CA, PV e DES) e outras criaturas.
 * Rola a iniciativa, ordena, passa o turno e conta as rodadas. O combate fica salvo ao fechar o app.
 
+### 🎙️ Comandos por Voz (IA no aparelho)
+* **Microfone na ficha:** "levei 8 de dano", "curar 5", "rolar 2d6 mais 3", "descanso curto", "concentrar em Bless" e "anotar o rei mentiu".
+* **Microfone no rastreador:** "o lobo leva 8 de dano", "cura o goblin em 3" e "próximo turno".
+* **Ditado e resumo:** o Diário de Campanha aceita notas ditadas e resume a sessão com o Gemini Nano.
+* **Como funciona:** a fala vira texto no aparelho (pt-BR). Regras fixas entendem as frases simples em qualquer celular. O Gemini Nano só entra nas frases livres, nos aparelhos com suporte, e devolve um JSON que o app valida.
+* **Segurança da ficha:** o app sempre mostra o comando entendido e só aplica depois da confirmação. As regras do SRD continuam no código: a IA nunca calcula PV nem dados.
+
 ### 🎲 Rolador de Dados
 * Pool com múltiplos tipos e quantidades de dados (d4 a d100).
 * Histórico das 50 rolagens mais novas, do rolador e da ficha.
@@ -107,7 +114,7 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 
 A IA é a parte experimental do projeto. Ela tem duas frentes:
 
-1. **IA no Android (próxima fase):** a pesquisa das opções de IA que rodam no aparelho. Os primeiros usos são o resumo das notas de sessão e sugestões para a história do personagem.
+1. **IA no Android (Fase G):** comandos por voz e resumo de sessão com o Gemini Nano pelo ML Kit GenAI Prompt API (beta), num canal Kotlin próprio (`OnDeviceAiChannel.kt`). O modelo roda no AICore do Android e só existe em alguns celulares; nos outros, as regras fixas continuam funcionando.
 2. **IA na API (primeiro experimento pronto):** a pasta [api/](api/) tem a API própria do CritSense, em Java 21 com Spring Boot 4.1 e Spring AI 2.0. O app ainda não chama a API; essa ligação está pausada no [roadmap](docs/ROADMAP.md).
 
 O que a API já tem:
