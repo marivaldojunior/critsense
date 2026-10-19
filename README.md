@@ -3,7 +3,7 @@
 **Projeto de estudo em Flutter e Java, com experimentos de IA no Android e numa API própria.** O tema é um app companheiro de D&D 5e: ficha de personagem pelas regras do SRD 5.1, compêndio (magias, equipamentos e bestiário), rastreador de iniciativa e rolador de dados. As fichas ficam no aparelho, e o compêndio funciona sem internet depois da primeira consulta.
 
 > [!NOTE]
-> O CritSense não é um produto. Ele serve para praticar arquitetura, testes e CI, e para testar recursos de IA em dois lugares: no próprio aparelho Android e numa API em Java.
+> O CritSense não é um produto. Ele serve para praticar arquitetura, testes e CI, e para testar recursos de IA em dois lugares: no próprio aparelho Android e numa API em Java. O [Guia de Estudo](docs/ESTUDO.md) resume a arquitetura, as decisões técnicas e um roteiro de leitura do código.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
@@ -35,7 +35,7 @@
 | [app/](app/) | App Flutter (fichas, compêndio e rolador de dados). |
 | [api/](api/) | API em Java (Spring Boot): autenticação e ferramentas de IA. Veja o [README da API](api/README.md). |
 | [contracts/](contracts/) | Contrato OpenAPI da API, usado para gerar os clientes. |
-| [docs/](docs/) | [Roadmap](docs/ROADMAP.md) e decisões do projeto. |
+| [docs/](docs/) | [Roadmap](docs/ROADMAP.md) e [Guia de Estudo](docs/ESTUDO.md) com a arquitetura e as decisões técnicas. |
 | `docker-compose.yml` | Ambiente local: API + PostgreSQL. |
 
 ---
