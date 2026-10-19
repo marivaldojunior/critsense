@@ -11,6 +11,9 @@ import 'package:crit_sense/features/character_sheet/presentation/bloc/character_
 import 'package:crit_sense/features/compendium/domain/entities/monster_summary.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monster_detail_usecase.dart';
 import 'package:crit_sense/features/compendium/domain/usecases/get_monsters_usecase.dart';
+import 'package:crit_sense/features/voice_commands/domain/entities/voice_command.dart';
+import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
+import 'package:crit_sense/features/voice_commands/presentation/widgets/voice_command_sheet.dart';
 
 import '../../domain/entities/combatant.dart';
 import '../cubit/initiative_cubit.dart';
@@ -125,6 +128,51 @@ class _TrackerView extends StatelessWidget {
     if (result != null) cubit.changeHitPoints(c.id, result);
   }
 
+  /// Abre a escuta e aplica o comando confirmado no combate.
+  Future<void> _listen(BuildContext context) async {
+    final cubit = context.read<InitiativeCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    void tell(String text) =>
+        messenger.showSnackBar(SnackBar(content: Text(text)));
+
+    final command = await showVoiceCommandSheet(
+      context,
+      scope: VoiceScope.combat,
+    );
+    switch (command) {
+      case NextTurnCommand():
+        cubit.nextTurn();
+      case PreviousTurnCommand():
+        cubit.previousTurn();
+      case DamageCommand(:final amount, :final target) ||
+          HealCommand(:final amount, :final target):
+        final combatant = target == null
+            ? cubit.state.current
+            : cubit.findByName(target);
+        if (combatant == null) {
+          tell(
+            target == null
+                ? 'Diga o nome da criatura ou comece o combate.'
+                : 'Não achei uma só criatura com o nome "$target".',
+          );
+          return;
+        }
+        if (combatant.hitPoints == null) {
+          tell('${combatant.name} não tem PV no rastreador. Use a ficha.');
+          return;
+        }
+        final delta = command is DamageCommand ? -amount : amount;
+        cubit.changeHitPoints(combatant.id, delta);
+        tell(
+          command is DamageCommand
+              ? '${combatant.name}: $amount de dano.'
+              : '${combatant.name}: $amount de cura.',
+        );
+      default:
+        break;
+    }
+  }
+
   Future<void> _confirmClear(BuildContext context) async {
     final cubit = context.read<InitiativeCubit>();
     final confirmed = await showDialog<bool>(
@@ -163,6 +211,8 @@ class _TrackerView extends StatelessWidget {
                   : 'Iniciativa',
             ),
             actions: [
+              if (state.combatants.isNotEmpty)
+                VoiceCommandButton(onPressed: () => _listen(context)),
               PopupMenuButton<String>(
                 tooltip: 'Adicionar',
                 icon: const Icon(Icons.person_add_alt_1_outlined),

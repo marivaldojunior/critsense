@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/voice_commands/presentation/widgets/voice_command_sheet.dart';
 
 import '../../domain/entities/character.dart';
 import '../bloc/character_bloc.dart';
 import '../bloc/inventory_bloc.dart';
+import '../voice/apply_voice_command.dart';
 import '../widgets/character_avatar.dart';
 import '../widgets/edit_identity_sheet.dart';
 import 'character_sheet_tabs/inventory_tab.dart';
@@ -102,6 +104,9 @@ class CharacterSheetScreen extends StatelessWidget {
             ],
           ),
           actions: [
+            VoiceCommandButton(
+              onPressed: () => listenForCharacterCommand(context, live.id),
+            ),
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Editar personagem',

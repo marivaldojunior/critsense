@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:crit_sense/features/voice_commands/domain/services/spoken_text.dart';
+
 import '../../domain/entities/combatant.dart';
 
 class InitiativeState extends Equatable {
@@ -204,6 +206,30 @@ class InitiativeCubit extends Cubit<InitiativeState> {
         ),
       );
     }
+  }
+
+  /// Encontra o participante pelo nome falado (ex: "goblin 2"), sem
+  /// diferenciar maiúsculas nem acentos. Um nome igual ganha; senão, vale o
+  /// único nome que começa com o texto ou que o contém. Devolve `null` sem
+  /// participante ou com mais de um possível.
+  Combatant? findByName(String spoken) {
+    final target = normalizeSpoken(spoken);
+    if (target.isEmpty) return null;
+    final names = {
+      for (final c in state.combatants) c.id: normalizeSpoken(c.name),
+    };
+    for (final c in state.combatants) {
+      if (names[c.id] == target) return c;
+    }
+    for (final test in [
+      (String name) => name.startsWith(target),
+      (String name) => name.contains(target),
+    ]) {
+      final matches = state.combatants.where((c) => test(names[c.id]!));
+      if (matches.length == 1) return matches.single;
+      if (matches.length > 1) return null;
+    }
+    return null;
   }
 
   /// Termina o combate e tira todos os participantes.

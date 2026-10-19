@@ -10,7 +10,11 @@ import 'package:crit_sense/features/character_sheet/presentation/bloc/character_
 import 'package:crit_sense/features/initiative_tracker/presentation/cubit/initiative_cubit.dart';
 import 'package:crit_sense/features/initiative_tracker/presentation/pages/initiative_tracker_screen.dart';
 
+import 'package:crit_sense/features/voice_commands/domain/services/command_interpreter.dart';
+import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
+
 import '../../helpers/character_test_helpers.dart';
+import '../../helpers/fake_speech_input.dart';
 
 /// Random que devolve sempre o mesmo d20.
 class _FixedRandom implements Random {
@@ -187,5 +191,59 @@ void main() {
     await tester.tap(find.text('Próximo turno'));
     await tester.pumpAndSettle();
     expect(find.text('Iniciativa — rodada 2'), findsOneWidget);
+  });
+
+  test('acha a criatura pelo nome falado', () {
+    final cubit = newCubit()
+      ..add(name: 'Lobo Atroz', hitPoints: 37)
+      ..add(name: 'Goblin', hitPoints: 7)
+      ..add(name: 'Goblin', hitPoints: 7)
+      ..add(name: 'Clérigo', characterId: 'c1');
+    addTearDown(cubit.close);
+
+    expect(cubit.findByName('lobo')!.name, 'Lobo Atroz');
+    expect(cubit.findByName('goblin')!.name, 'Goblin');
+    expect(cubit.findByName('goblin 2')!.name, 'Goblin 2');
+    expect(cubit.findByName('clerigo')!.name, 'Clérigo');
+    expect(cubit.findByName('dragão'), isNull);
+  });
+
+  testWidgets('a voz aplica dano numa criatura e passa o turno', (
+    tester,
+  ) async {
+    final cubit = newCubit()
+      ..add(name: 'Lobo', hitPoints: 11)
+      ..add(name: 'Goblin', hitPoints: 7, initiativeBonus: 2)
+      ..start();
+    final speech = FakeSpeechInput();
+    sl
+      ..registerSingleton<InitiativeCubit>(cubit)
+      ..registerFactoryParam<VoiceCommandCubit, VoiceScope, void>(
+        (scope, _) => VoiceCommandCubit(
+          speech,
+          const RuleBasedInterpreter(),
+          scope: scope,
+        ),
+      );
+    addTearDown(sl.reset);
+
+    await tester.pumpWidget(const MaterialApp(home: InitiativeTrackerScreen()));
+    expect(cubit.state.current!.name, 'Goblin');
+
+    await tester.tap(find.byTooltip('Comando por voz'));
+    await tester.pumpAndSettle();
+    speech.say('o lobo leva oito de dano');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aplicar'));
+    await tester.pumpAndSettle();
+    expect(find.text('3/11 PV'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Comando por voz'));
+    await tester.pumpAndSettle();
+    speech.say('próximo turno');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aplicar'));
+    await tester.pumpAndSettle();
+    expect(cubit.state.current!.name, 'Lobo');
   });
 }

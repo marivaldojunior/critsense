@@ -152,7 +152,7 @@ Esta fase vem depois dos testes da Fase F no aparelho. A voz só converte a fala
 - [x] **TG.4** Mostre o comando entendido e peça a confirmação antes de aplicar.
 - [x] **TG.5** Dite as notas de lore e de sessão direto para o Diário de Campanha.
 - [ ] **TG.6** Resuma as notas da sessão com o modelo no aparelho, sem enviar o texto para a nuvem.
-- [ ] **TG.7** Adicione um botão de microfone na ficha e no rastreador de iniciativa (ex.: "o lobo leva 8 de dano", "próximo turno").
+- [x] **TG.7** Adicione um botão de microfone na ficha e no rastreador de iniciativa (ex.: "o lobo leva 8 de dano", "próximo turno").
 
 ### Fase 1 — API base e primeiro endpoint de IA (NPC)
 
