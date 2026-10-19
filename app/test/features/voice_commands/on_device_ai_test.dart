@@ -8,37 +8,8 @@ import 'package:crit_sense/features/voice_commands/domain/services/llm_command_p
 import 'package:crit_sense/features/voice_commands/domain/services/on_device_ai.dart';
 import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
 
+import '../../helpers/fake_on_device_ai.dart';
 import '../../helpers/fake_speech_input.dart';
-
-/// Modelo falso: devolve [reply] e conta as chamadas.
-class _FakeAi implements OnDeviceAi {
-  _FakeAi({this.current = OnDeviceAiStatus.available, this.reply});
-
-  OnDeviceAiStatus current;
-  String? reply;
-  String? lastPrompt;
-  int generations = 0;
-
-  @override
-  Future<OnDeviceAiStatus> status() async => current;
-
-  @override
-  Future<bool> download() async {
-    current = OnDeviceAiStatus.available;
-    return true;
-  }
-
-  @override
-  Future<String?> generate(
-    String prompt, {
-    double temperature = 0.1,
-    int maxOutputTokens = 256,
-  }) async {
-    generations++;
-    lastPrompt = prompt;
-    return reply;
-  }
-}
 
 /// Testa a IA no aparelho: o JSON do modelo, o intérprete híbrido e o
 /// canal com o Android.
@@ -90,7 +61,7 @@ void main() {
 
   group('intérprete híbrido', () {
     test('as regras respondem sem chamar o modelo', () async {
-      final ai = _FakeAi(reply: '{"action":"long_rest"}');
+      final ai = FakeOnDeviceAi(reply: '{"action":"long_rest"}');
       final command = await HybridInterpreter(ai).interpret('dano 5');
 
       expect(command, const DamageCommand(5));
@@ -98,7 +69,9 @@ void main() {
     });
 
     test('frase livre vai para o modelo', () async {
-      final ai = _FakeAi(reply: '{"action":"damage","amount":7,"target":null}');
+      final ai = FakeOnDeviceAi(
+        reply: '{"action":"damage","amount":7,"target":null}',
+      );
       final command = await HybridInterpreter(
         ai,
       ).interpret('aquele orc maldito arrancou sete pontos meus');
@@ -108,7 +81,7 @@ void main() {
     });
 
     test('sem o modelo pronto, a frase livre fica sem comando', () async {
-      final ai = _FakeAi(
+      final ai = FakeOnDeviceAi(
         current: OnDeviceAiStatus.downloadable,
         reply: '{"action":"long_rest"}',
       );
@@ -121,7 +94,7 @@ void main() {
   });
 
   test('o cubit mostra o estado do modelo e baixa quando pedido', () async {
-    final ai = _FakeAi(current: OnDeviceAiStatus.downloadable);
+    final ai = FakeOnDeviceAi(current: OnDeviceAiStatus.downloadable);
     final cubit = VoiceCommandCubit(
       FakeSpeechInput(),
       HybridInterpreter(ai),

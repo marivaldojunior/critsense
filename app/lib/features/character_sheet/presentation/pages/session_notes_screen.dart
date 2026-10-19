@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
 import 'package:crit_sense/features/voice_commands/domain/entities/voice_command.dart';
+import 'package:crit_sense/features/voice_commands/domain/services/on_device_ai.dart';
+import 'package:crit_sense/features/voice_commands/domain/services/session_summarizer.dart';
 import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
 import 'package:crit_sense/features/voice_commands/presentation/widgets/voice_command_sheet.dart';
 
@@ -123,6 +126,113 @@ class _SessionNotesView extends StatelessWidget {
     );
   }
 
+  /// Resume as notas do último dia de jogo com o Gemini Nano, no aparelho.
+  /// O resumo pode virar uma nota nova.
+  Future<void> _summarize(BuildContext context) async {
+    final bloc = context.read<SessionNotesBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    void tell(String text) =>
+        messenger.showSnackBar(SnackBar(content: Text(text)));
+
+    final notes = SessionSummarizer.notesOfLastSession(bloc.state.notes);
+    if (notes.isEmpty) {
+      tell('Escreva as notas da sessão antes de pedir o resumo.');
+      return;
+    }
+    final ai = sl<OnDeviceAi>();
+    final status = await ai.status();
+    if (!context.mounted) return;
+    if (status == OnDeviceAiStatus.unavailable) {
+      tell('A IA do aparelho (Gemini Nano) não está disponível neste celular.');
+      return;
+    }
+    if (status != OnDeviceAiStatus.available) {
+      final download = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Baixar a IA do aparelho?'),
+          content: const Text(
+            'O resumo usa o Gemini Nano, que roda no celular. O Android baixa '
+            'o modelo uma vez. As notas não saem do aparelho.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Baixar'),
+            ),
+          ],
+        ),
+      );
+      if (download != true) return;
+      tell('Baixando a IA do aparelho. Isso pode levar alguns minutos.');
+      if (!await ai.download()) {
+        tell('Não foi possível baixar a IA do aparelho.');
+        return;
+      }
+      if (!context.mounted) return;
+    }
+
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Expanded(child: Text('Resumindo ${notes.length} nota(s)...')),
+            ],
+          ),
+        ),
+      ),
+    );
+    final summary = await SessionSummarizer(ai).summarize(notes);
+    navigator.pop();
+    if (!context.mounted) return;
+    if (summary == null) {
+      tell('A IA do aparelho não respondeu. Tente de novo.');
+      return;
+    }
+
+    final day = DateFormat('dd/MM/yyyy').format(notes.last.createdAt);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Resumo da sessão de $day'),
+        content: SingleChildScrollView(child: Text(summary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Fechar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              bloc.add(
+                AddSessionNoteEvent(
+                  SessionNote(
+                    id: const Uuid().v4(),
+                    characterId: characterId,
+                    title: 'Resumo da sessão de $day',
+                    content: summary,
+                    createdAt: DateTime.now(),
+                  ),
+                ),
+              );
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Salvar no diário'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Dita uma nota por voz e abre o painel já preenchido.
   Future<void> _dictateNote(BuildContext context) async {
     final command = await showVoiceCommandSheet(
@@ -157,6 +267,11 @@ class _SessionNotesView extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
+          IconButton(
+            tooltip: 'Resumir sessão',
+            icon: const Icon(Icons.auto_awesome_outlined),
+            onPressed: () => _summarize(context),
+          ),
           VoiceCommandButton(
             tooltip: 'Ditar nota',
             onPressed: () => _dictateNote(context),
