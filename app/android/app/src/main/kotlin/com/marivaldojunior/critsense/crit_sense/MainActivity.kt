@@ -50,12 +50,17 @@ class MainActivity : FlutterActivity(), SensorEventListener {
 
     private var lastShakeTimestamp = 0L
 
+    private val onDeviceAi = OnDeviceAiChannel()
+
     // ─── Configuração dos Canais ───────────────────────────────────────────────
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         setupMethodChannel(flutterEngine)
         setupEventChannel(flutterEngine)
+        // IA no aparelho (Fase G): Gemini Nano pelo ML Kit GenAI.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, OnDeviceAiChannel.CHANNEL)
+            .setMethodCallHandler(onDeviceAi)
     }
 
     /**
@@ -248,6 +253,7 @@ class MainActivity : FlutterActivity(), SensorEventListener {
      */
     override fun onDestroy() {
         sensorManager?.unregisterListener(this)
+        onDeviceAi.dispose()
         super.onDestroy()
     }
 }

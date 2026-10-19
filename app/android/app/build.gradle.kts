@@ -30,7 +30,8 @@ android {
         applicationId = "com.marivaldojunior.critsense.crit_sense"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // O ML Kit GenAI (Gemini Nano) pede a API 26 ou maior.
+        minSdk = maxOf(flutter.minSdkVersion, 26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -69,4 +70,11 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // IA no aparelho (Fase G). A API está em beta: confira a versão nova em
+    // https://developers.google.com/ml-kit/genai/prompt/android/get-started
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 }

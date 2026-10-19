@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:crit_sense/di/injection_container.dart';
 
 import '../../domain/entities/voice_command.dart';
+import '../../domain/services/on_device_ai.dart';
 import '../cubit/voice_command_cubit.dart';
 
 /// Abre a escuta e devolve o comando que o jogador confirmou, ou `null` se
@@ -177,6 +178,7 @@ class _VoiceCommandSheetState extends State<VoiceCommandSheet> {
                       ),
                     ),
                   ],
+                  if (command == null) _AiStatusLine(state: state),
                   if (command == null) ...[
                     const SizedBox(height: 16),
                     Text('Exemplos', style: theme.textTheme.labelLarge),
@@ -209,5 +211,46 @@ class _VoiceCommandSheetState extends State<VoiceCommandSheet> {
         ),
       ),
     );
+  }
+}
+
+/// Mostra o estado da IA do aparelho e o botão para baixar o modelo.
+class _AiStatusLine extends StatelessWidget {
+  const _AiStatusLine({required this.state});
+
+  final VoiceCommandState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return switch (state.aiStatus) {
+      OnDeviceAiStatus.available => Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Text(
+          'IA do aparelho ativa para frases livres.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall,
+        ),
+      ),
+      OnDeviceAiStatus.downloadable => Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: TextButton.icon(
+          onPressed: context.read<VoiceCommandCubit>().downloadAi,
+          icon: const Icon(Icons.download),
+          label: const Text('Baixar a IA do aparelho (Gemini Nano)'),
+        ),
+      ),
+      OnDeviceAiStatus.downloading => const Padding(
+        padding: EdgeInsets.only(top: 12),
+        child: Column(
+          children: [
+            Text('Baixando a IA do aparelho...'),
+            SizedBox(height: 4),
+            LinearProgressIndicator(),
+          ],
+        ),
+      ),
+      OnDeviceAiStatus.unavailable || null => const SizedBox.shrink(),
+    };
   }
 }

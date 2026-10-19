@@ -59,7 +59,9 @@ import 'package:crit_sense/features/compendium/presentation/bloc/spell_detail_bl
 import 'package:crit_sense/features/dice_roller/presentation/bloc/roll_history_cubit.dart';
 import 'package:crit_sense/features/initiative_tracker/presentation/cubit/initiative_cubit.dart';
 import 'package:crit_sense/features/voice_commands/data/services/device_speech_input.dart';
+import 'package:crit_sense/features/voice_commands/data/services/method_channel_on_device_ai.dart';
 import 'package:crit_sense/features/voice_commands/domain/services/command_interpreter.dart';
+import 'package:crit_sense/features/voice_commands/domain/services/on_device_ai.dart';
 import 'package:crit_sense/features/voice_commands/domain/services/speech_input.dart';
 import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
 import 'package:dio/dio.dart';
@@ -94,14 +96,17 @@ Future<void> init() async {
   // Comandos por voz (Fase G): um só reconhecimento de voz para o app e um
   // cubit novo a cada abertura da folha.
   sl.registerLazySingleton<SpeechInput>(DeviceSpeechInput.new);
+  sl.registerLazySingleton<OnDeviceAi>(() => const MethodChannelOnDeviceAi());
+  // Regras fixas primeiro; o Gemini Nano só entra nas frases livres.
   sl.registerLazySingleton<CommandInterpreter>(
-    () => const RuleBasedInterpreter(),
+    () => HybridInterpreter(sl<OnDeviceAi>()),
   );
   sl.registerFactoryParam<VoiceCommandCubit, VoiceScope, void>(
     (scope, _) => VoiceCommandCubit(
       sl<SpeechInput>(),
       sl<CommandInterpreter>(),
       scope: scope,
+      ai: sl<OnDeviceAi>(),
     ),
   );
   // Singleton: o rolador e a ficha gravam no mesmo histórico.
