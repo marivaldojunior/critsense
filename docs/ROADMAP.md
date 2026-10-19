@@ -150,7 +150,7 @@ Esta fase vem depois dos testes da Fase F no aparelho. A voz só converte a fala
 - [x] **TG.2** Converta frases simples em comandos com regras fixas, sem IA (ex.: "dano 12", "curar 5", "rolar 2d6 mais 3", "descanso curto"). Escreva testes unitários com frases de exemplo.
 - [ ] **TG.3** Use um modelo no aparelho (Gemini Nano pelo ML Kit GenAI) para frases livres. O modelo devolve um JSON com o comando, e o app valida esse JSON. Em aparelhos sem o modelo, use só as regras da TG.2.
 - [x] **TG.4** Mostre o comando entendido e peça a confirmação antes de aplicar.
-- [ ] **TG.5** Dite as notas de lore e de sessão direto para o Diário de Campanha.
+- [x] **TG.5** Dite as notas de lore e de sessão direto para o Diário de Campanha.
 - [ ] **TG.6** Resuma as notas da sessão com o modelo no aparelho, sem enviar o texto para a nuvem.
 - [ ] **TG.7** Adicione um botão de microfone na ficha e no rastreador de iniciativa (ex.: "o lobo leva 8 de dano", "próximo turno").
 

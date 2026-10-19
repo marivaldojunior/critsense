@@ -8,6 +8,10 @@ import 'package:uuid/uuid.dart';
 import 'package:crit_sense/core/presentation/widgets/dnd_icon.dart';
 import 'package:crit_sense/core/presentation/widgets/skeleton_bones.dart';
 import 'package:crit_sense/di/injection_container.dart';
+import 'package:crit_sense/features/voice_commands/domain/entities/voice_command.dart';
+import 'package:crit_sense/features/voice_commands/presentation/cubit/voice_command_cubit.dart';
+import 'package:crit_sense/features/voice_commands/presentation/widgets/voice_command_sheet.dart';
+
 import '../../domain/entities/session_note.dart';
 import '../bloc/session_notes_bloc.dart';
 
@@ -90,83 +94,47 @@ class _SessionNotesView extends StatelessWidget {
   }
 
   /// Exibe o painel de criação de nota e envia a nota ao [SessionNotesBloc]
-  /// ao confirmar.
-  void _showAddNoteSheet(BuildContext context) {
+  /// ao confirmar. [title] e [content] preenchem o painel (ex: uma nota
+  /// ditada), e o jogador ainda pode editar antes de salvar.
+  void _showAddNoteSheet(
+    BuildContext context, {
+    String title = '',
+    String content = '',
+  }) {
     final bloc = context.read<SessionNotesBloc>();
-    final titleCtrl = TextEditingController();
-    final contentCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-        ),
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Nova Anotação', style: Theme.of(ctx).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: titleCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Título',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Campo obrigatório.'
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: contentCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Conteúdo',
-                  border: OutlineInputBorder(),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 5,
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Campo obrigatório.'
-                    : null,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('Salvar'),
-                onPressed: () {
-                  if (!formKey.currentState!.validate()) return;
-
-                  bloc.add(
-                    AddSessionNoteEvent(
-                      SessionNote(
-                        id: const Uuid().v4(),
-                        characterId: characterId,
-                        title: titleCtrl.text.trim(),
-                        content: contentCtrl.text.trim(),
-                        createdAt: DateTime.now(),
-                      ),
-                    ),
-                  );
-                  Navigator.pop(ctx);
-                },
-              ),
-            ],
+      builder: (_) => _AddNoteSheet(
+        initialTitle: title,
+        initialContent: content,
+        onSave: (title, content) => bloc.add(
+          AddSessionNoteEvent(
+            SessionNote(
+              id: const Uuid().v4(),
+              characterId: characterId,
+              title: title,
+              content: content,
+              createdAt: DateTime.now(),
+            ),
           ),
         ),
       ),
-    ).whenComplete(() {
-      titleCtrl.dispose();
-      contentCtrl.dispose();
-    });
+    );
+  }
+
+  /// Dita uma nota por voz e abre o painel já preenchido.
+  Future<void> _dictateNote(BuildContext context) async {
+    final command = await showVoiceCommandSheet(
+      context,
+      scope: VoiceScope.dictation,
+    );
+    if (command is! NoteCommand || !context.mounted) return;
+    _showAddNoteSheet(
+      context,
+      title: noteTitleFrom(command.text),
+      content: command.text,
+    );
   }
 
   @override
@@ -188,6 +156,12 @@ class _SessionNotesView extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+        actions: [
+          VoiceCommandButton(
+            tooltip: 'Ditar nota',
+            onPressed: () => _dictateNote(context),
+          ),
+        ],
       ),
       body: BlocConsumer<SessionNotesBloc, SessionNotesState>(
         // Erros de escrita (salvar/excluir) não trocam a lista por uma tela
@@ -279,6 +253,93 @@ class _SessionNotesView extends StatelessWidget {
 /// Esqueleto de carregamento que imita a silhueta de [_SessionNoteCard]:
 /// título + data numa linha e três linhas de prévia do conteúdo, a última
 /// mais curta para reproduzir o fim natural de um parágrafo.
+/// Painel de criação de nota. É um [StatefulWidget] para os controllers
+/// viverem até o fim da animação de fechar do painel.
+class _AddNoteSheet extends StatefulWidget {
+  const _AddNoteSheet({
+    required this.initialTitle,
+    required this.initialContent,
+    required this.onSave,
+  });
+
+  final String initialTitle;
+  final String initialContent;
+  final void Function(String title, String content) onSave;
+
+  @override
+  State<_AddNoteSheet> createState() => _AddNoteSheetState();
+}
+
+class _AddNoteSheetState extends State<_AddNoteSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final _titleCtrl = TextEditingController(text: widget.initialTitle);
+  late final _contentCtrl = TextEditingController(text: widget.initialContent);
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _contentCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Nova Anotação',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _titleCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Título',
+                border: OutlineInputBorder(),
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Campo obrigatório.' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _contentCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Conteúdo',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 5,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Campo obrigatório.' : null,
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              icon: const Icon(Icons.save_outlined),
+              label: const Text('Salvar'),
+              onPressed: () {
+                if (!_formKey.currentState!.validate()) return;
+                widget.onSave(_titleCtrl.text.trim(), _contentCtrl.text.trim());
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SessionNotesSkeleton extends StatelessWidget {
   const _SessionNotesSkeleton({super.key});
 

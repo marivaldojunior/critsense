@@ -134,3 +134,11 @@ final class PreviousTurnCommand extends VoiceCommand {
   @override
   String get description => 'Turno anterior';
 }
+
+/// Título de uma nota ditada: as primeiras [maxWords] palavras do texto,
+/// com reticências quando o texto é maior.
+String noteTitleFrom(String text, {int maxWords = 6}) {
+  final words = text.trim().split(RegExp(r'\s+'));
+  if (words.length <= maxWords) return text.trim();
+  return '${words.take(maxWords).join(' ')}...';
+}
