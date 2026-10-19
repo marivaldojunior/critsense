@@ -54,8 +54,9 @@ class RuleBasedParser {
 
   ConcentrationCommand? _concentration(String original, String text) {
     if (!text.contains('concentr')) return null;
-    if (_endConcentration.hasMatch(text))
+    if (_endConcentration.hasMatch(text)) {
       return const ConcentrationCommand(null);
+    }
     final spell = _startConcentration.firstMatch(original.trim())?.group(1);
     if (spell == null || spell.trim().isEmpty) return null;
     return ConcentrationCommand(_titleCase(spell.trim()));
