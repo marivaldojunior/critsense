@@ -1,4 +1,4 @@
-/// Funções que limpam o texto falado antes do parser.
+// Funções que limpam o texto falado antes do parser.
 
 const _accents = {
   'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'é': 'e', 'ê': 'e', 'í': 'i', //
