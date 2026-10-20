@@ -4,7 +4,8 @@ info:
     \ D&D 5e. Conteúdo de regras restrito ao SRD 5.1 (CC-BY-4.0). Todo erro segue\
     \ o formato application/problem+json (RFC 9457), com o campo code."
   license:
-    name: SRD 5.1 — CC-BY-4.0
+    name: PolyForm Strict 1.0.0
+    url: https://polyformproject.org/licenses/strict/1.0.0
   title: CritSense API
   version: v1
 servers:

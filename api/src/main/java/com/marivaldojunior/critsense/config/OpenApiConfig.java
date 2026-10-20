@@ -41,7 +41,11 @@ public class OpenApiConfig {
                                 + " ao SRD 5.1 (CC-BY-4.0). Todo erro segue o"
                                 + " formato application/problem+json (RFC 9457),"
                                 + " com o campo code.")
-                        .license(new License().name("SRD 5.1 — CC-BY-4.0")))
+                        // Licença do código do CritSense. O conteúdo de regras
+                        // continua sob a CC-BY-4.0 do SRD 5.1 (ver a descrição).
+                        .license(new License()
+                                .name("PolyForm Strict 1.0.0")
+                                .url("https://polyformproject.org/licenses/strict/1.0.0")))
                 // Fixo para o contrato não depender do host de quem gerou o arquivo.
                 .servers(List.of(new Server().url("http://localhost:8080").description("Local")))
                 .components(new Components()

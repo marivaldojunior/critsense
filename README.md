@@ -180,10 +180,25 @@ O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pron
 
 ## 📄 Licenças e Atribuições
 
+**Código do CritSense.** O código deste repositório está sob a [PolyForm Strict License 1.0.0](LICENSE).
+
+* **O que a licença permite:** ler, estudar e rodar o código para fins pessoais e não comerciais, e também em organizações sem fins lucrativos (ensino, pesquisa, caridade, governo).
+* **O que a licença não permite:** distribuir o código, publicar versões modificadas, criar obras derivadas ou usar o código para fins comerciais.
+* **Outros usos:** para qualquer uso fora destes termos, peça uma licença separada ao autor.
+
+**Versões anteriores.** A PolyForm Strict vale a partir do commit que adicionou o arquivo [LICENSE](LICENSE). Os commits anteriores não tinham licença. Sem licença, todos os direitos já eram reservados ao autor, e esses commits continuam assim. Nenhuma versão anterior deu permissão de cópia, de modificação ou de distribuição.
+
+**Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1, os ícones abaixo e os scripts do Maven Wrapper (`api/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
+
 **Conteúdo de regras (SRD 5.1).** This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
 
 **Dados do compêndio.** As magias, equipamentos e monstros vêm da [D&D 5e API](https://www.dnd5eapi.co) do projeto [5e-bits](https://github.com/5e-bits), que publica o conteúdo do SRD 5.1.
 
 **Ícones.** Os ícones em `app/assets/icons/` são o [Intrinsical's D&D 5e Icon Set](https://github.com/intrinsical/tw-dnd/tree/main/icons), de [David Kor Kian Wei](https://github.com/intrinsical), sob a licença [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). O texto da licença está em [app/assets/icons/LICENSE](app/assets/icons/LICENSE).
+
+**Outros arquivos de terceiros.** Estes arquivos não são do autor do CritSense e não estão sob a PolyForm Strict. Os direitos continuam com os donos originais:
+
+* `dd-5e-ficha-de-personagem-biblioteca-elfica.pdf`: ficha de personagem de D&D 5e em português, da Biblioteca Élfica. O arquivo serve só como referência visual da ficha.
+* `app/assets/sounds/dice_roll.mp3` e `app/assets/sounds/dices_roll.mp3`: sons de rolagem de dados. A origem e a licença destes sons ainda não estão registradas.
 
 O CritSense não tem vínculo com a Wizards of the Coast nem é endossado por ela.
