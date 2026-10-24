@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   build:
-    name: Lint, testes e build
+    name: Lint, tipos, testes e build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,26 +30,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: astral-sh/setup-uv@v6
         with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
+          # Mesma versão do api/.python-version e da imagem Docker.
+          python-version: "3.15"
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
 
-      - name: Lint (Spotless)
-        run: ./mvnw -B -ntp spotless:check
+      - name: Dependências
+        run: uv sync --locked
+
+      - name: Lint (Ruff)
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+
+      - name: Tipos (mypy)
+        run: uv run mypy
 
       # Roda todos os testes. No runner há Docker, então os testes com
       # Testcontainers (PostgreSQL) rodam aqui, ao contrário de máquinas sem
-      # Docker, onde eles são pulados. O OpenApiContractTest falha se
+      # Docker, onde eles são pulados. O test_contract falha se
       # contracts/openapi.yaml estiver diferente do contrato gerado pelo código.
-      - name: Testes e build
-        run: ./mvnw -B -ntp verify
+      - name: Testes
+        run: uv run pytest --cov=critsense --cov-report=term-missing:skip-covered
 
-      - name: Relatórios dos testes
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: api/target/surefire-reports/
-          retention-days: 7
+      - name: Build da imagem
+        run: docker build -t critsense-api .

@@ -1,5 +1,5 @@
 # Regras gerais do monorepo. Cada projeto tem o próprio .gitignore:
-# app/.gitignore (Flutter) e api/.gitignore (Java).
+# app/.gitignore (Flutter), api/.gitignore (Python) e api-java/.gitignore (Java).
 
 # Sistema operacional
 .DS_Store

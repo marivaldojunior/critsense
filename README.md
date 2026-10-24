@@ -1,15 +1,17 @@
 # ⚔️ CritSense
 
-**Projeto de estudo em Flutter e Java, com experimentos de IA no Android e numa API própria.** O tema é um app companheiro de D&D 5e: ficha de personagem pelas regras do SRD 5.1, compêndio (magias, equipamentos e bestiário), rastreador de iniciativa e rolador de dados. As fichas ficam no aparelho, e o compêndio funciona sem internet depois da primeira consulta.
+**Projeto de estudo em Flutter, Python e Java, com experimentos de IA no Android e numa API própria.** O tema é um app companheiro de D&D 5e: ficha de personagem pelas regras do SRD 5.1, compêndio (magias, equipamentos e bestiário), rastreador de iniciativa e rolador de dados. As fichas ficam no aparelho, e o compêndio funciona sem internet depois da primeira consulta.
 
 > [!NOTE]
-> O CritSense não é um produto. Ele serve para praticar arquitetura, testes e CI, e para testar recursos de IA em dois lugares: no próprio aparelho Android e numa API em Java. O [Guia de Estudo](docs/ESTUDO.md) resume a arquitetura, as decisões técnicas e um roteiro de leitura do código.
+> O CritSense não é um produto. Ele serve para praticar arquitetura, testes e CI, e para testar recursos de IA em dois lugares: no próprio aparelho Android e numa API em Python. Uma versão da API em Java continua no repositório como estudo. O [Guia de Estudo](docs/ESTUDO.md) resume a arquitetura, as decisões técnicas e um roteiro de leitura do código.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Drift-003B57?logo=sqlite&logoColor=white)
 ![BLoC](https://img.shields.io/badge/State%20Management-BLoC-5C2D91)
 ![Material 3](https://img.shields.io/badge/Design-Material%203-757575?logo=materialdesign&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.15-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.162-009688?logo=fastapi&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F?logo=spring&logoColor=white)
@@ -21,8 +23,9 @@
 | Área | O que o projeto pratica |
 |---|---|
 | **Flutter** | Clean Architecture, BLoC/Cubit, `get_it`, Drift/SQLite com migrações, cache offline com `Dio`, testes de widget e de migração. |
-| **Java** | Spring Boot 4, Spring Security com JWT, Flyway, PostgreSQL, Testcontainers, contrato OpenAPI e erros RFC 9457. |
-| **IA na API** | Spring AI com provedor configurável, saída em JSON validada, prompts versionados, rate limit e timeout. |
+| **Python** | FastAPI, Pydantic 2, SQLAlchemy 2 async com Alembic, JWT, uv, Ruff, mypy `strict`, pytest com Testcontainers, contrato OpenAPI e erros RFC 9457. |
+| **Java (estudo)** | A mesma API em Spring Boot 4, com Spring Security, Flyway e Testcontainers, em [api-java/](api-java/). |
+| **IA na API** | SDK da Anthropic (ou da OpenAI) com provedor configurável, saída em JSON validada, prompts versionados, rate limit e timeout. |
 | **IA no Android** | Comandos por voz com regras fixas e Gemini Nano (ML Kit GenAI) no aparelho, canal Kotlin próprio e resumo de sessão sem enviar as notas para a nuvem. |
 | **Processo** | Monorepo, CI separado por pasta no GitHub Actions e roadmap por fases em [docs/ROADMAP.md](docs/ROADMAP.md). |
 
@@ -33,10 +36,11 @@
 | Pasta | Conteúdo |
 |---|---|
 | [app/](app/) | App Flutter (fichas, compêndio e rolador de dados). |
-| [api/](api/) | API em Java (Spring Boot): autenticação e ferramentas de IA. Veja o [README da API](api/README.md). |
+| [api/](api/) | API em Python (FastAPI): autenticação e ferramentas de IA. Veja o [README da API](api/README.md). |
+| [api-java/](api-java/) | A mesma API em Java (Spring Boot), mantida como projeto de estudo. Veja o [README da API Java](api-java/README.md). |
 | [contracts/](contracts/) | Contrato OpenAPI da API, usado para gerar os clientes. |
 | [docs/](docs/) | [Roadmap](docs/ROADMAP.md) e [Guia de Estudo](docs/ESTUDO.md) com a arquitetura e as decisões técnicas. |
-| `docker-compose.yml` | Ambiente local: API + PostgreSQL. |
+| `docker-compose.yml` | Ambiente local: API + PostgreSQL. A API Java fica no perfil `java`. |
 
 ---
 
@@ -115,14 +119,14 @@ O projeto é estruturado sob os princípios de **Clean Architecture**, com cada 
 A IA é a parte experimental do projeto. Ela tem duas frentes:
 
 1. **IA no Android (Fase G):** comandos por voz e resumo de sessão com o Gemini Nano pelo ML Kit GenAI Prompt API (beta), num canal Kotlin próprio (`OnDeviceAiChannel.kt`). O modelo roda no AICore do Android e só existe em alguns celulares; nos outros, as regras fixas continuam funcionando.
-2. **IA na API (primeiro experimento pronto):** a pasta [api/](api/) tem a API própria do CritSense, em Java 21 com Spring Boot 4.1 e Spring AI 2.0. O app ainda não chama a API; essa ligação está pausada no [roadmap](docs/ROADMAP.md).
+2. **IA na API (primeiro experimento pronto):** a pasta [api/](api/) tem a API própria do CritSense, em Python 3.15 com FastAPI e o SDK da Anthropic. A primeira versão foi escrita em Java 21 com Spring Boot 4.1 e Spring AI 2.0 e continua em [api-java/](api-java/). O app ainda não chama a API; essa ligação está pausada no [roadmap](docs/ROADMAP.md).
 
 O que a API já tem:
 
 * **Gerador de NPCs** (`POST /api/v1/npcs/generate`): a IA cria nome, raça, personalidade, segredo e ganchos de aventura, sempre em JSON validado contra um schema. Uma resposta inválida recebe uma nova tentativa com a lista de erros; se continuar inválida, a API devolve um erro, nunca um JSON quebrado.
 * **Provedor configurável:** Anthropic (padrão, `claude-opus-5-5`) ou OpenAI, escolhido pela variável `AI_PROVIDER`. A chave fica só no backend.
-* **Autenticação JWT**, **rate limit por usuário** (Bucket4j) e **timeout** em toda chamada de IA.
-* **Prompts versionados** em `api/src/main/resources/prompts/`.
+* **Autenticação JWT**, **rate limit por usuário** (token bucket) e **timeout** em toda chamada de IA.
+* **Prompts versionados** em `api/src/critsense/prompts/`.
 * **Contrato OpenAPI** em [contracts/openapi.yaml](contracts/openapi.yaml), verificado no CI.
 * **Erros no formato RFC 9457** (`application/problem+json`), com um `code` estável.
 
@@ -188,7 +192,7 @@ O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pron
 
 **Versões anteriores.** A PolyForm Strict vale a partir do commit que adicionou o arquivo [LICENSE](LICENSE). Os commits anteriores não tinham licença. Sem licença, todos os direitos já eram reservados ao autor, e esses commits continuam assim. Nenhuma versão anterior deu permissão de cópia, de modificação ou de distribuição.
 
-**Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1, os ícones abaixo e os scripts do Maven Wrapper (`api/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
+**Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1, os ícones abaixo e os scripts do Maven Wrapper (`api-java/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
 
 **Conteúdo de regras (SRD 5.1).** This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
 

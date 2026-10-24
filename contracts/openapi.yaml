@@ -1,260 +1,371 @@
 openapi: 3.1.0
 info:
-  description: "API do CritSense: autenticação e ferramentas de IA para mestres de\
-    \ D&D 5e. Conteúdo de regras restrito ao SRD 5.1 (CC-BY-4.0). Todo erro segue\
-    \ o formato application/problem+json (RFC 9457), com o campo code."
+  title: CritSense API
+  description: 'API do CritSense: autenticação e ferramentas de IA para mestres de D&D 5e. Conteúdo de regras restrito ao SRD 5.1 (CC-BY-4.0). Todo erro segue o formato application/problem+json (RFC 9457), com o campo code.'
   license:
     name: PolyForm Strict 1.0.0
     url: https://polyformproject.org/licenses/strict/1.0.0
-  title: CritSense API
   version: v1
 servers:
-- description: Local
-  url: http://localhost:8080
-security:
-- bearerAuth: []
+  - url: http://localhost:8080
+    description: Local
 paths:
-  /api/v1/auth/login:
-    post:
-      operationId: login
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-          description: Erro no formato RFC 9457. Veja o campo code.
-      security: []
-      summary: Troca usuário e senha por um token de acesso
-      tags:
-      - Autenticação
   /api/v1/auth/register:
     post:
+      tags:
+        - Autenticação
+      summary: Cria uma conta e devolve um token de acesso
       operationId: register
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RegisterRequest"
+              $ref: '#/components/schemas/RegisterRequest'
         required: true
       responses:
-        "201":
+        '201':
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TokenResponse"
-          description: Created
+                $ref: '#/components/schemas/TokenResponse'
         default:
+          description: Erro no formato RFC 9457. Veja o campo code.
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/Problem"
-          description: Erro no formato RFC 9457. Veja o campo code.
-      security: []
-      summary: Cria uma conta e devolve um token de acesso
+                $ref: '#/components/schemas/Problem'
+  /api/v1/auth/login:
+    post:
       tags:
-      - Autenticação
+        - Autenticação
+      summary: Troca usuário e senha por um token de acesso
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        default:
+          description: Erro no formato RFC 9457. Veja o campo code.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /api/v1/me:
     get:
+      tags:
+        - Autenticação
+      summary: Devolve o usuário do token
       operationId: getMe
       responses:
-        "200":
+        '200':
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MeResponse"
-          description: OK
+                $ref: '#/components/schemas/MeResponse'
         default:
+          description: Erro no formato RFC 9457. Veja o campo code.
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/Problem"
-          description: Erro no formato RFC 9457. Veja o campo code.
-      summary: Devolve o usuário do token
-      tags:
-      - Autenticação
+                $ref: '#/components/schemas/Problem'
+      security:
+        - bearerAuth: []
   /api/v1/npcs/generate:
     post:
-      description: "Conta no limite de chamadas de IA do usuário (cabeçalho X-RateLimit-Remaining).\
-        \ Erros: 429 RATE_LIMITED, 422 AI_REFUSED, 502 AI_INVALID_OUTPUT ou AI_PROVIDER_ERROR,\
-        \ 503 AI_UNAVAILABLE, 504 AI_TIMEOUT."
+      tags:
+        - NPCs
+      summary: Gera um NPC com a IA
+      description: 'Conta no limite de chamadas de IA do usuário (cabeçalho X-RateLimit-Remaining). Erros: 429 RATE_LIMITED, 422 AI_REFUSED, 502 AI_INVALID_OUTPUT ou AI_PROVIDER_ERROR, 503 AI_UNAVAILABLE, 504 AI_TIMEOUT.'
       operationId: generateNpc
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NpcRequest"
+              $ref: '#/components/schemas/NpcRequest'
         required: true
       responses:
-        "200":
+        '200':
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NpcResponse"
-          description: OK
+                $ref: '#/components/schemas/NpcResponse'
         default:
+          description: Erro no formato RFC 9457. Veja o campo code.
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/Problem"
-          description: Erro no formato RFC 9457. Veja o campo code.
-      summary: Gera um NPC com a IA
-      tags:
-      - NPCs
+                $ref: '#/components/schemas/Problem'
+      security:
+        - bearerAuth: []
 components:
   schemas:
     Alignment:
       type: string
       enum:
-      - LAWFUL_GOOD
-      - NEUTRAL_GOOD
-      - CHAOTIC_GOOD
-      - LAWFUL_NEUTRAL
-      - TRUE_NEUTRAL
-      - CHAOTIC_NEUTRAL
-      - LAWFUL_EVIL
-      - NEUTRAL_EVIL
-      - CHAOTIC_EVIL
+        - LAWFUL_GOOD
+        - NEUTRAL_GOOD
+        - CHAOTIC_GOOD
+        - LAWFUL_NEUTRAL
+        - TRUE_NEUTRAL
+        - CHAOTIC_NEUTRAL
+        - LAWFUL_EVIL
+        - NEUTRAL_EVIL
+        - CHAOTIC_EVIL
+      title: Alignment
+      description: As nove tendências do SRD 5.1.
     LoginRequest:
-      type: object
-      description: Credenciais de uma conta existente.
       properties:
-        password:
-          type: string
-          example: uma-senha-longa
-          minLength: 1
         username:
           type: string
-          example: thorin
           minLength: 1
-      required:
-      - password
-      - username
-    MeResponse:
+          title: Username
+          examples:
+            - thorin
+        password:
+          type: string
+          minLength: 1
+          title: Password
+          examples:
+            - uma-senha-longa
       type: object
-      description: Usuário autenticado.
+      required:
+        - username
+        - password
+      title: LoginRequest
+      description: Credenciais de uma conta existente.
+    MeResponse:
       properties:
         id:
           type: string
           format: uuid
+          title: Id
         username:
           type: string
-    Npc:
+          title: Username
       type: object
-      description: NPC gerado.
+      required:
+        - id
+        - username
+      title: MeResponse
+      description: Usuário autenticado.
+    Npc:
       properties:
-        alignment:
-          $ref: "#/components/schemas/Alignment"
-        appearance:
-          type: string
-          maxLength: 400
-          minLength: 0
-        mannerism:
-          type: string
-          maxLength: 200
-          minLength: 0
-        motivation:
-          type: string
-          maxLength: 300
-          minLength: 0
         name:
           type: string
           maxLength: 80
-          minLength: 0
-        personalityTraits:
-          type: array
-          items:
-            type: string
-            maxLength: 120
-            minLength: 0
-          maxItems: 4
-          minItems: 2
+          minLength: 1
+          title: Name
+          description: Nome do NPC, coerente com a raça.
         race:
-          $ref: "#/components/schemas/SrdRace"
+          $ref: '#/components/schemas/SrdRace'
         role:
           type: string
           maxLength: 80
-          minLength: 0
+          minLength: 1
+          title: Role
+          description: Ocupação ou papel no mundo.
+        alignment:
+          $ref: '#/components/schemas/Alignment'
+        appearance:
+          type: string
+          maxLength: 400
+          minLength: 1
+          title: Appearance
+          description: Aparência em uma ou duas frases.
+        personalityTraits:
+          items:
+            type: string
+            maxLength: 120
+            minLength: 1
+          type: array
+          maxItems: 4
+          minItems: 2
+          title: Personalitytraits
+          description: De 2 a 4 traços de personalidade curtos.
+        motivation:
+          type: string
+          maxLength: 300
+          minLength: 1
+          title: Motivation
+          description: O que o NPC quer.
         secret:
           type: string
           maxLength: 300
-          minLength: 0
+          minLength: 1
+          title: Secret
+          description: Algo que o NPC esconde.
+        mannerism:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Mannerism
+          description: Jeito de falar ou maneirismo para o mestre interpretar.
         storyHooks:
-          type: array
           items:
             type: string
             maxLength: 300
-            minLength: 0
+            minLength: 1
+          type: array
           maxItems: 3
           minItems: 1
-      required:
-      - alignment
-      - appearance
-      - mannerism
-      - motivation
-      - name
-      - personalityTraits
-      - race
-      - role
-      - secret
-      - storyHooks
-    NpcRequest:
+          title: Storyhooks
+          description: De 1 a 3 ganchos de aventura que envolvem o grupo.
       type: object
-      description: "Preferências do NPC. Todo campo é opcional: o que faltar, a IA\
-        \ escolhe."
+      required:
+        - name
+        - race
+        - role
+        - alignment
+        - appearance
+        - personalityTraits
+        - motivation
+        - secret
+        - mannerism
+        - storyHooks
+      title: Npc
+      description: NPC gerado.
+    NpcRequest:
       properties:
-        alignment:
-          $ref: "#/components/schemas/Alignment"
-        context:
-          type: string
-          description: Descrição livre da campanha ou da cena.
-          example: "Uma vila mineira nas montanhas, ameaçada por kobolds."
-          maxLength: 1000
-          minLength: 0
         race:
-          $ref: "#/components/schemas/SrdRace"
+          anyOf:
+            - $ref: '#/components/schemas/SrdRace'
+            - type: 'null'
           description: Raça do NPC (SRD 5.1).
         role:
-          type: string
+          anyOf:
+            - type: string
+              maxLength: 60
+            - type: 'null'
+          title: Role
           description: Ocupação ou papel no mundo.
-          example: ferreiro
-          maxLength: 60
-          minLength: 0
-    NpcResponse:
+          examples:
+            - ferreiro
+        alignment:
+          anyOf:
+            - $ref: '#/components/schemas/Alignment'
+            - type: 'null'
+        context:
+          anyOf:
+            - type: string
+              maxLength: 1000
+            - type: 'null'
+          title: Context
+          description: Descrição livre da campanha ou da cena.
+          examples:
+            - Uma vila mineira nas montanhas, ameaçada por kobolds.
       type: object
-      description: NPC gerado e a versão do prompt usada.
+      title: NpcRequest
+      description: 'Preferências do NPC. Todo campo é opcional: o que faltar, a IA escolhe.'
+    NpcResponse:
       properties:
         npc:
-          $ref: "#/components/schemas/Npc"
+          $ref: '#/components/schemas/Npc'
         promptVersion:
           type: string
+          title: Promptversion
           description: Prompt que gerou este NPC.
-          example: npc-generator@v1
+          examples:
+            - npc-generator@v1
+      type: object
+      required:
+        - npc
+        - promptVersion
+      title: NpcResponse
+      description: NPC gerado e a versão do prompt usada.
+    RegisterRequest:
+      properties:
+        username:
+          type: string
+          maxLength: 30
+          minLength: 3
+          pattern: ^[A-Za-z0-9._-]+$
+          title: Username
+          description: Letras, números, ponto, hífen ou sublinhado.
+          examples:
+            - thorin
+        password:
+          type: string
+          maxLength: 128
+          minLength: 8
+          title: Password
+          examples:
+            - uma-senha-longa
+      type: object
+      required:
+        - username
+        - password
+      title: RegisterRequest
+      description: Dados para criar uma conta.
+    SrdRace:
+      type: string
+      enum:
+        - DRAGONBORN
+        - DWARF
+        - ELF
+        - GNOME
+        - HALF_ELF
+        - HALF_ORC
+        - HALFLING
+        - HUMAN
+        - TIEFLING
+      title: SrdRace
+      description: Raças jogáveis do SRD 5.1 (CC-BY-4.0). A API só aceita e só devolve estas.
+    TokenResponse:
+      properties:
+        accessToken:
+          type: string
+          title: Accesstoken
+        tokenType:
+          type: string
+          const: Bearer
+          title: Tokentype
+        expiresIn:
+          type: integer
+          title: Expiresin
+          description: Validade do token, em segundos.
+      type: object
+      required:
+        - accessToken
+        - tokenType
+        - expiresIn
+      title: TokenResponse
+      description: 'Token de acesso. Envie no cabeçalho Authorization: Bearer <accessToken>.'
     Problem:
       type: object
       description: Erro no formato application/problem+json (RFC 9457).
       properties:
-        code:
+        type:
           type: string
-          description: "Código estável do erro (ex: RATE_LIMITED)."
-          example: RATE_LIMITED
+          examples:
+            - urn:critsense:problem:rate-limited
+        title:
+          type: string
+        status:
+          type: integer
         detail:
           type: string
+        instance:
+          type: string
+        code:
+          type: string
+          description: 'Código estável do erro (ex: RATE_LIMITED).'
+          examples:
+            - RATE_LIMITED
         errors:
           type: array
-          description: "Campos inválidos, só em VALIDATION_FAILED."
+          description: Campos inválidos, só em VALIDATION_FAILED.
           items:
             type: object
             properties:
@@ -262,64 +373,12 @@ components:
                 type: string
               message:
                 type: string
-        instance:
-          type: string
-        status:
-          type: integer
-          format: int32
-        title:
-          type: string
-        type:
-          type: string
-          example: urn:critsense:problem:rate-limited
       required:
-      - code
-      - status
-      - title
-    RegisterRequest:
-      type: object
-      description: Dados para criar uma conta.
-      properties:
-        password:
-          type: string
-          example: uma-senha-longa
-          maxLength: 72
-          minLength: 8
-        username:
-          type: string
-          description: "Letras, números, ponto, hífen ou sublinhado."
-          example: thorin
-          maxLength: 30
-          minLength: 3
-          pattern: "[A-Za-z0-9._-]+"
-      required:
-      - password
-      - username
-    SrdRace:
-      type: string
-      enum:
-      - DRAGONBORN
-      - DWARF
-      - ELF
-      - GNOME
-      - HALF_ELF
-      - HALF_ORC
-      - HALFLING
-      - HUMAN
-      - TIEFLING
-    TokenResponse:
-      type: object
-      description: "Token de acesso. Envie no cabeçalho Authorization: Bearer <accessToken>."
-      properties:
-        accessToken:
-          type: string
-        expiresIn:
-          type: integer
-          format: int64
-        tokenType:
-          type: string
+        - code
+        - status
+        - title
   securitySchemes:
     bearerAuth:
-      bearerFormat: JWT
-      scheme: bearer
       type: http
+      scheme: bearer
+      bearerFormat: JWT

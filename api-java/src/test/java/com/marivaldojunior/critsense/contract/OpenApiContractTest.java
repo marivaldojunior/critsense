@@ -16,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Garante que {@code contracts/openapi.yaml} é igual ao contrato que o código gera. Se um endpoint
+ * Garante que {@code api-java/openapi.yaml} é igual ao contrato que o código gera. Se um endpoint
  * mudar sem o contrato ser atualizado, o teste falha (e o CI também).
  *
  * <p>Para atualizar o arquivo depois de mudar a API:
@@ -34,8 +34,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class OpenApiContractTest {
 
-    /** Caminho a partir de {@code api/}, onde o Maven roda os testes. */
-    private static final Path CONTRACT = Path.of("..", "contracts", "openapi.yaml");
+    /**
+     * Contrato próprio do projeto Java de estudo. O {@code contracts/openapi.yaml} da raiz vem da API
+     * Python; caminho a partir de {@code api-java/}, onde o Maven roda os testes.
+     */
+    private static final Path CONTRACT = Path.of("openapi.yaml");
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,11 +61,11 @@ class OpenApiContractTest {
         }
 
         assertThat(CONTRACT)
-                .as("contracts/openapi.yaml não existe; gere com -Dopenapi.update=true")
+                .as("api-java/openapi.yaml não existe; gere com -Dopenapi.update=true")
                 .exists();
         String committed = Files.readString(CONTRACT, StandardCharsets.UTF_8).replace("\r\n", "\n");
         assertThat(committed)
-                .as("contracts/openapi.yaml está desatualizado. Rode: ./mvnw test"
+                .as("api-java/openapi.yaml está desatualizado. Rode: ./mvnw test"
                         + " -Dtest=OpenApiContractTest -Dopenapi.update=true")
                 .isEqualTo(generated);
     }

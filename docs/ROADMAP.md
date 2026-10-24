@@ -13,7 +13,7 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 |---|---|---|
 | Resumo de sessão | As notas de sessão já ficam no Drift (`SessionNote`: `title`, `content`, `createdAt`). | O app envia as notas locais para a API. A API não precisa guardar as notas no MVP. |
 | Gerador de NPCs | Não existe. | Crie a feature `lib/features/ai_tools/` com as camadas `domain`, `data` e `presentation`, igual às outras features. |
-| Montador de encontros | O Bestiário já lê monstros da API 5e-bits. As entidades de domínio não têm `challengeRating` nem XP. | A API Java precisa de uma base própria de monstros do SRD com CR e XP. O cálculo determinístico não pode depender de uma API externa. |
+| Montador de encontros | O Bestiário já lê monstros da API 5e-bits. As entidades de domínio não têm `challengeRating` nem XP. | A API precisa de uma base própria de monstros do SRD com CR e XP. O cálculo determinístico não pode depender de uma API externa. |
 | Login | A [login_screen.dart](../app/lib/features/auth/presentation/screens/login_screen.dart) só valida campos vazios. | O rate limit "por usuário" precisa de uma identidade real. Ligue a tela de login a uma autenticação real da API. |
 | Cliente HTTP | Existe um `Dio` singleton sem `baseUrl` e sem timeout. | Registre um segundo `Dio` só para a API do CritSense, com `baseUrl` por `--dart-define`, timeout e interceptor de token. |
 | Offline-first | A ficha funciona offline. O compêndio não funciona. | As features de IA precisam de rede. Mostre um estado "sem conexão" claro e não bloqueie o resto do app. |
@@ -30,33 +30,34 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 
 ### 1.3 Estrutura do repositório
 
-Cada projeto fica na sua própria pasta: o app Flutter em `app/` e a API em `api/`. O contrato OpenAPI fica no mesmo repositório.
+Cada projeto fica na sua própria pasta: o app Flutter em `app/`, a API Python em `api/` e a API Java de estudo em `api-java/`. O contrato OpenAPI fica no mesmo repositório.
 
 ```
 crit_sense/
 ├── app/                          # App Flutter
 │   ├── lib/, test/, android/, ios/
 │   └── packages/critsense_api_client/   # Cliente Dart gerado do OpenAPI
-├── api/                          # API Java (Spring Boot)
-│   ├── src/main/resources/prompts/
-│   └── src/main/resources/db/migration/   # Flyway
-├── contracts/openapi.yaml        # Contrato exportado pela API
-├── docker-compose.yml            # API + PostgreSQL
+├── api/                          # API Python (FastAPI)
+│   ├── src/critsense/prompts/
+│   └── migrations/               # Alembic
+├── api-java/                     # API Java de estudo (Spring Boot)
+│   └── openapi.yaml              # Contrato próprio da API Java
+├── contracts/openapi.yaml        # Contrato exportado pela API Python
+├── docker-compose.yml            # API + PostgreSQL (API Java no perfil "java")
 ├── docs/
 └── .github/workflows/            # CI separado por pasta (paths)
 ```
 
-O CI usa filtros de `paths`: o workflow do Flutter roda só quando `app/` muda, e o workflow da API roda só quando `api/` ou `contracts/` mudam.
+O CI usa filtros de `paths`: o workflow do Flutter roda só quando `app/` muda, o workflow da API roda só quando `api/` ou `contracts/` mudam, e o workflow da API Java roda só quando `api-java/` muda.
 
 ### 1.4 Fluxo de uma chamada de IA
 
 ```
-App Flutter ──JWT──▶ API (Spring Security)
-                      ├─ Bucket4j: verifica o limite do usuário
+App Flutter ──JWT──▶ API (FastAPI)
+                      ├─ Token bucket: verifica o limite do usuário
                       ├─ Regras determinísticas (ex.: XP/CR do encontro)
-                      ├─ Spring AI ──▶ Provedor LLM (chave só no backend)
-                      ├─ Converte a saída para um record Java
-                      └─ Valida com Bean Validation ──▶ resposta JSON ao app
+                      ├─ ChatModel ──▶ Provedor LLM (chave só no backend)
+                      └─ Valida com o Pydantic ──▶ resposta JSON ao app
 ```
 
 Se a validação falhar, a API tenta mais uma vez. Se a segunda tentativa também falhar, a API devolve um erro `502` com um código claro, e não um JSON inválido.
@@ -183,13 +184,25 @@ Esta fase vem depois dos testes da Fase F no aparelho. A voz só converte a fala
 - [ ] **T1.16** Ligue a tela de login à API. Guarde o token com `flutter_secure_storage`.
 - [ ] **T1.17** Crie a feature `ai_tools` com a tela do gerador de NPCs. Trate os estados de carregamento, erro, limite atingido (`429`) e sem conexão.
 
+### Fase 1P — API em Python
+
+A API passou de Java para Python. A API Java continua em `api-java/` como projeto de estudo, com o mesmo comportamento e um contrato próprio.
+
+- [x] **T1P.1** Mova a API Java para `api-java/`, com um contrato próprio (`api-java/openapi.yaml`) e um workflow próprio.
+- [x] **T1P.2** Crie a API em `api/` com Python 3.15, uv, FastAPI, Pydantic 2, SQLAlchemy 2 async e Alembic.
+- [x] **T1P.3** Mantenha os endpoints, os códigos de erro (RFC 9457), o JWT, o rate limit e o timeout da API Java.
+- [x] **T1P.4** Use o SDK da Anthropic (padrão) ou o da OpenAI atrás da interface `ChatModel`.
+- [x] **T1P.5** Escreva os testes com pytest, Testcontainers e um modelo de chat falso.
+- [x] **T1P.6** Configure o CI com Ruff, mypy `strict`, pytest, o teste do contrato e o build da imagem Docker.
+- [x] **T1P.7** Rode os testes de integração e o build da imagem Docker numa máquina com Docker.
+
 ### Fase 2 — Encontros e resumo de sessão (pausada)
 
 A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e a IA no aparelho estiverem prontas.
 
 
 #### Montador de encontros
-- [ ] **T2.1** Importe os monstros do SRD (nome, CR, XP, tipo) para o PostgreSQL com uma migração Flyway.
+- [ ] **T2.1** Importe os monstros do SRD (nome, CR, XP, tipo) para o PostgreSQL com uma migração do Alembic.
 - [ ] **T2.2** Implemente o cálculo determinístico de dificuldade (limites de XP por nível, multiplicador por número de monstros).
 - [ ] **T2.3** Escreva testes unitários para o cálculo, com os exemplos das tabelas do SRD.
 - [ ] **T2.4** Crie o endpoint `POST /api/v1/encounters/build`. A IA recebe os monstros já escolhidos e cria só a ambientação e a descrição.
@@ -201,7 +214,7 @@ A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e
 
 ### Fase 3 — Narração com streaming (SSE) (pausada)
 
-- [ ] **T3.1** Crie o endpoint `GET` ou `POST /api/v1/narration/stream` com `text/event-stream`, usando o streaming do Spring AI.
+- [ ] **T3.1** Crie o endpoint `GET` ou `POST /api/v1/narration/stream` com `text/event-stream`, usando o streaming do SDK do provedor.
 - [ ] **T3.2** Defina os eventos SSE (`token`, `done`, `error`) e documente esses eventos no contrato.
 - [ ] **T3.3** Aplique o rate limit e um tempo máximo para cada stream.
 - [ ] **T3.4** Escreva um cliente SSE manual no Flutter com `Dio` e `ResponseType.stream`.

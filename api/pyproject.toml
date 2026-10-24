@@ -1,0 +1,74 @@
+[project]
+name = "critsense-api"
+version = "0.1.0"
+description = "API do CritSense: autenticação e ferramentas de IA para mestres de D&D 5e."
+readme = "README.md"
+license = "LicenseRef-PolyForm-Strict-1.0.0"
+requires-python = ">=3.15"
+dependencies = [
+    "alembic>=1.20",
+    "anthropic>=2.3",
+    "asyncpg>=0.32",
+    "fastapi>=0.162",
+    "openai>=3.37",
+    "pwdlib[argon2]>=0.3",
+    "pydantic>=2.14",
+    "pydantic-settings>=2.16",
+    "pyjwt>=2.15",
+    "ruamel.yaml>=0.19",
+    "sqlalchemy[asyncio]>=2.1",
+    "uvicorn>=0.54",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28",
+    "mypy>=2.4",
+    "pytest>=9.1",
+    "pytest-cov>=7.0",
+    "ruff>=0.17",
+    "testcontainers[postgres]>=4.15",
+]
+
+[build-system]
+requires = ["uv_build>=0.13,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "critsense"
+
+[tool.ruff]
+line-length = 100
+target-version = "py315"
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",  # pycodestyle e pyflakes
+    "I",            # ordem dos imports
+    "UP",           # sintaxe moderna do Python
+    "B",            # bugbear
+    "SIM",          # simplificações
+    "ASYNC",        # erros comuns em código async
+    "S",            # bandit (segurança)
+    "PT",           # boas práticas do pytest
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# assert é o jeito normal de testar com pytest, e os testes usam senhas falsas.
+"tests/**" = ["S101", "S105", "S106"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests", "migrations"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "--import-mode=importlib"]
+markers = ["integration: testes com PostgreSQL real (Testcontainers); pulados sem Docker"]
+filterwarnings = ["error::DeprecationWarning:critsense.*"]

@@ -6,12 +6,13 @@ Este guia resume como o CritSense funciona e por que cada decisão técnica foi 
 
 ## 1. Visão geral
 
-O CritSense é um monorepo com duas aplicações:
+O CritSense é um monorepo com duas aplicações e uma versão de estudo da API:
 
 | Parte | Tecnologia | O que faz |
 |---|---|---|
 | [app/](../app/) | Flutter 3.44, Dart 3.12 | Ficha de D&D 5e, compêndio, rastreador de iniciativa, rolador de dados e comandos por voz. Funciona sem a API. |
-| [api/](../api/) | Java 21, Spring Boot 4.1, Spring AI 2.0 | Autenticação JWT e o gerador de NPCs com IA. O app ainda não chama a API. |
+| [api/](../api/) | Python 3.15, FastAPI, SDK da Anthropic | Autenticação JWT e o gerador de NPCs com IA. O app ainda não chama a API. |
+| [api-java/](../api-java/) | Java 21, Spring Boot 4.1, Spring AI 2.0 | A mesma API em Java, mantida como estudo. Tem um contrato próprio (`api-java/openapi.yaml`). |
 | [contracts/](../contracts/) | OpenAPI 3 | Contrato da API, conferido no CI. |
 
 ```mermaid
@@ -26,7 +27,7 @@ flowchart LR
         BLoC --> Nano[Gemini Nano via canal Kotlin]
     end
     Dio --> SRD[API 5e-bits / SRD 5.1]
-    API[API Spring Boot] --> PG[(PostgreSQL)]
+    API[API FastAPI] --> PG[(PostgreSQL)]
     API --> LLM[Anthropic ou OpenAI]
     UI -. futuro .-> API
 ```
@@ -114,14 +115,19 @@ Cada decisão tem o motivo e a alternativa que o projeto não escolheu.
 
 | Decisão | Motivo |
 |---|---|
-| **Spring AI com provedor por variável** (`AI_PROVIDER`) | Troca Anthropic por OpenAI sem mudar o código. A chave fica só no backend. |
-| **Saída da IA em JSON validado** (Bean Validation) | Uma resposta inválida ganha uma nova tentativa com a lista de erros. Depois disso, a API devolve um erro, nunca um JSON quebrado. |
-| **Prompts versionados** (`resources/prompts/npc-generator/v1/`) | Uma mudança no prompt vira uma versão nova, com histórico no Git. |
-| **JWT HS256 sem sessão** | A API não guarda estado do login. |
-| **Rate limit por usuário** (Bucket4j + Caffeine) | Chamadas de IA custam dinheiro. A API devolve `429` com `Retry-After`. |
-| **Erros RFC 9457** (`application/problem+json`) | Um formato único de erro, com um `code` estável para o cliente. |
-| **Flyway** | O schema do PostgreSQL muda por migrações versionadas, como no app. |
-| **Testcontainers + `ChatModel` falso** | Os testes usam um PostgreSQL real e nunca chamam o provedor de IA. |
+| **Troca de Java para Python** | A API Python faz o mesmo com menos código e serve para estudar FastAPI. A API Java continua em `api-java/` para comparar as duas. |
+| **FastAPI + Pydantic 2** | Os modelos Pydantic validam o corpo, geram o contrato OpenAPI e geram o JSON Schema que a IA recebe. |
+| **`create_app()` e `Depends`** | A fábrica recebe a configuração e o modelo de chat. Os testes trocam essas peças sem mocks globais. |
+| **Interface `ChatModel` com um adaptador por provedor** (`AI_PROVIDER`) | Troca Anthropic por OpenAI sem mudar o resto do código. A chave fica só no backend. |
+| **Saída da IA em JSON validado** (Pydantic) | Uma resposta inválida ganha uma nova tentativa com a lista de erros. Depois disso, a API devolve um erro, nunca um JSON quebrado. |
+| **Prompts versionados** (`critsense/prompts/npc-generator/v1/`) | Uma mudança no prompt vira uma versão nova, com histórico no Git. |
+| **JWT HS256 sem sessão** (PyJWT) e **Argon2** (`pwdlib`) | A API não guarda estado do login. O hash da senha roda numa thread para não travar o event loop. |
+| **Rate limit por usuário** (token bucket em memória) | Chamadas de IA custam dinheiro. A API devolve `429` com `Retry-After`. |
+| **Erros RFC 9457** (`application/problem+json`) | Um formato único de erro, com um `code` estável para o cliente. A API devolve `400`, e não o `422` padrão do FastAPI. |
+| **SQLAlchemy 2 async + Alembic** | O schema do PostgreSQL muda por migrações versionadas, como no app. |
+| **uv + `uv.lock`** | As versões das dependências ficam fixas, iguais no computador, no CI e no Docker. |
+| **Ruff + mypy `strict`** | Um só linter e formatador, e tipos conferidos em todo o código. |
+| **Testcontainers + `FakeChatModel`** | Os testes usam um PostgreSQL real e nunca chamam o provedor de IA. |
 | **Contrato OpenAPI no CI** | O CI falha se o código e o `contracts/openapi.yaml` ficam diferentes. |
 
 ### 3.4 Repositório e CI
@@ -130,13 +136,13 @@ Cada decisão tem o motivo e a alternativa que o projeto não escolheu.
 |---|---|
 | **Monorepo** | O app, a API e o contrato mudam juntos num só commit. |
 | **Workflows com filtro de `paths`** | Uma mudança no app não roda o CI da API, e o contrário também vale. |
-| **Spotless (palantir-java-format)** e **`flutter analyze`** | O estilo do código não depende de quem escreve. |
+| **Ruff**, **Spotless** (na API Java) e **`flutter analyze`** | O estilo do código não depende de quem escreve. |
 
 ---
 
 ## 4. Testes
 
-O app tem mais de 330 testes em `app/test/`. A API tem 53 testes em `api/src/test/`.
+O app tem mais de 330 testes em `app/test/`. A API Python tem 71 testes em `api/tests/`. A API Java tem 53 testes em `api-java/src/test/`.
 
 | Tipo | Exemplo | O que aprender |
 |---|---|---|
@@ -146,7 +152,8 @@ O app tem mais de 330 testes em `app/test/`. A API tem 53 testes em `api/src/tes
 | Migração | `app_database_migration_test.dart` | Criar um banco antigo à mão e comparar com um banco novo. |
 | Canal nativo | `on_device_ai_test.dart` | `setMockMethodCallHandler` no lugar do Android. |
 | Voz | `rule_based_parser_test.dart` | Tabelas de frases de exemplo. |
-| Integração (API) | `AuthIntegrationTest` | Testcontainers com PostgreSQL. |
+| API | `test_npc.py` | `TestClient`, `dependency_overrides` e um modelo de chat falso. |
+| Integração (API) | `test_integration.py` | Testcontainers com PostgreSQL e as migrações do Alembic. |
 
 Para rodar:
 
@@ -155,7 +162,11 @@ cd app && flutter test
 ```
 
 ```bash
-cd api && ./mvnw verify
+cd api && uv run pytest
+```
+
+```bash
+cd api-java && ./mvnw verify
 ```
 
 ---
@@ -171,7 +182,8 @@ Leia o código nesta ordem. Cada passo usa o que o passo anterior mostrou.
 5. Leia o [offline_cache_interceptor.dart](../app/lib/core/network/offline_cache_interceptor.dart).
 6. Siga um comando de voz: `rule_based_parser.dart` → `voice_command_cubit.dart` → `apply_voice_command.dart`.
 7. Compare o canal Dart (`method_channel_on_device_ai.dart`) com o canal Kotlin (`OnDeviceAiChannel.kt`).
-8. Na API, siga `NpcController` → `NpcService` → `StructuredAiService` → `AiGateway`.
+8. Na API, siga `npc/router.py` → `npc/service.py` → `ai/structured.py` → `ai/gateway.py` → `ai/chat.py`.
+9. Compare com o mesmo caminho na API Java: `NpcController` → `NpcService` → `StructuredAiService` → `AiGateway`.
 
 ---
 
@@ -196,6 +208,10 @@ Leia o código nesta ordem. Cada passo usa o que o passo anterior mostrou.
 | **MethodChannel** | Canal de chamadas entre o Dart e o código nativo (Kotlin). |
 | **Gemini Nano** | Modelo de linguagem do Google que roda no celular, pelo AICore do Android. |
 | **ML Kit GenAI** | API do Google para usar o Gemini Nano no Android (em beta). |
-| **Spring AI** | Biblioteca do Spring para chamar modelos de linguagem. |
+| **FastAPI** | Framework web do Python, com validação pelo Pydantic e contrato OpenAPI gerado. |
+| **Pydantic** | Biblioteca do Python que valida dados com base nas anotações de tipo. |
+| **Alembic** | Ferramenta de migrações do SQLAlchemy. |
+| **uv** | Gerenciador de pacotes e de ambientes virtuais do Python. |
+| **Spring AI** | Biblioteca do Spring para chamar modelos de linguagem (na API Java). |
 | **ProblemDetail** | Formato de erro HTTP da RFC 9457. |
 | **Testcontainers** | Biblioteca que sobe containers Docker nos testes. |
