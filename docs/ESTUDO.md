@@ -124,7 +124,9 @@ Cada decisão tem o motivo e a alternativa que o projeto não escolheu.
 | **JWT HS256 sem sessão** (PyJWT) e **Argon2** (`pwdlib`) | A API não guarda estado do login. O hash da senha roda numa thread para não travar o event loop. |
 | **Rate limit por usuário** (token bucket em memória) | Chamadas de IA custam dinheiro. A API devolve `429` com `Retry-After`. |
 | **Erros RFC 9457** (`application/problem+json`) | Um formato único de erro, com um `code` estável para o cliente. A API devolve `400`, e não o `422` padrão do FastAPI. |
-| **SQLAlchemy 2 async + Alembic** | O schema do PostgreSQL muda por migrações versionadas, como no app. |
+| **SQLAlchemy 2 async + Alembic** | O schema do PostgreSQL muda por migrações versionadas, como no app. Um teste confere se os modelos e as migrações estão iguais (`alembic check`). |
+| **Monstros do SRD numa migração** (`migrations/data/`) | O cálculo de dificuldade não depende de uma API externa. Os dados ficam versionados e são conferidos contra a tabela de XP por CR. |
+| **Dificuldade como função pura** (`encounters/rules.py`) | A regra do SRD 5.2.1 tem testes com os exemplos do próprio SRD, sem banco e sem IA. A IA só vai criar a ambientação (T2.4). |
 | **uv + `uv.lock`** | As versões das dependências ficam fixas, iguais no computador, no CI e no Docker. |
 | **Ruff + mypy `strict`** | Um só linter e formatador, e tipos conferidos em todo o código. |
 | **Testcontainers + `FakeChatModel`** | Os testes usam um PostgreSQL real e nunca chamam o provedor de IA. |
@@ -142,7 +144,7 @@ Cada decisão tem o motivo e a alternativa que o projeto não escolheu.
 
 ## 4. Testes
 
-O app tem mais de 330 testes em `app/test/`. A API Python tem 71 testes em `api/tests/`. A API Java tem 53 testes em `api-java/src/test/`.
+O app tem mais de 330 testes em `app/test/`. A API Python tem 106 testes em `api/tests/`. A API Java tem 53 testes em `api-java/src/test/`.
 
 | Tipo | Exemplo | O que aprender |
 |---|---|---|

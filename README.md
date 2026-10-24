@@ -178,7 +178,7 @@ Sem o `app/android/key.properties`, o release é assinado com a chave de debug. 
 
 ## 🗺️ Roadmap
 
-O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pronto. As próximas tarefas (ligar o app à API, encontros, resumo de sessão e narração com streaming) estão em [docs/ROADMAP.md](docs/ROADMAP.md).
+O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pronto. Na Fase 2, a API já tem os monstros do SRD e o cálculo de dificuldade de encontros. As próximas tarefas (ligar o app à API, o endpoint de encontros, resumo de sessão e narração com streaming) estão em [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ---
 
@@ -194,7 +194,11 @@ O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pron
 
 **Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1, os ícones abaixo e os scripts do Maven Wrapper (`api-java/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
 
-**Conteúdo de regras (SRD 5.1).** This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
+**Conteúdo de regras (SRD 5.1 e SRD 5.2.1).** O app e os monstros da API usam o SRD 5.1. Só a regra de dificuldade de encontros da API usa o SRD 5.2.1, porque o SRD 5.1 não tem essa regra.
+
+This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
+
+This work includes material from the System Reference Document 5.2.1 ("SRD 5.2.1") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.
 
 **Dados do compêndio.** As magias, equipamentos e monstros vêm da [D&D 5e API](https://www.dnd5eapi.co) do projeto [5e-bits](https://github.com/5e-bits), que publica o conteúdo do SRD 5.1.
 

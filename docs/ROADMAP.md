@@ -25,7 +25,7 @@ Depois, ele lista as tarefas em fases. Marque cada tarefa com `[x]` quando ela e
 3. **SSE e cliente gerado.** Os geradores OpenAPI para Dart (`dart-dio`) não tratam bem respostas `text/event-stream`. Use o cliente gerado para os endpoints comuns. Escreva um cliente SSE manual para a narração, com `Dio` e `ResponseType.stream`.
 4. **Conflito de dependências.** O `pubspec.yaml` força `analyzer: ^13.0.0` em `dependency_overrides`. O cliente gerado pode usar `built_value` ou `json_serializable`, que dependem do `analyzer`. Gere o cliente como um pacote separado (`app/packages/critsense_api_client`) e teste o `build_runner` antes de integrar.
 5. **Autenticação.** A proposta não define a autenticação, mas o rate limit depende dela. Para o MVP, use JWT com Spring Security e um cadastro simples (usuário e senha). Não guarde a senha no app. Guarde só o token, com `flutter_secure_storage`.
-6. **Licenças.** A proposta cita o SRD 5.1 (CC-BY-4.0). O SRD 5.2 também é CC-BY-4.0, mas use uma só versão para os dados de regras. Os ícones de `assets/icons/` usam CC-BY-SA 4.0, e o README atual não tem essa atribuição.
+6. **Licenças.** A proposta cita o SRD 5.1 (CC-BY-4.0). O SRD 5.2 também é CC-BY-4.0, mas use uma só versão para os dados de regras. Exceção: a dificuldade de encontros vem do SRD 5.2.1, porque o SRD 5.1 não tem essa regra. Os monstros continuam do SRD 5.1. Os ícones de `assets/icons/` usam CC-BY-SA 4.0, e o README atual não tem essa atribuição.
 7. **Prompts.** Guarde os prompts em `api/src/main/resources/prompts/` como templates (`.st`), com uma pasta por versão (ex.: `prompts/npc-generator/v1/system.st` e `user.st`).
 
 ### 1.3 Estrutura do repositório
@@ -202,9 +202,9 @@ A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e
 
 
 #### Montador de encontros
-- [ ] **T2.1** Importe os monstros do SRD (nome, CR, XP, tipo) para o PostgreSQL com uma migração do Alembic.
-- [ ] **T2.2** Implemente o cálculo determinístico de dificuldade (limites de XP por nível, multiplicador por número de monstros).
-- [ ] **T2.3** Escreva testes unitários para o cálculo, com os exemplos das tabelas do SRD.
+- [x] **T2.1** Importe os monstros do SRD 5.1 (nome, tamanho, tipo, CR, XP) para o PostgreSQL com uma migração do Alembic.
+- [x] **T2.2** Implemente o cálculo determinístico de dificuldade pelo orçamento de XP por personagem do SRD 5.2.1 (Baixa, Moderada e Alta). Essa regra não tem multiplicador por número de monstros.
+- [x] **T2.3** Escreva testes unitários para o cálculo, com os exemplos das tabelas do SRD.
 - [ ] **T2.4** Crie o endpoint `POST /api/v1/encounters/build`. A IA recebe os monstros já escolhidos e cria só a ambientação e a descrição.
 - [ ] **T2.5** Crie a tela de encontros no app (nível do grupo, tamanho do grupo, dificuldade).
 

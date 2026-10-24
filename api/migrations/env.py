@@ -8,9 +8,11 @@ from alembic import context
 from sqlalchemy import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from critsense.auth import models  # noqa: F401  # registra as tabelas no Base.metadata
+# Importa os modelos para registrar as tabelas no Base.metadata.
+from critsense.auth import models as _auth_models  # noqa: F401
 from critsense.config import DEFAULT_DATABASE_URL
 from critsense.db import Base
+from critsense.encounters import models as _encounter_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None and config.attributes.get("configure_logger", True):

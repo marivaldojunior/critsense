@@ -1,0 +1,335 @@
+index,name,size,type,challenge_rating,xp
+aboleth,Aboleth,Large,aberration,10,5900
+acolyte,Acolyte,Medium,humanoid,1/4,50
+adult-black-dragon,Adult Black Dragon,Huge,dragon,14,11500
+adult-blue-dragon,Adult Blue Dragon,Huge,dragon,16,15000
+adult-brass-dragon,Adult Brass Dragon,Huge,dragon,13,10000
+adult-bronze-dragon,Adult Bronze Dragon,Huge,dragon,15,13000
+adult-copper-dragon,Adult Copper Dragon,Huge,dragon,14,11500
+adult-gold-dragon,Adult Gold Dragon,Huge,dragon,17,18000
+adult-green-dragon,Adult Green Dragon,Huge,dragon,15,13000
+adult-red-dragon,Adult Red Dragon,Huge,dragon,17,18000
+adult-silver-dragon,Adult Silver Dragon,Huge,dragon,16,15000
+adult-white-dragon,Adult White Dragon,Huge,dragon,13,10000
+air-elemental,Air Elemental,Large,elemental,5,1800
+ancient-black-dragon,Ancient Black Dragon,Gargantuan,dragon,21,33000
+ancient-blue-dragon,Ancient Blue Dragon,Gargantuan,dragon,23,50000
+ancient-brass-dragon,Ancient Brass Dragon,Gargantuan,dragon,20,25000
+ancient-bronze-dragon,Ancient Bronze Dragon,Gargantuan,dragon,22,41000
+ancient-copper-dragon,Ancient Copper Dragon,Gargantuan,dragon,21,33000
+ancient-gold-dragon,Ancient Gold Dragon,Gargantuan,dragon,24,62000
+ancient-green-dragon,Ancient Green Dragon,Gargantuan,dragon,22,41000
+ancient-red-dragon,Ancient Red Dragon,Gargantuan,dragon,24,62000
+ancient-silver-dragon,Ancient Silver Dragon,Gargantuan,dragon,23,50000
+ancient-white-dragon,Ancient White Dragon,Gargantuan,dragon,20,25000
+androsphinx,Androsphinx,Large,monstrosity,17,18000
+animated-armor,Animated Armor,Medium,construct,1,200
+ankheg,Ankheg,Large,monstrosity,2,450
+ape,Ape,Medium,beast,1/2,100
+archmage,Archmage,Medium,humanoid,12,8400
+assassin,Assassin,Medium,humanoid,8,3900
+awakened-shrub,Awakened Shrub,Small,plant,0,10
+awakened-tree,Awakened Tree,Huge,plant,2,450
+axe-beak,Axe Beak,Large,beast,1/4,50
+azer,Azer,Medium,elemental,2,450
+baboon,Baboon,Small,beast,0,10
+badger,Badger,Tiny,beast,0,10
+balor,Balor,Huge,fiend,19,22000
+bandit,Bandit,Medium,humanoid,1/8,25
+bandit-captain,Bandit Captain,Medium,humanoid,2,450
+barbed-devil,Barbed Devil,Medium,fiend,5,1800
+basilisk,Basilisk,Medium,monstrosity,3,700
+bat,Bat,Tiny,beast,0,10
+bearded-devil,Bearded Devil,Medium,fiend,3,700
+behir,Behir,Huge,monstrosity,11,7200
+berserker,Berserker,Medium,humanoid,2,450
+black-bear,Black Bear,Medium,beast,1/2,100
+black-dragon-wyrmling,Black Dragon Wyrmling,Medium,dragon,2,450
+black-pudding,Black Pudding,Large,ooze,4,1100
+blink-dog,Blink Dog,Medium,fey,1/4,50
+blood-hawk,Blood Hawk,Small,beast,1/8,25
+blue-dragon-wyrmling,Blue Dragon Wyrmling,Medium,dragon,3,700
+boar,Boar,Medium,beast,1/4,50
+bone-devil,Bone Devil,Large,fiend,9,5000
+brass-dragon-wyrmling,Brass Dragon Wyrmling,Medium,dragon,1,200
+bronze-dragon-wyrmling,Bronze Dragon Wyrmling,Medium,dragon,2,450
+brown-bear,Brown Bear,Large,beast,1,200
+bugbear,Bugbear,Medium,humanoid,1,200
+bulette,Bulette,Large,monstrosity,5,1800
+camel,Camel,Large,beast,1/8,25
+cat,Cat,Tiny,beast,0,10
+centaur,Centaur,Large,monstrosity,2,450
+chain-devil,Chain Devil,Medium,fiend,8,3900
+chimera,Chimera,Large,monstrosity,6,2300
+chuul,Chuul,Large,aberration,4,1100
+clay-golem,Clay Golem,Large,construct,9,5000
+cloaker,Cloaker,Large,aberration,8,3900
+cloud-giant,Cloud Giant,Huge,giant,9,5000
+cockatrice,Cockatrice,Small,monstrosity,1/2,100
+commoner,Commoner,Medium,humanoid,0,10
+constrictor-snake,Constrictor Snake,Large,beast,1/4,50
+copper-dragon-wyrmling,Copper Dragon Wyrmling,Medium,dragon,1,200
+couatl,Couatl,Medium,celestial,4,1100
+crab,Crab,Tiny,beast,0,10
+crocodile,Crocodile,Large,beast,1/2,100
+cult-fanatic,Cult Fanatic,Medium,humanoid,2,450
+cultist,Cultist,Medium,humanoid,1/8,25
+darkmantle,Darkmantle,Small,monstrosity,1/2,100
+death-dog,Death Dog,Medium,monstrosity,1,200
+deep-gnome-svirfneblin,Deep Gnome (Svirfneblin),Small,humanoid,1/2,100
+deer,Deer,Medium,beast,0,10
+deva,Deva,Medium,celestial,10,5900
+dire-wolf,Dire Wolf,Large,beast,1,200
+djinni,Djinni,Large,elemental,11,7200
+doppelganger,Doppelganger,Medium,monstrosity,3,700
+draft-horse,Draft Horse,Large,beast,1/4,50
+dragon-turtle,Dragon Turtle,Gargantuan,dragon,17,18000
+dretch,Dretch,Small,fiend,1/4,50
+drider,Drider,Large,monstrosity,6,2300
+drow,Drow,Medium,humanoid,1/4,50
+druid,Druid,Medium,humanoid,2,450
+dryad,Dryad,Medium,fey,1,200
+duergar,Duergar,Medium,humanoid,1,200
+dust-mephit,Dust Mephit,Small,elemental,1/2,100
+eagle,Eagle,Small,beast,0,10
+earth-elemental,Earth Elemental,Large,elemental,5,1800
+efreeti,Efreeti,Large,elemental,11,7200
+elephant,Elephant,Huge,beast,4,1100
+elk,Elk,Large,beast,1/4,50
+erinyes,Erinyes,Medium,fiend,12,8400
+ettercap,Ettercap,Medium,monstrosity,2,450
+ettin,Ettin,Large,giant,4,1100
+fire-elemental,Fire Elemental,Large,elemental,5,1800
+fire-giant,Fire Giant,Huge,giant,9,5000
+flesh-golem,Flesh Golem,Medium,construct,5,1800
+flying-snake,Flying Snake,Tiny,beast,1/8,25
+flying-sword,Flying Sword,Small,construct,1/4,50
+frog,Frog,Tiny,beast,0,0
+frost-giant,Frost Giant,Huge,giant,8,3900
+gargoyle,Gargoyle,Medium,elemental,2,450
+gelatinous-cube,Gelatinous Cube,Large,ooze,2,450
+ghast,Ghast,Medium,undead,2,450
+ghost,Ghost,Medium,undead,4,1100
+ghoul,Ghoul,Medium,undead,1,200
+giant-ape,Giant Ape,Huge,beast,7,2900
+giant-badger,Giant Badger,Medium,beast,1/4,50
+giant-bat,Giant Bat,Large,beast,1/4,50
+giant-boar,Giant Boar,Large,beast,2,450
+giant-centipede,Giant Centipede,Small,beast,1/4,50
+giant-constrictor-snake,Giant Constrictor Snake,Huge,beast,2,450
+giant-crab,Giant Crab,Medium,beast,1/8,25
+giant-crocodile,Giant Crocodile,Huge,beast,5,1800
+giant-eagle,Giant Eagle,Large,beast,1,200
+giant-elk,Giant Elk,Huge,beast,2,450
+giant-fire-beetle,Giant Fire Beetle,Small,beast,0,10
+giant-frog,Giant Frog,Medium,beast,1/4,50
+giant-goat,Giant Goat,Large,beast,1/2,100
+giant-hyena,Giant Hyena,Large,beast,1,200
+giant-lizard,Giant Lizard,Large,beast,1/4,50
+giant-octopus,Giant Octopus,Large,beast,1,200
+giant-owl,Giant Owl,Large,beast,1/4,50
+giant-poisonous-snake,Giant Poisonous Snake,Medium,beast,1/4,50
+giant-rat,Giant Rat,Small,beast,1/8,25
+giant-rat-diseased,Giant Rat (Diseased),Small,beast,1/8,25
+giant-scorpion,Giant Scorpion,Large,beast,3,700
+giant-sea-horse,Giant Sea Horse,Large,beast,1/2,100
+giant-shark,Giant Shark,Huge,beast,5,1800
+giant-spider,Giant Spider,Large,beast,1,200
+giant-toad,Giant Toad,Large,beast,1,200
+giant-vulture,Giant Vulture,Large,beast,1,200
+giant-wasp,Giant Wasp,Medium,beast,1/2,100
+giant-weasel,Giant Weasel,Medium,beast,1/8,25
+giant-wolf-spider,Giant Wolf Spider,Medium,beast,1/4,50
+gibbering-mouther,Gibbering Mouther,Medium,aberration,2,450
+glabrezu,Glabrezu,Large,fiend,9,5000
+gladiator,Gladiator,Medium,humanoid,5,1800
+gnoll,Gnoll,Medium,humanoid,1/2,100
+goat,Goat,Medium,beast,0,10
+goblin,Goblin,Small,humanoid,1/4,50
+gold-dragon-wyrmling,Gold Dragon Wyrmling,Medium,dragon,3,700
+gorgon,Gorgon,Large,monstrosity,5,1800
+gray-ooze,Gray Ooze,Medium,ooze,1/2,100
+green-dragon-wyrmling,Green Dragon Wyrmling,Medium,dragon,2,450
+green-hag,Green Hag,Medium,fey,3,700
+grick,Grick,Medium,monstrosity,2,450
+griffon,Griffon,Large,monstrosity,2,450
+grimlock,Grimlock,Medium,humanoid,1/4,50
+guard,Guard,Medium,humanoid,1/8,25
+guardian-naga,Guardian Naga,Large,monstrosity,10,5900
+gynosphinx,Gynosphinx,Large,monstrosity,11,7200
+half-red-dragon-veteran,Half-Red Dragon Veteran,Medium,humanoid,5,1800
+harpy,Harpy,Medium,monstrosity,1,200
+hawk,Hawk,Tiny,beast,0,10
+hell-hound,Hell Hound,Medium,fiend,3,700
+hezrou,Hezrou,Large,fiend,8,3900
+hill-giant,Hill Giant,Huge,giant,5,1800
+hippogriff,Hippogriff,Large,monstrosity,1,200
+hobgoblin,Hobgoblin,Medium,humanoid,1/2,100
+homunculus,Homunculus,Tiny,construct,0,10
+horned-devil,Horned Devil,Large,fiend,11,7200
+hunter-shark,Hunter Shark,Large,beast,2,450
+hydra,Hydra,Huge,monstrosity,8,3900
+hyena,Hyena,Medium,beast,0,10
+ice-devil,Ice Devil,Large,fiend,14,11500
+ice-mephit,Ice Mephit,Small,elemental,1/2,100
+imp,Imp,Tiny,fiend,1,200
+invisible-stalker,Invisible Stalker,Medium,elemental,6,2300
+iron-golem,Iron Golem,Large,construct,16,15000
+jackal,Jackal,Small,beast,0,10
+killer-whale,Killer Whale,Huge,beast,3,700
+knight,Knight,Medium,humanoid,3,700
+kobold,Kobold,Small,humanoid,1/8,25
+kraken,Kraken,Gargantuan,monstrosity,23,50000
+lamia,Lamia,Large,monstrosity,4,1100
+lemure,Lemure,Medium,fiend,0,10
+lich,Lich,Medium,undead,21,33000
+lion,Lion,Large,beast,1,200
+lizard,Lizard,Tiny,beast,0,10
+lizardfolk,Lizardfolk,Medium,humanoid,1/2,100
+mage,Mage,Medium,humanoid,6,2300
+magma-mephit,Magma Mephit,Small,elemental,1/2,100
+magmin,Magmin,Small,elemental,1/2,100
+mammoth,Mammoth,Huge,beast,6,2300
+manticore,Manticore,Large,monstrosity,3,700
+marilith,Marilith,Large,fiend,16,15000
+mastiff,Mastiff,Medium,beast,1/8,25
+medusa,Medusa,Medium,monstrosity,6,2300
+merfolk,Merfolk,Medium,humanoid,1/8,25
+merrow,Merrow,Large,monstrosity,2,450
+mimic,Mimic,Medium,monstrosity,2,450
+minotaur,Minotaur,Large,monstrosity,3,700
+minotaur-skeleton,Minotaur Skeleton,Large,undead,2,450
+mule,Mule,Medium,beast,1/8,25
+mummy,Mummy,Medium,undead,3,700
+mummy-lord,Mummy Lord,Medium,undead,15,13000
+nalfeshnee,Nalfeshnee,Large,fiend,13,10000
+night-hag,Night Hag,Medium,fiend,5,1800
+nightmare,Nightmare,Large,fiend,3,700
+noble,Noble,Medium,humanoid,1/8,25
+ochre-jelly,Ochre Jelly,Large,ooze,2,450
+octopus,Octopus,Small,beast,0,10
+ogre,Ogre,Large,giant,2,450
+ogre-zombie,Ogre Zombie,Large,undead,2,450
+oni,Oni,Large,giant,7,2900
+orc,Orc,Medium,humanoid,1/2,100
+otyugh,Otyugh,Large,aberration,5,1800
+owl,Owl,Tiny,beast,0,10
+owlbear,Owlbear,Large,monstrosity,3,700
+panther,Panther,Medium,beast,1/4,50
+pegasus,Pegasus,Large,celestial,2,450
+phase-spider,Phase Spider,Large,monstrosity,3,700
+pit-fiend,Pit Fiend,Large,fiend,20,25000
+planetar,Planetar,Large,celestial,16,15000
+plesiosaurus,Plesiosaurus,Large,beast,2,450
+poisonous-snake,Poisonous Snake,Tiny,beast,1/8,25
+polar-bear,Polar Bear,Large,beast,2,450
+pony,Pony,Medium,beast,1/8,25
+priest,Priest,Medium,humanoid,2,450
+pseudodragon,Pseudodragon,Tiny,dragon,1/4,50
+purple-worm,Purple Worm,Gargantuan,monstrosity,15,13000
+quasit,Quasit,Tiny,fiend,1,200
+quipper,Quipper,Tiny,beast,0,10
+rakshasa,Rakshasa,Medium,fiend,13,10000
+rat,Rat,Tiny,beast,0,10
+raven,Raven,Tiny,beast,0,10
+red-dragon-wyrmling,Red Dragon Wyrmling,Medium,dragon,4,1100
+reef-shark,Reef Shark,Medium,beast,1/2,100
+remorhaz,Remorhaz,Huge,monstrosity,11,7200
+rhinoceros,Rhinoceros,Large,beast,2,450
+riding-horse,Riding Horse,Large,beast,1/4,50
+roc,Roc,Gargantuan,monstrosity,11,7200
+roper,Roper,Large,monstrosity,5,1800
+rug-of-smothering,Rug of Smothering,Large,construct,2,450
+rust-monster,Rust Monster,Medium,monstrosity,1/2,100
+saber-toothed-tiger,Saber-Toothed Tiger,Large,beast,2,450
+sahuagin,Sahuagin,Medium,humanoid,1/2,100
+salamander,Salamander,Large,elemental,5,1800
+satyr,Satyr,Medium,fey,1/2,100
+scorpion,Scorpion,Tiny,beast,0,10
+scout,Scout,Medium,humanoid,1/2,100
+sea-hag,Sea Hag,Medium,fey,2,450
+sea-horse,Sea Horse,Tiny,beast,0,0
+shadow,Shadow,Medium,undead,1/2,100
+shambling-mound,Shambling Mound,Large,plant,5,1800
+shield-guardian,Shield Guardian,Large,construct,7,2900
+shrieker,Shrieker,Medium,plant,0,10
+silver-dragon-wyrmling,Silver Dragon Wyrmling,Medium,dragon,2,450
+skeleton,Skeleton,Medium,undead,1/4,50
+solar,Solar,Large,celestial,21,33000
+specter,Specter,Medium,undead,1,200
+spider,Spider,Tiny,beast,0,10
+spirit-naga,Spirit Naga,Large,monstrosity,8,3900
+sprite,Sprite,Tiny,fey,1/4,50
+spy,Spy,Medium,humanoid,1,200
+steam-mephit,Steam Mephit,Small,elemental,1/4,50
+stirge,Stirge,Tiny,beast,1/8,25
+stone-giant,Stone Giant,Huge,giant,7,2900
+stone-golem,Stone Golem,Large,construct,10,5900
+storm-giant,Storm Giant,Huge,giant,13,10000
+succubus-incubus,Succubus/Incubus,Medium,fiend,4,1100
+swarm-of-bats,Swarm of Bats,Medium,swarm of tiny beasts,1/4,50
+swarm-of-beetles,Swarm of Beetles,Medium,swarm of tiny beasts,1/2,100
+swarm-of-centipedes,Swarm of Centipedes,Medium,swarm of tiny beasts,1/2,100
+swarm-of-insects,Swarm of Insects,Medium,swarm of tiny beasts,1/2,100
+swarm-of-poisonous-snakes,Swarm of Poisonous Snakes,Medium,swarm of tiny beasts,2,450
+swarm-of-quippers,Swarm of Quippers,Medium,swarm of tiny beasts,1,200
+swarm-of-rats,Swarm of Rats,Medium,swarm of tiny beasts,1/4,50
+swarm-of-ravens,Swarm of Ravens,Medium,swarm of tiny beasts,1/4,50
+swarm-of-spiders,Swarm of Spiders,Medium,swarm of tiny beasts,1/2,100
+swarm-of-wasps,Swarm of Wasps,Medium,swarm of tiny beasts,1/2,100
+tarrasque,Tarrasque,Gargantuan,monstrosity,30,155000
+thug,Thug,Medium,humanoid,1/2,100
+tiger,Tiger,Large,beast,1,200
+treant,Treant,Huge,plant,9,5000
+tribal-warrior,Tribal Warrior,Medium,humanoid,1/8,25
+triceratops,Triceratops,Huge,beast,5,1800
+troll,Troll,Large,giant,5,1800
+tyrannosaurus-rex,Tyrannosaurus Rex,Huge,beast,8,3900
+unicorn,Unicorn,Large,celestial,5,1800
+vampire-bat,"Vampire, Bat Form",Medium,undead,13,10000
+vampire-mist,"Vampire, Mist Form",Medium,undead,13,10000
+vampire-spawn,Vampire Spawn,Medium,undead,5,1800
+vampire-vampire,"Vampire, Vampire Form",Medium,undead,13,10000
+veteran,Veteran,Medium,humanoid,3,700
+violet-fungus,Violet Fungus,Medium,plant,1/4,50
+vrock,Vrock,Large,fiend,6,2300
+vulture,Vulture,Medium,beast,0,10
+warhorse,Warhorse,Large,beast,1/2,100
+warhorse-skeleton,Warhorse Skeleton,Large,undead,1/2,100
+water-elemental,Water Elemental,Large,elemental,5,1800
+weasel,Weasel,Tiny,beast,0,10
+werebear-bear,"Werebear, Bear Form",Medium,humanoid,5,1800
+werebear-human,"Werebear, Human Form",Medium,humanoid,5,1800
+werebear-hybrid,"Werebear, Hybrid Form",Medium,humanoid,5,1800
+wereboar-boar,"Wereboar, Boar Form",Medium,humanoid,4,1100
+wereboar-human,"Wereboar, Human Form",Medium,humanoid,4,1100
+wereboar-hybrid,"Wereboar, Hybrid Form",Medium,humanoid,4,1100
+wererat-human,"Wererat, Human Form",Medium,humanoid,2,450
+wererat-hybrid,"Wererat, Hybrid Form",Medium,humanoid,2,450
+wererat-rat,"Wererat, Rat Form",Medium,humanoid,2,450
+weretiger-human,"Weretiger, Human Form",Medium,humanoid,4,1100
+weretiger-hybrid,"Weretiger, Hybrid Form",Medium,humanoid,4,1100
+weretiger-tiger,"Weretiger, Tiger Form",Medium,humanoid,4,1100
+werewolf-human,"Werewolf, Human Form",Medium,humanoid,3,700
+werewolf-hybrid,"Werewolf, Hybrid Form",Medium,humanoid,3,700
+werewolf-wolf,"Werewolf, Wolf Form",Medium,humanoid,3,700
+white-dragon-wyrmling,White Dragon Wyrmling,Medium,dragon,2,450
+wight,Wight,Medium,undead,3,700
+will-o-wisp,Will-o'-Wisp,Tiny,undead,2,450
+winter-wolf,Winter Wolf,Large,monstrosity,3,700
+wolf,Wolf,Medium,beast,1/4,50
+worg,Worg,Large,monstrosity,1/2,100
+wraith,Wraith,Medium,undead,5,1800
+wyvern,Wyvern,Large,dragon,6,2300
+xorn,Xorn,Medium,elemental,5,1800
+young-black-dragon,Young Black Dragon,Large,dragon,7,2900
+young-blue-dragon,Young Blue Dragon,Large,dragon,9,5000
+young-brass-dragon,Young Brass Dragon,Large,dragon,6,2300
+young-bronze-dragon,Young Bronze Dragon,Large,dragon,8,3900
+young-copper-dragon,Young Copper Dragon,Large,dragon,7,2900
+young-gold-dragon,Young Gold Dragon,Large,dragon,10,5900
+young-green-dragon,Young Green Dragon,Large,dragon,8,3900
+young-red-dragon,Young Red Dragon,Large,dragon,10,5900
+young-silver-dragon,Young Silver Dragon,Large,dragon,9,5000
+young-white-dragon,Young White Dragon,Large,dragon,6,2300
+zombie,Zombie,Medium,undead,1/4,50

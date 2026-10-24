@@ -4,6 +4,7 @@ Sem Docker, os testes são pulados. No CI, todos rodam.
 """
 
 from collections.abc import Iterator
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,8 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 
+from critsense.db import create_engine, create_session_factory
+from critsense.encounters.repository import MonsterRepository
 from critsense.errors import ErrorCode
 from critsense.main import create_app
 
@@ -19,6 +22,13 @@ from .conftest import PASSWORD, bearer, make_settings
 pytestmark = pytest.mark.integration
 
 API_DIR = Path(__file__).resolve().parents[1]
+
+
+def alembic_config(url: str) -> Config:
+    config = Config(API_DIR / "alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    config.attributes["configure_logger"] = False
+    return config
 
 
 @pytest.fixture(scope="module")
@@ -32,10 +42,7 @@ def database_url() -> Iterator[str]:
         pytest.skip(f"Docker indisponível: {e}")
     try:
         url: str = container.get_connection_url()
-        config = Config(API_DIR / "alembic.ini")
-        config.set_main_option("sqlalchemy.url", url)
-        config.attributes["configure_logger"] = False
-        command.upgrade(config, "head")
+        command.upgrade(alembic_config(url), "head")
         yield url
     finally:
         container.stop()
@@ -81,3 +88,35 @@ def test_ai_without_provider_returns_503(client: TestClient) -> None:
 
     assert response.status_code == 503
     assert response.json()["code"] == ErrorCode.AI_UNAVAILABLE.name
+
+
+def test_models_match_the_migrations(database_url: str) -> None:
+    # Falha se um modelo do SQLAlchemy mudou sem uma migração nova.
+    command.check(alembic_config(database_url))
+
+
+@pytest.mark.anyio
+async def test_monsters_are_imported(database_url: str) -> None:
+    engine = create_engine(database_url)
+    try:
+        async with create_session_factory(engine)() as session:
+            repository = MonsterRepository(session)
+
+            found = await repository.find_by_indexes(["aboleth", "giant-rat", "nao-existe"])
+            assert set(found) == {"aboleth", "giant-rat"}
+            assert found["giant-rat"].challenge_rating == Decimal("0.125")
+            assert found["giant-rat"].xp == 25
+            assert found["aboleth"].xp == 5_900
+
+            cheap = await repository.list_up_to_xp(25)
+            assert cheap
+            assert all(monster.xp <= 25 for monster in cheap)
+            assert [m.xp for m in cheap] == sorted((m.xp for m in cheap), reverse=True)
+            assert len(await repository.list_up_to_xp(1_000_000)) == 334
+    finally:
+        await engine.dispose()
+
+
+@pytest.fixture
+def anyio_backend() -> str:
+    return "asyncio"

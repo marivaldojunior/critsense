@@ -29,8 +29,10 @@ api/
 │   ├── auth/            # cadastro, login, JWT e usuário atual
 │   ├── ai/              # modelos de chat, gateway, prompts e saída estruturada
 │   ├── npc/             # gerador de NPCs
+│   ├── encounters/      # monstros do SRD e dificuldade de encontros
 │   └── prompts/         # prompts versionados (<nome>/v<versão>/)
 ├── migrations/          # migrações do Alembic
+│   └── data/            # dados importados pelas migrações (monstros do SRD 5.1)
 └── tests/
 ```
 
@@ -162,6 +164,18 @@ Veja [../.env.example](../.env.example). As principais:
 | `AI_RATE_LIMIT_PER_MINUTE` | `10` | Chamadas de IA por usuário, por minuto. |
 | `DATABASE_URL` | PostgreSQL local | Conexão com o banco (`postgresql+asyncpg://...`). |
 | `LOG_LEVEL` | `INFO` | Nível dos logs. |
+
+## Encontros
+
+A tabela `monsters` tem os 334 monstros do SRD 5.1, com nome, tamanho, tipo, CR e XP. A migração `0002` importa os dados de `migrations/data/srd_5_1_monsters.csv`, gerado da API 5e-bits (`/api/2014`). A fonte tinha o XP errado em quatro monstros, e a tabela de XP por CR do SRD corrigiu esses valores. O teste `test_imported_monsters_follow_the_xp_table` confere o arquivo todo.
+
+O cálculo de dificuldade fica em `critsense/encounters/rules.py`, sem banco e sem IA. Ele segue a regra "Combat Encounter Difficulty" do SRD 5.2.1, porque o SRD 5.1 não tem regras de dificuldade:
+
+1. A dificuldade é `LOW`, `MODERATE` ou `HIGH`.
+2. O orçamento do grupo é a soma do valor da tabela "XP Budget per Character" para o nível de cada personagem.
+3. O XP dos monstros gasta o orçamento, sem multiplicador. Um encontro é da menor dificuldade cujo orçamento cobre o XP total. Acima do orçamento de `HIGH`, ele é `BEYOND_HIGH`.
+
+O endpoint `POST /api/v1/encounters/build` (tarefa T2.4) ainda não existe.
 
 ## Contrato OpenAPI
 
