@@ -228,7 +228,7 @@ A IA pela API está pausada. As Fases 2 e 3 voltam depois que a ficha completa e
 ### Documentação final (contínua)
 
 - [ ] **T5.1** Adicione ao README um diagrama de arquitetura (app, API, PostgreSQL, provedor LLM).
-- [ ] **T5.2** Grave um GIF do app e adicione ao README.
+- [x] **T5.2** Grave um GIF do app e adicione ao README.
 - [ ] **T5.3** Escreva a seção "Como rodar localmente" com o Docker Compose e o `flutter run --dart-define`.
 - [ ] **T5.4** Escreva a seção "Decisões técnicas": monorepo, cálculo determinístico mais IA, JWT, SSE manual e escolha das versões.
 

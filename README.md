@@ -18,6 +18,22 @@
 
 ---
 
+## 📸 Telas
+
+<p align="center">
+  <img src="docs/screenshots/demo.gif" alt="Demonstração do CritSense: tela inicial, rolador de dados, ficha, iniciativa, bestiário, magias e tema escuro" width="300">
+</p>
+
+| Tela inicial | Rolador de dados | Ficha de personagem |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/home.png" alt="Tela inicial" width="220"> | <img src="docs/screenshots/rolador-de-dados.png" alt="Resultado de uma rolagem com vantagem" width="220"> | <img src="docs/screenshots/ficha.png" alt="Aba Status e Combate da ficha" width="220"> |
+| **Rastreador de iniciativa** | **Bestiário** | **Tema escuro** |
+| <img src="docs/screenshots/iniciativa.png" alt="Combate na rodada 1 com dois kobolds" width="220"> | <img src="docs/screenshots/bestiario.png" alt="Bloco de estatísticas do Adult Black Dragon" width="220"> | <img src="docs/screenshots/home-tema-escuro.png" alt="Tela inicial no tema escuro" width="220"> |
+
+Os prints vêm de um emulador Android (Medium Phone, 1080 x 2400). O GIF também mostra o compêndio de magias. Os arquivos ficam em [docs/screenshots/](docs/screenshots/).
+
+---
+
 ## 🎯 Objetivos de Estudo
 
 | Área | O que o projeto pratica |
