@@ -51,7 +51,7 @@ Os prints vêm de um emulador Android (Medium Phone, 1080 x 2400). O GIF também
 
 | Pasta | Conteúdo |
 |---|---|
-| [app/](app/) | App Flutter (fichas, compêndio e rolador de dados). |
+| [app/](app/) | App Flutter (fichas, compêndio, rastreador de iniciativa, rolador de dados e comandos por voz). |
 | [api/](api/) | API em Python (FastAPI): autenticação e ferramentas de IA. Veja o [README da API](api/README.md). |
 | [api-java/](api-java/) | A mesma API em Java (Spring Boot), mantida como projeto de estudo. Veja o [README da API Java](api-java/README.md). |
 | [contracts/](contracts/) | Contrato OpenAPI da API, usado para gerar os clientes. |
@@ -145,8 +145,10 @@ O que a API já tem:
 * **Prompts versionados** em `api/src/critsense/prompts/`.
 * **Contrato OpenAPI** em [contracts/openapi.yaml](contracts/openapi.yaml), verificado no CI.
 * **Erros no formato RFC 9457** (`application/problem+json`), com um `code` estável.
+* **Monstros do SRD 5.1** (Fase 2): os 334 monstros, com tamanho, tipo, CR e XP, entram no PostgreSQL por uma migração do Alembic. O cálculo de encontros não depende de uma API externa.
+* **Dificuldade de encontros** (Fase 2): um cálculo sem IA soma o orçamento de XP de cada personagem pela regra do SRD 5.2.1 e classifica o encontro como Baixo, Moderado, Alto ou acima de Alto. O endpoint de encontros (T2.4) ainda não existe.
 
-Como rodar a API, os endpoints e as variáveis de ambiente estão no [README da API](api/README.md).
+A API tem 106 testes com pytest, também com um PostgreSQL real (Testcontainers). Como rodar a API, os testes, os endpoints e as variáveis de ambiente estão no [README da API](api/README.md).
 
 ---
 
@@ -156,17 +158,20 @@ Como rodar a API, os endpoints e as variáveis de ambiente estão no [README da 
 
 ```bash
 # 1. Clone o repositório
-git clone <url-do-repositorio>
-cd crit_sense/app
+git clone https://github.com/marivaldojunior/critsense.git
+cd critsense/app
 
 # 2. Instale as dependências
 flutter pub get
 
-# 3. Gere o código do Drift (tabelas/queries do banco local)
-dart run build_runner build --delete-conflicting-outputs
-
-# 4. Rode o app
+# 3. Rode o app
 flutter run
+```
+
+O código gerado do Drift (`app_database.g.dart`) já está no repositório. Gere o código de novo só depois de mudar uma tabela ou uma query do banco local:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 **Testes e análise estática:**
@@ -176,7 +181,7 @@ flutter test
 flutter analyze
 ```
 
-Os testes usam `mocktail` e cobrem os BLoCs de todas as features, as regras de rolagem do `DiceRepositoryImpl`, o `CharacterRepositoryImpl` e as migrações do Drift (com um banco SQLite em memória). O pacote `bloc_test` está no `pubspec.yaml`, mas os testes não o usam: ele conflita com os `dependency_overrides` necessários para o `drift_dev` (ver o comentário no `pubspec.yaml`).
+O app tem 45 arquivos de teste em `app/test/`. Os testes usam `mocktail` e cobrem os BLoCs e Cubits de todas as features que têm estado, as regras de rolagem do `DiceRepositoryImpl`, o `CharacterRepositoryImpl` e as migrações do Drift (com um banco SQLite em memória). O pacote `bloc_test` está no `pubspec.yaml`, mas os testes não o usam: ele conflita com os `dependency_overrides` necessários para o `drift_dev` (ver o comentário no `pubspec.yaml`).
 
 **Build de release (Android):**
 
@@ -208,7 +213,7 @@ O lado servidor da Fase 1 (API, autenticação, gerador de NPCs e CI) está pron
 
 **Versões anteriores.** A PolyForm Strict vale a partir do commit que adicionou o arquivo [LICENSE](LICENSE). Os commits anteriores não tinham licença. Sem licença, todos os direitos já eram reservados ao autor, e esses commits continuam assim. Nenhuma versão anterior deu permissão de cópia, de modificação ou de distribuição.
 
-**Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1, os ícones abaixo e os scripts do Maven Wrapper (`api-java/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
+**Conteúdo de terceiros.** A PolyForm Strict cobre só o código do CritSense. O conteúdo do SRD 5.1 e do SRD 5.2.1, os ícones abaixo e os scripts do Maven Wrapper (`api-java/mvnw`, Apache-2.0) continuam sob as licenças originais deles. As dependências do app e da API também mantêm as suas licenças.
 
 **Conteúdo de regras (SRD 5.1 e SRD 5.2.1).** O app e os monstros da API usam o SRD 5.1. Só a regra de dificuldade de encontros da API usa o SRD 5.2.1, porque o SRD 5.1 não tem essa regra.
 
